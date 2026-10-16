@@ -17,6 +17,9 @@ request from the owner, the newer request wins; point out the conflict.
 - A lodging bride's arrival evening is marked on the calendar with a red dot and holds the venue from her
   arrival time; tours (treated as 1 hour) and shoots may not overlap any booking.
 - Month title opens a month/year picker for quick navigation.
+- Day window actions: + interested, 🍇 tour, 💍 close deal (bride), 🤰 maternity shoot (a separate hourly
+  service, not a bride status). Client cards offer a one-tap ✕ cancel (with undo); list cards can be swiped
+  left/right to reveal cancel.
 - Deal/payment fields (amount, 15% deposit, balance, contract/paid checkboxes) only for bookings
   (bride, maternity shoot); hidden for interested and tour.
 

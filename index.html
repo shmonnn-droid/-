@@ -327,7 +327,7 @@
               <div class="rounded-xl border-2 border-zinc-200 px-2 py-2 text-center transition peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
                 <span class="text-lg leading-none">🔵</span>
                 <span class="text-base font-semibold text-zinc-700">צילומי הריון</span>
-                <span class="text-[13px] text-zinc-500">שעות בלבד – היום נשאר פתוח</span>
+                <span class="text-[13px] text-zinc-500">שירות נפרד לפי שעות – היום נשאר פתוח</span>
               </div>
             </label>
           </div>
@@ -986,7 +986,7 @@
           ${l.state === 'tour'
             ? `<button data-act="toOpen" data-id="${l.id}" class="py-2 rounded-xl border border-orange-400 bg-orange-50 text-orange-700 text-base font-semibold">🟠 החזר למתעניינת</button>`
             : `<button data-act="toTour" data-id="${l.id}" class="py-2 rounded-xl border border-[#6b1d38] text-[#6b1d38] text-base font-semibold">🍇 תיאום סיור</button>`}
-          <button data-act="toMaternity" data-id="${l.id}" class="py-2 rounded-xl border border-blue-600 text-blue-700 text-base font-semibold">🤰 צילומי הריון</button>
+          <button data-act="cancelLead" data-id="${l.id}" class="py-2 rounded-xl border-2 border-red-500 bg-red-50 text-red-700 text-base font-semibold">✕ ביטול</button>
         </div>`}
       </div>`).join('')
       : visiting ? '' : `<div class="text-center py-8">
@@ -996,10 +996,11 @@
          </div>`);
     footer.innerHTML = past
       ? `<div class="w-full py-3 mb-1 rounded-2xl bg-zinc-100 text-zinc-500 text-base text-center">🔒 התאריך עבר – לא ניתן לתאם או להוסיף מתעניינות/סיורים</div>`
-      : `<div class="grid grid-cols-3 gap-2 mb-1">
+      : `<div class="grid grid-cols-2 gap-2 mb-1">
            <button data-act="add" class="py-3 rounded-2xl bg-orange-500 text-white font-semibold shadow-soft">+ מתעניינת</button>
-           <button data-act="addTour" class="py-3 rounded-2xl bg-[#6b1d38] text-white font-semibold shadow-soft">🍇 סיור</button>
-           <button data-act="addMaternity" class="py-3 rounded-2xl bg-blue-600 text-white font-semibold shadow-soft">🤰 הריון</button>
+           <button data-act="addTour" class="py-3 rounded-2xl bg-[#6b1d38] text-white font-semibold shadow-soft">🍇 תיאום סיור</button>
+           <button data-act="addBride" class="py-3 rounded-2xl bg-red-600 text-white font-semibold shadow-soft">💍 סגור עסקה (כלה)</button>
+           <button data-act="addMaternity" class="py-3 rounded-2xl bg-blue-600 text-white font-semibold shadow-soft">🤰 צילומי הריון</button>
          </div>`;
   }
 
@@ -1013,8 +1014,10 @@
     const leadKey = btn.dataset.key || activeKey;
     const lead = id ? findLead(leadKey, id) : null;
 
-    if (['add', 'addTour', 'addMaternity', 'book', 'toTour', 'toOpen', 'toMaternity'].includes(act) && isPast(activeKey)) { toast(PAST_MSG); return; }
+    if (['add', 'addTour', 'addBride', 'addMaternity', 'book', 'toTour', 'toOpen', 'toMaternity'].includes(act) && isPast(activeKey)) { toast(PAST_MSG); return; }
     if (act === 'add') openForm(null);
+    else if (act === 'addBride') openForm(null, 'won');
+    else if (act === 'cancelLead' && lead) cancelLead(leadKey, lead.id);
     else if (act === 'addTour') openForm(null, 'tour');
     else if (act === 'addMaternity') openForm(null, 'maternity');
     else if (act === 'edit' && lead) openForm(lead);
@@ -1062,6 +1065,19 @@
       if (l.state === 'open' || l.state === 'tour') l.prevState = l.state;
       l.state = l.id === leadId ? 'won' : 'lost';
     });
+  }
+
+  // One-tap cancel (cards and list swipe). The whole day is snapshotted so "undo" restores it exactly.
+  function cancelLead(key, id) {
+    const day = db.days[key];
+    const lead = day && day.leads.find(l => l.id === id);
+    if (!lead || lead.state === 'cancelled') return;
+    const snapshot = JSON.parse(JSON.stringify(day));
+    if (day.status === 'booked' && day.bookedLeadId === id) unbookDay(key);
+    lead.state = 'cancelled';
+    delete lead.prevState;
+    save(); refresh();
+    toast(`${fullName(lead)} – הפנייה בוטלה`, { label: '↩ ביטול הפעולה', fn: () => { db.days[key] = snapshot; save(); refresh(); toast('הפנייה שוחזרה'); } });
   }
 
   // ---------- Tour sharing ----------
@@ -1297,14 +1313,21 @@
   }
 
   function renderList() {
+    openSwipeCard = null; // cards are re-created below
     $('listTabs').innerHTML = TABS.map(t => `
       <button data-tab="${t.id}" class="shrink-0 text-base px-3 py-1.5 rounded-full border ${t.id === listTab ? 'bg-wine text-white border-wine' : 'border-zinc-200 text-zinc-600 bg-white'}">${t.label}</button>`).join('');
     const records = listRecords();
     $('listCount').textContent = `${records.length} רשומות`;
     $('listBody').innerHTML = records.length ? records.map(r => {
       const sched = scheduleText(r);
+      const cancellable = r.kind !== 'cancelled';
       return `
-        <div class="rounded-2xl border border-zinc-200 bg-white p-3 ${isPast(r.date) ? 'opacity-70' : ''}">
+      <div class="swipe relative rounded-2xl overflow-hidden ${isPast(r.date) ? 'opacity-70' : ''}" data-key="${r.key}" data-id="${r.lead.id}">
+        ${cancellable ? `<div class="absolute inset-0 bg-red-600 flex items-stretch justify-between" aria-hidden="true">
+          <button data-lact="cancel" data-key="${r.key}" data-id="${r.lead.id}" tabindex="-1" class="w-24 text-white font-bold">✕ ביטול</button>
+          <button data-lact="cancel" data-key="${r.key}" data-id="${r.lead.id}" tabindex="-1" class="w-24 text-white font-bold">✕ ביטול</button>
+        </div>` : ''}
+        <div class="swipe-card relative rounded-2xl border border-zinc-200 bg-white p-3 transition-transform duration-200" style="touch-action: pan-y">
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
               <div class="text-sm text-zinc-500">${prettyDate(r.date)}</div>
@@ -1318,17 +1341,62 @@
           <div class="flex gap-2 mt-2">
             <button data-lact="open" data-key="${r.key}" class="flex-1 py-1.5 rounded-xl bg-zinc-100 text-wine text-base">📅 פתח יום</button>
             <button data-lact="edit" data-key="${r.key}" data-id="${r.lead.id}" class="flex-1 py-1.5 rounded-xl border border-wine text-wine text-base">✎ עריכה</button>
+            ${cancellable ? `<button data-lact="cancel" data-key="${r.key}" data-id="${r.lead.id}" class="px-3 py-1.5 rounded-xl border border-red-400 bg-red-50 text-red-700 text-base font-semibold" aria-label="ביטול הפנייה">✕</button>` : ''}
           </div>
-        </div>`;
+        </div>
+      </div>`;
     }).join('') : `<div class="text-center text-base text-zinc-500 py-10">אין רשומות להצגה</div>`;
   }
 
+  // Swipe a list card left or right to reveal its "cancel" button.
+  const SWIPE_OPEN = 96;
+  let swipe = null;        // card being dragged
+  let openSwipeCard = null;
+  let swallowClick = false;
+  const setX = (card, x) => { card.style.transform = x ? `translateX(${x}px)` : ''; };
+  function closeSwipe() { if (openSwipeCard) { setX(openSwipeCard, 0); openSwipeCard = null; } }
+  $('listBody').addEventListener('pointerdown', (e) => {
+    const card = e.target.closest('.swipe-card');
+    if (!card || !card.previousElementSibling) return; // cancelled cards have no action layer
+    swipe = { card, x0: e.clientX, y0: e.clientY, base: card === openSwipeCard ? (parseFloat(card.style.transform.slice(11)) || 0) : 0, dx: 0, dragging: false };
+  });
+  $('listBody').addEventListener('pointermove', (e) => {
+    if (!swipe) return;
+    const dx = e.clientX - swipe.x0, dy = e.clientY - swipe.y0;
+    if (!swipe.dragging) {
+      if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { swipe = null; return; } // vertical scroll
+      if (Math.abs(dx) < 8) return;
+      swipe.dragging = true;
+      if (openSwipeCard && openSwipeCard !== swipe.card) closeSwipe();
+      swipe.card.style.transition = 'none';
+    }
+    swipe.dx = dx;
+    setX(swipe.card, Math.max(-SWIPE_OPEN - 20, Math.min(SWIPE_OPEN + 20, swipe.base + dx)));
+  });
+  const endSwipe = () => {
+    if (!swipe) return;
+    const { card, dragging, base, dx } = swipe;
+    swipe = null;
+    card.style.transition = '';
+    if (!dragging) return;
+    swallowClick = true;
+    const x = base + dx;
+    if (Math.abs(x) > 60) { setX(card, Math.sign(x) * SWIPE_OPEN); openSwipeCard = card; }
+    else { setX(card, 0); if (openSwipeCard === card) openSwipeCard = null; }
+  };
+  $('listBody').addEventListener('pointerup', endSwipe);
+  $('listBody').addEventListener('pointercancel', endSwipe);
+
   function handleListAction(e) {
+    if (swallowClick) { swallowClick = false; return; }
     const tab = e.target.closest('[data-tab]');
     if (tab) { listTab = tab.dataset.tab; renderList(); return; }
+    // tapping an opened card (anywhere but its cancel button) just closes it
+    if (openSwipeCard && !e.target.closest('[data-lact="cancel"]')) { closeSwipe(); return; }
     const btn = e.target.closest('[data-lact]');
     if (!btn) return;
     const key = btn.dataset.key;
+    if (btn.dataset.lact === 'cancel') { closeSwipe(); cancelLead(key, btn.dataset.id); return; }
     if (btn.dataset.lact === 'open') openDay(key);
     else if (btn.dataset.lact === 'edit') {
       const lead = findLead(key, btn.dataset.id);
@@ -1455,12 +1523,23 @@
   }
 
   let toastTimer = null;
-  function toast(text) {
-    $('toastInner').textContent = text;
+  let toastAction = null;
+  // action: optional { label, fn } shown as a button (e.g. undo)
+  function toast(text, action) {
+    toastAction = action || null;
+    $('toastInner').innerHTML = esc(text) + (action
+      ? ` <button id="toastAction" type="button" class="pointer-events-auto mr-3 px-3 py-1 rounded-full bg-white text-wine-dark font-semibold">${esc(action.label)}</button>` : '');
     $('toast').classList.remove('hidden');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => $('toast').classList.add('hidden'), 2200);
+    toastTimer = setTimeout(() => { $('toast').classList.add('hidden'); toastAction = null; }, action ? 5000 : 2200);
   }
+  $('toast').addEventListener('click', (e) => {
+    if (!e.target.closest('#toastAction') || !toastAction) return;
+    const fn = toastAction.fn;
+    toastAction = null;
+    $('toast').classList.add('hidden');
+    fn();
+  });
 
   function downloadBlob(blob, filename) {
     const a = document.createElement('a');

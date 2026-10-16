@@ -39,9 +39,13 @@
       opacity: .13; mix-blend-mode: multiply;
     }
     .hair-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); }
-    .day-free    { background: #e9f7ee; color: #1f7a45; border-color: #9fd8b4; }
-    .day-pending { background: #fff6d6; color: #8a6a00; border-color: #f0d36b; }
-    .day-booked  { background: #e5484d; color: #fff;    border-color: #b8282d; box-shadow: 0 4px 12px -4px rgba(229,72,77,.6); }
+    /* Day status colors – fixed by the app's iron rules */
+    .day-free      { background: #e9f7ee; color: #1f7a45; border-color: #9fd8b4; }
+    .day-pending   { background: #fff6d6; color: #8a6a00; border-color: #f0d36b; }
+    .day-booked    { background: #e5484d; color: #fff;    border-color: #b8282d; box-shadow: 0 4px 12px -4px rgba(229,72,77,.6); }
+    .day-tour      { background: #6b1d38; color: #fff;    border-color: #581c2f; box-shadow: 0 4px 12px -4px rgba(107,29,56,.55); }
+    .day-maternity { background: #2563eb; color: #fff;    border-color: #1d4ed8; box-shadow: 0 4px 12px -4px rgba(37,99,235,.55); }
+    .day-muted     { background: #e4e4e7; color: #52525b; border-color: #d4d4d8; }
     .day-past    { opacity: .45; }
     .modal-enter { animation: slideUp .25s ease-out; }
     @keyframes slideUp { from { transform: translateY(30px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
@@ -50,6 +54,8 @@
     .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
     input, textarea { font-size: 16px; } /* prevents iOS zoom */
     input[type=checkbox] { accent-color: #4a151b; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { scrollbar-width: none; }
   </style>
 </head>
 <body class="font-sans text-wine-dark">
@@ -71,31 +77,39 @@
 
   <main class="relative z-10 max-w-xl mx-auto px-4 pt-4 pb-24">
 
-    <!-- Stats -->
+    <!-- Stats: tap a tile to open its list -->
     <section class="grid grid-cols-3 gap-2 mb-4">
-      <div class="rounded-2xl bg-white/70 shadow-soft p-3 text-center border border-zinc-200">
+      <button data-list="booked" class="rounded-2xl bg-white/70 shadow-soft p-3 text-center border border-zinc-200 active:scale-95 transition">
         <div id="statBooked" class="text-2xl font-bold text-red-500">0</div>
-        <div class="text-xs text-zinc-500">תפוסים החודש</div>
-      </div>
-      <div class="rounded-2xl bg-white/70 shadow-soft p-3 text-center border border-zinc-200">
+        <div class="text-xs text-zinc-500">כלות (תפוסים)</div>
+        <div class="text-[10px] text-wine/60 mt-0.5">לרשימה ›</div>
+      </button>
+      <button data-list="pending" class="rounded-2xl bg-white/70 shadow-soft p-3 text-center border border-zinc-200 active:scale-95 transition">
         <div id="statPending" class="text-2xl font-bold text-yellow-600">0</div>
-        <div class="text-xs text-zinc-500">בטיפול החודש</div>
-      </div>
-      <div class="rounded-2xl bg-white/70 shadow-soft p-3 text-center border border-zinc-200">
-        <div id="statLeads" class="text-2xl font-bold text-wine">0</div>
-        <div class="text-xs text-zinc-500">מתעניינות פתוחות</div>
-      </div>
+        <div class="text-xs text-zinc-500">מתעניינות (בטיפול)</div>
+        <div class="text-[10px] text-wine/60 mt-0.5">לרשימה ›</div>
+      </button>
+      <button data-list="tour" class="rounded-2xl bg-white/70 shadow-soft p-3 text-center border border-zinc-200 active:scale-95 transition">
+        <div id="statTours" class="text-2xl font-bold text-[#6b1d38]">0</div>
+        <div class="text-xs text-zinc-500">סיורים</div>
+        <div class="text-[10px] text-wine/60 mt-0.5">לרשימה ›</div>
+      </button>
     </section>
 
     <!-- Calendar card -->
     <section class="bg-white/75 rounded-3xl shadow-soft border border-zinc-200 overflow-hidden">
       <div class="bg-wine text-white px-4 py-4 flex items-center justify-between">
-        <button id="btnPrev" aria-label="החודש הקודם" class="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-xl transition">&#8250;</button>
+        <!-- RTL: the right-hand arrow (pointing right) goes back, the left-hand arrow (pointing left) goes forward -->
+        <button id="btnPrev" aria-label="החודש הקודם" class="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
         <div class="text-center">
           <div id="monthTitle" class="font-display text-2xl font-bold tracking-wide"></div>
           <div class="hair-line w-24 mx-auto mt-1 opacity-80"></div>
         </div>
-        <button id="btnNext" aria-label="החודש הבא" class="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-xl transition">&#8249;</button>
+        <button id="btnNext" aria-label="החודש הבא" class="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
       </div>
 
       <div class="grid grid-cols-7 text-center text-xs font-semibold text-wine px-2 pt-3">
@@ -104,10 +118,12 @@
       <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 p-2 pb-3"></div>
 
       <!-- Legend -->
-      <div class="flex flex-wrap justify-center gap-4 text-xs py-3 border-t border-zinc-200 bg-zinc-100">
+      <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs py-3 px-2 border-t border-zinc-200 bg-zinc-100">
         <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-free border"></span>פנוי</span>
-        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-pending border"></span>יש מתעניינות</span>
-        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-booked border"></span>תפוס</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-pending border"></span>מתעניינות</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-tour border"></span>יום סיור</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-booked border"></span>תפוס (כלה)</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-maternity border"></span>צילומי הריון</span>
       </div>
     </section>
 
@@ -118,13 +134,42 @@
     </section>
 
     <!-- Backup -->
-    <section class="mt-6 flex gap-2 justify-center text-sm">
+    <section class="mt-6 flex flex-wrap gap-2 justify-center text-sm">
+      <button data-list="all" class="px-4 py-2 rounded-full bg-wine text-white">📋 כל הרשימות וייצוא</button>
       <button id="btnExport" class="px-4 py-2 rounded-full border border-wine text-wine hover:bg-zinc-100">ייצוא גיבוי</button>
       <label class="px-4 py-2 rounded-full border border-wine text-wine hover:bg-zinc-100 cursor-pointer">
         ייבוא גיבוי<input id="fileImport" type="file" accept="application/json" class="hidden" />
       </label>
     </section>
   </main>
+
+  <!-- Lists Modal -->
+  <div id="listModal" class="fixed inset-0 z-30 hidden">
+    <div class="absolute inset-0 bg-black/40 fade-in" data-close="listModal"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
+      <div class="modal-enter pointer-events-auto bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl h-[92vh] sm:h-[85vh] flex flex-col shadow-2xl">
+        <div class="px-5 pt-4 pb-3 border-b border-zinc-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-display text-xl font-bold text-wine">רשימות היומן</div>
+              <div id="listCount" class="text-xs text-zinc-500"></div>
+            </div>
+            <button class="w-9 h-9 rounded-full bg-zinc-100 text-wine text-xl leading-none" data-close="listModal" aria-label="סגירה">&times;</button>
+          </div>
+          <div id="listTabs" class="flex gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1"></div>
+          <input id="listSearch" type="search" placeholder="🔍 חיפוש לפי שם, טלפון, הערות..." class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+          <div class="flex items-center justify-between gap-2">
+            <label class="flex items-center gap-2 text-sm text-zinc-600 cursor-pointer"><input id="listPast" type="checkbox" class="w-4 h-4" /> כולל תאריכים שעברו</label>
+            <div class="flex gap-1.5">
+              <button id="listCsv" class="text-xs px-3 py-1.5 rounded-full border border-wine text-wine">⬇️ Excel</button>
+              <button id="listPdf" class="text-xs px-3 py-1.5 rounded-full bg-wine text-white">🖨️ PDF</button>
+            </div>
+          </div>
+        </div>
+        <div id="listBody" class="overflow-y-auto px-5 py-4 space-y-2 flex-1 safe-bottom"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- Day Modal -->
   <div id="dayModal" class="fixed inset-0 z-40 hidden">
@@ -152,10 +197,11 @@
     <div class="absolute inset-0 bg-black/50 fade-in" data-close="formModal"></div>
     <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
       <form id="leadForm" class="modal-enter pointer-events-auto bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto shadow-2xl px-5 pt-5 safe-bottom" novalidate>
-        <div class="flex items-center justify-between mb-4">
-          <h3 id="formTitle" class="font-display text-xl font-bold text-wine">מתעניינת חדשה</h3>
+        <div class="flex items-center justify-between mb-1">
+          <h3 id="formTitle" class="font-display text-xl font-bold text-wine">רישום חדש</h3>
           <button type="button" class="w-9 h-9 rounded-full bg-zinc-100 text-wine text-xl leading-none" data-close="formModal" aria-label="סגירה">&times;</button>
         </div>
+        <div id="formDate" class="text-sm text-zinc-500 mb-4"></div>
         <input type="hidden" id="fLeadId" />
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
@@ -177,8 +223,101 @@
         </label>
         <label class="block mt-3">
           <span class="text-sm text-zinc-500">הערות</span>
-          <textarea id="fNotes" rows="3" class="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="מספר אורחות, שעת הגעה, בקשות מיוחדות..."></textarea>
+          <textarea id="fNotes" rows="3" class="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="מספר אורחות, בקשות מיוחדות..."></textarea>
         </label>
+
+        <!-- Status -->
+        <fieldset class="mt-4">
+          <legend class="text-sm text-zinc-500 mb-2">סטטוס / סוג רישום</legend>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="fStatus" value="open" class="peer sr-only" checked />
+              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2.5 text-center transition peer-checked:border-yellow-400 peer-checked:bg-yellow-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+                <div class="text-lg leading-none">🟡</div>
+                <div class="text-sm font-semibold mt-1 text-zinc-700">מתעניינת</div>
+                <div class="text-[11px] text-zinc-500">בטיפול</div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="fStatus" value="tour" class="peer sr-only" />
+              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2.5 text-center transition peer-checked:border-[#6b1d38] peer-checked:bg-[#f6e8ed] peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+                <div class="text-lg leading-none">🟣</div>
+                <div class="text-sm font-semibold mt-1 text-zinc-700">יום סיור</div>
+                <div class="text-[11px] text-zinc-500">תיאום ביקור</div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="fStatus" value="cancelled" class="peer sr-only" />
+              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2.5 text-center transition peer-checked:border-zinc-500 peer-checked:bg-zinc-100 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+                <div class="text-lg leading-none">⚪</div>
+                <div class="text-sm font-semibold mt-1 text-zinc-700">מבוטל</div>
+                <div class="text-[11px] text-zinc-500">הפנייה בוטלה</div>
+              </div>
+            </label>
+            <label class="cursor-pointer col-span-3 sm:col-span-1 grid">
+              <input type="radio" name="fStatus" value="won" class="peer sr-only" />
+              <div class="rounded-xl border-2 border-zinc-200 px-2 py-2.5 text-center transition peer-checked:border-red-500 peer-checked:bg-red-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+                <span class="text-lg leading-none">🔴</span>
+                <span class="text-sm font-semibold text-zinc-700">סגור – כלה</span>
+                <span class="text-[11px] text-zinc-500">תפיסת התאריך</span>
+              </div>
+            </label>
+            <label class="cursor-pointer col-span-3 sm:col-span-2 grid">
+              <input type="radio" name="fStatus" value="maternity" class="peer sr-only" />
+              <div class="rounded-xl border-2 border-zinc-200 px-2 py-2.5 text-center transition peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+                <span class="text-lg leading-none">🔵</span>
+                <span class="text-sm font-semibold text-zinc-700">סגירה לצילומי הריון</span>
+                <span class="text-[11px] text-zinc-500">תפיסת התאריך</span>
+              </div>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Tour details -->
+        <fieldset id="fTourSec" class="mt-4 rounded-2xl border border-[#6b1d38]/30 bg-[#f6e8ed]/60 p-3 hidden">
+          <legend class="px-1 text-sm font-semibold text-[#6b1d38]">🍇 פרטי הסיור</legend>
+          <label class="block">
+            <span class="text-sm text-zinc-500">שעת הסיור *</span>
+            <input id="fTourTime" type="time" dir="ltr" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+          </label>
+        </fieldset>
+
+        <!-- Package details (booked days) -->
+        <fieldset id="fPkgSec" class="mt-4 rounded-2xl border border-zinc-200 bg-white/60 p-3 hidden">
+          <legend class="px-1 text-sm font-semibold text-wine">🌗 חבילה ושעות</legend>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="fPkg" value="lodging" class="peer sr-only" checked />
+              <div class="h-full rounded-xl border-2 border-zinc-200 px-2 py-2 text-center transition peer-checked:border-wine peer-checked:bg-wine-soft">
+                <div class="text-sm font-semibold text-wine-dark">🛏️ חבילה 1</div>
+                <div class="text-[11px] text-zinc-500">כוללת לינה</div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="fPkg" value="prep" class="peer sr-only" />
+              <div class="h-full rounded-xl border-2 border-zinc-200 px-2 py-2 text-center transition peer-checked:border-wine peer-checked:bg-wine-soft">
+                <div class="text-sm font-semibold text-wine-dark">💄 חבילה 2</div>
+                <div class="text-[11px] text-zinc-500">התארגנות בלבד – חצי יום</div>
+              </div>
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <label class="block">
+              <span class="text-sm text-zinc-500">שעת הגעה</span>
+              <input id="fArrive" type="time" dir="ltr" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-zinc-500">שעת עזיבה</span>
+              <input id="fLeave" type="time" dir="ltr" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+            </label>
+          </div>
+          <label id="fLeaveDateWrap" class="block mt-2">
+            <span class="text-sm text-zinc-500">תאריך עזיבה (לינה)</span>
+            <input id="fLeaveDate" type="date" dir="ltr" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+          </label>
+        </fieldset>
+
+        <!-- Finance -->
         <fieldset class="mt-4 rounded-2xl border border-zinc-200 bg-white/60 p-3">
           <legend class="px-1 text-sm font-semibold text-wine">💰 פרטי עסקה ותשלום</legend>
           <label class="block">
@@ -201,35 +340,7 @@
             <label class="flex items-center gap-2 cursor-pointer"><input id="fPaidFull" type="checkbox" class="w-5 h-5" /> שולמה היתרה / שולם במלואו</label>
           </div>
         </fieldset>
-        <fieldset class="mt-4">
-          <legend class="text-sm text-zinc-500 mb-2">סטטוס הזמנה</legend>
-          <div class="grid grid-cols-3 gap-2">
-            <label class="cursor-pointer">
-              <input type="radio" name="fStatus" value="open" class="peer sr-only" checked />
-              <div class="rounded-xl border-2 border-zinc-200 px-2 py-3 text-center transition peer-checked:border-yellow-400 peer-checked:bg-yellow-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
-                <div class="text-xl leading-none">🟡</div>
-                <div class="text-sm font-semibold mt-1 text-zinc-700">מתעניינת</div>
-                <div class="text-[11px] text-zinc-500">בטיפול</div>
-              </div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="fStatus" value="won" class="peer sr-only" />
-              <div class="rounded-xl border-2 border-zinc-200 px-2 py-3 text-center transition peer-checked:border-red-500 peer-checked:bg-red-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
-                <div class="text-xl leading-none">🔴</div>
-                <div class="text-sm font-semibold mt-1 text-zinc-700">סגור</div>
-                <div class="text-[11px] text-zinc-500">תפיסת התאריך</div>
-              </div>
-            </label>
-            <label class="cursor-pointer">
-              <input type="radio" name="fStatus" value="cancelled" class="peer sr-only" />
-              <div class="rounded-xl border-2 border-zinc-200 px-2 py-3 text-center transition peer-checked:border-zinc-500 peer-checked:bg-zinc-100 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
-                <div class="text-xl leading-none">⚪</div>
-                <div class="text-sm font-semibold mt-1 text-zinc-700">מבוטל</div>
-                <div class="text-[11px] text-zinc-500">הפנייה בוטלה</div>
-              </div>
-            </label>
-          </div>
-        </fieldset>
+
         <p id="formError" class="text-sm text-red-600 mt-2 hidden"></p>
         <div class="flex gap-2 mt-5 mb-1">
           <button type="submit" class="flex-1 py-3 rounded-2xl bg-wine text-white font-semibold shadow-soft">שמירה</button>
@@ -264,8 +375,12 @@
 
   // ---------- Storage ----------
   const STORAGE_KEY = 'bridalCabinCalendar.v1';
-  // Data shape: { days: { 'YYYY-MM-DD': { status: 'booked'|null, bookedLeadId, leads: [Lead] } } }
-  // Lead: { id, firstName, lastName, phone, email, notes, total, contractSigned, depositPaid, paidInFull, createdAt, state: 'open'|'won'|'lost'|'cancelled' }
+  // Data shape: { days: { 'YYYY-MM-DD': Day } }
+  // Day:  { status: 'booked'|null, bookingType: 'bride'|'maternity', bookedLeadId, leads: [Lead] }
+  // Lead: { id, firstName, lastName, phone, email, notes, createdAt,
+  //         state: 'open'|'tour'|'won'|'lost'|'cancelled', prevState,
+  //         tourTime, pkg: 'lodging'|'prep', arriveTime, leaveTime, leaveDate,
+  //         total, contractSigned, depositPaid, paidInFull }
   let db = load();
 
   function load() {
@@ -289,25 +404,41 @@
   const keyOf = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
   const parseKey = (k) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
   const todayKey = () => { const t = new Date(); return keyOf(t.getFullYear(), t.getMonth(), t.getDate()); };
+  const nextKey = (k) => { const d = parseKey(k); d.setDate(d.getDate() + 1); return keyOf(d.getFullYear(), d.getMonth(), d.getDate()); };
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   const fullName = (l) => `${l.firstName} ${l.lastName || ''}`.trim();
   const prettyDate = (k) => { const d = parseKey(k); return `יום ${HE_DAYS[d.getDay()]}, ${d.getDate()} ב${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
+  const shortDate = (k) => { if (!k) return ''; const d = parseKey(k); return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`; };
   const intlPhone = (p) => { const digits = String(p).replace(/\D/g, ''); return digits.startsWith('0') ? '972' + digits.slice(1) : digits; };
 
-  // Iron rule: dates before today can never receive new leads or bookings.
+  // Iron rule: dates before today can never receive new leads, tours or bookings.
   const isPast = (k) => k < todayKey();
-  const PAST_MSG = 'לא ניתן לתאם או להוסיף מתעניינות בתאריך שעבר';
+  const PAST_MSG = 'לא ניתן לתאם או להוסיף מתעניינות/סיורים בתאריך שעבר';
 
-  function getDay(k) { return db.days[k] || { status: null, bookedLeadId: null, leads: [] }; }
-  function ensureDay(k) { if (!db.days[k]) db.days[k] = { status: null, bookedLeadId: null, leads: [] }; return db.days[k]; }
+  function getDay(k) { return db.days[k] || { status: null, bookingType: null, bookedLeadId: null, leads: [] }; }
+  function ensureDay(k) { if (!db.days[k]) db.days[k] = getDay(k); return db.days[k]; }
   function cleanupDay(k) { const d = db.days[k]; if (d && !d.status && d.leads.length === 0) delete db.days[k]; }
-  function openLeads(day) { return day.leads.filter(l => l.state === 'open'); }
+  const openLeads = (day) => day.leads.filter(l => l.state === 'open');
+  const tourLeads = (day) => day.leads.filter(l => l.state === 'tour');
+  const activeLeads = (day) => day.leads.filter(l => l.state === 'open' || l.state === 'tour');
+  const isMaternity = (day) => day.status === 'booked' && day.bookingType === 'maternity';
+
+  // Day color priority: booked (red / blue) > tour (purple) > interested (yellow) > free (green)
   function dayState(k) {
     const d = getDay(k);
-    if (d.status === 'booked') return 'booked';
-    if (openLeads(d).length > 0) return 'pending';
+    if (d.status === 'booked') return isMaternity(d) ? 'maternity' : 'booked';
+    if (tourLeads(d).length) return 'tour';
+    if (openLeads(d).length) return 'pending';
     return 'free';
+  }
+
+  // Form status value for an existing lead
+  function statusOf(lead, day) {
+    if (!lead) return null;
+    if (lead.state === 'won') return isMaternity(day) ? 'maternity' : 'won';
+    if (lead.state === 'tour' || lead.state === 'cancelled') return lead.state;
+    return 'open';
   }
 
   // ---------- State ----------
@@ -317,6 +448,9 @@
   let activeKey = null;
 
   // ---------- Calendar ----------
+  const DAY_BADGE = { booked: 'תפוס', maternity: 'הריון', tour: 'סיור' };
+  const STATE_LABEL = { free: 'פנוי', pending: 'בטיפול', tour: 'יום סיור', booked: 'תפוס', maternity: 'צילומי הריון' };
+
   function renderCalendar() {
     $('monthTitle').textContent = `${HE_MONTHS[viewMonth]} ${viewYear}`;
     const grid = $('calendarGrid');
@@ -324,7 +458,6 @@
     const firstDow = new Date(viewYear, viewMonth, 1).getDay();
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     const tKey = todayKey();
-    let booked = 0, pending = 0;
 
     for (let i = 0; i < firstDow; i++) grid.appendChild(document.createElement('div'));
 
@@ -332,8 +465,6 @@
       const k = keyOf(viewYear, viewMonth, d);
       const state = dayState(k);
       const day = getDay(k);
-      if (state === 'booked') booked++;
-      if (state === 'pending') pending++;
 
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -342,46 +473,83 @@
       if (k === tKey) btn.classList.add('ring-2', 'ring-wine', 'ring-offset-1');
 
       let badge = '';
-      const openCount = openLeads(day).length;
-      if (state === 'pending') badge = `<span class="absolute top-0.5 left-1 text-[10px] font-bold">${openCount}</span>`;
-      if (state === 'booked') badge = `<span class="text-[9px] leading-none mt-0.5">תפוס</span>`;
+      if (state === 'pending') badge = `<span class="absolute top-0.5 left-1 text-[10px] font-bold">${openLeads(day).length}</span>`;
+      if (DAY_BADGE[state]) badge = `<span class="text-[9px] leading-none mt-0.5">${DAY_BADGE[state]}</span>`;
       btn.innerHTML = `<span>${d}</span>${badge}`;
-      btn.setAttribute('aria-label', `${d} ${HE_MONTHS[viewMonth]} - ${state === 'booked' ? 'תפוס' : state === 'pending' ? 'בטיפול' : 'פנוי'}`);
+      btn.setAttribute('aria-label', `${d} ${HE_MONTHS[viewMonth]} - ${STATE_LABEL[state]}`);
       btn.addEventListener('click', () => openDay(k));
       grid.appendChild(btn);
     }
 
-    $('statBooked').textContent = booked;
-    $('statPending').textContent = pending;
-    let totalOpen = 0;
-    const tk = todayKey();
-    Object.entries(db.days).forEach(([k, d]) => { if (k >= tk && d.status !== 'booked') totalOpen += openLeads(d).length; });
-    $('statLeads').textContent = totalOpen;
+    renderStats();
     renderUpcoming();
   }
 
+  function renderStats() {
+    const upcoming = allRecords().filter(r => !isPast(r.key));
+    $('statBooked').textContent = upcoming.filter(r => r.kind === 'booked').length;
+    $('statPending').textContent = upcoming.filter(r => r.kind === 'pending').length;
+    $('statTours').textContent = upcoming.filter(r => r.kind === 'tour').length;
+  }
+
   function renderUpcoming() {
-    const tk = todayKey();
-    const items = Object.entries(db.days)
-      .filter(([k, d]) => k >= tk && d.status === 'booked')
-      .sort(([a], [b]) => a.localeCompare(b))
+    const items = allRecords()
+      .filter(r => !isPast(r.key) && (r.kind === 'booked' || r.kind === 'maternity'))
       .slice(0, 6);
     const list = $('upcomingList');
     if (!items.length) {
       list.innerHTML = `<div class="text-sm text-zinc-500 text-center py-4 bg-white rounded-2xl border border-zinc-200">אין אירועים סגורים קרובים</div>`;
       return;
     }
-    list.innerHTML = items.map(([k, d]) => {
-      const bride = d.leads.find(l => l.id === d.bookedLeadId);
-      return `<button data-key="${k}" class="w-full text-right bg-white rounded-2xl border border-zinc-200 shadow-sm px-4 py-3 flex items-center justify-between gap-3">
+    list.innerHTML = items.map(r => `
+      <button data-key="${r.key}" class="w-full text-right bg-white rounded-2xl border border-zinc-200 shadow-sm px-4 py-3 flex items-center justify-between gap-3">
         <div>
-          <div class="font-semibold text-wine-dark">${esc(bride ? fullName(bride) : 'כלה')}</div>
-          <div class="text-xs text-zinc-500">${prettyDate(k)}</div>
+          <div class="font-semibold text-wine-dark">${esc(fullName(r.lead))}</div>
+          <div class="text-xs text-zinc-500">${prettyDate(r.key)}</div>
+          ${packageText(r.lead) ? `<div class="text-xs text-zinc-500 mt-0.5">${esc(packageText(r.lead))}</div>` : ''}
         </div>
-        <span class="text-xs px-2.5 py-1 rounded-full day-booked">תפוס</span>
-      </button>`;
-    }).join('');
+        ${kindBadge(r.kind)}
+      </button>`).join('');
     list.querySelectorAll('[data-key]').forEach(b => b.addEventListener('click', () => openDay(b.dataset.key)));
+  }
+
+  // ---------- Records (used by lists, stats and exports) ----------
+  const KIND = {
+    booked:    { label: 'כלה – תפוס',   cls: 'day-booked' },
+    maternity: { label: 'צילומי הריון', cls: 'day-maternity' },
+    tour:      { label: 'סיור',         cls: 'day-tour' },
+    pending:   { label: 'מתעניינת',     cls: 'day-pending' },
+    lost:      { label: 'התאריך נתפס',  cls: 'day-muted' },
+    cancelled: { label: 'מבוטל',        cls: 'day-muted' }
+  };
+  const kindBadge = (kind) => `<span class="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full border ${KIND[kind].cls}">${KIND[kind].label}</span>`;
+
+  function recordKind(day, lead) {
+    if (lead.state === 'won') return isMaternity(day) ? 'maternity' : 'booked';
+    if (lead.state === 'tour') return 'tour';
+    if (lead.state === 'open') return 'pending';
+    return lead.state === 'cancelled' ? 'cancelled' : 'lost';
+  }
+
+  function allRecords() {
+    const out = [];
+    Object.keys(db.days).sort().forEach(key => {
+      const day = db.days[key];
+      day.leads.forEach(lead => out.push({ key, day, lead, kind: recordKind(day, lead) }));
+    });
+    return out.sort((a, b) => a.key.localeCompare(b.key) || String(a.lead.tourTime || '').localeCompare(String(b.lead.tourTime || '')));
+  }
+
+  function packageText(l) {
+    if (l.state !== 'won' || !l.pkg) return '';
+    if (l.pkg === 'lodging') {
+      return `חבילה 1 – כולל לינה · הגעה ${l.arriveTime || '—'} · עזיבה ${shortDate(l.leaveDate)} ${l.leaveTime || ''}`.trim();
+    }
+    return `חבילה 2 – התארגנות בלבד (חצי יום) · ${l.arriveTime || '—'}–${l.leaveTime || '—'}`;
+  }
+  function scheduleText(r) {
+    if (r.kind === 'tour') return `סיור בשעה ${r.lead.tourTime || '—'}`;
+    return packageText(r.lead);
   }
 
   // ---------- Day modal ----------
@@ -395,7 +563,9 @@
     const map = {
       free: ['day-free', 'פנוי לחלוטין'],
       pending: ['day-pending', 'בטיפול – יש מתעניינות'],
-      booked: ['day-booked', 'תפוס – נסגר עבור כלה']
+      tour: ['day-tour', 'יום סיור'],
+      booked: ['day-booked', 'תפוס – נסגר עבור כלה'],
+      maternity: ['day-maternity', 'תפוס – צילומי הריון']
     };
     const [cls, txt] = map[state];
     return `<span class="inline-block text-xs font-semibold px-3 py-1 rounded-full border ${cls}">${txt}</span>`;
@@ -420,6 +590,7 @@
     const deposit = round2(t * DEPOSIT_RATE);
     return { total: t, deposit, balance: round2(t - deposit) };
   }
+  const balanceDue = (l) => l.paidInFull ? 0 : finance(l.total).balance;
   function hasFinance(l) { return l.total > 0 || l.contractSigned || l.depositPaid || l.paidInFull; }
   function financeBlock(l, always) {
     if (!always && !hasFinance(l)) return '';
@@ -430,7 +601,7 @@
         <div class="grid grid-cols-3 gap-2 text-center">
           <div><div class="text-[11px] text-zinc-500">סכום עסקה</div><div class="font-bold text-wine-dark">${money(f.total)}</div></div>
           <div><div class="text-[11px] text-zinc-500">מקדמה 15%</div><div class="font-bold text-wine-dark">${money(f.deposit)}</div></div>
-          <div><div class="text-[11px] text-zinc-500">יתרה</div><div class="font-bold text-wine-dark">${money(l.paidInFull ? 0 : f.balance)}</div></div>
+          <div><div class="text-[11px] text-zinc-500">יתרה</div><div class="font-bold text-wine-dark">${money(balanceDue(l))}</div></div>
         </div>
         <div class="flex flex-wrap gap-1.5 mt-2 justify-center">
           ${flag(l.contractSigned, 'חוזה נחתם')}
@@ -445,6 +616,21 @@
     $('fBalance').textContent = money(f.balance);
   }
 
+  function packageBlock(l) {
+    if (!l.pkg) return `<div class="mt-3 text-xs text-zinc-500 bg-zinc-50 rounded-xl p-2 text-center">לא הוגדרה חבילה – ניתן להוסיף דרך "עריכת פרטים"</div>`;
+    const cell = (label, value) => `<div><div class="text-[11px] text-zinc-500">${label}</div><div class="font-bold text-wine-dark" dir="ltr">${esc(value || '—')}</div></div>`;
+    const lodging = l.pkg === 'lodging';
+    return `
+      <div class="mt-3 rounded-xl border border-wine/20 bg-wine-soft/60 p-3">
+        <div class="text-sm font-semibold text-wine mb-2">${lodging ? '🛏️ חבילה 1 – כוללת לינה' : '💄 חבילה 2 – התארגנות בלבד (חצי יום)'}</div>
+        <div class="grid ${lodging ? 'grid-cols-3' : 'grid-cols-2'} gap-2 text-center">
+          ${cell('שעת הגעה', l.arriveTime)}
+          ${lodging ? cell('תאריך עזיבה', shortDate(l.leaveDate)) : ''}
+          ${cell('שעת עזיבה', l.leaveTime)}
+        </div>
+      </div>`;
+  }
+
   function leadDetails(l) {
     return `
       <div class="text-sm text-zinc-600 space-y-0.5 mt-1">
@@ -454,7 +640,21 @@
       </div>`;
   }
 
+  function tourBlock(l) {
+    return `
+      <div class="mt-3 rounded-xl border border-[#6b1d38]/25 bg-[#f6e8ed] p-3">
+        <div class="flex items-center justify-between">
+          <div class="text-sm font-semibold text-[#6b1d38]">🍇 סיור בשעה <span dir="ltr">${esc(l.tourTime || '—')}</span></div>
+        </div>
+        <div class="flex gap-2 mt-2">
+          <button data-act="share" data-id="${l.id}" class="flex-1 py-2 rounded-xl bg-[#6b1d38] text-white text-sm font-semibold">📤 שתף</button>
+          ${l.phone ? `<button data-act="shareWa" data-id="${l.id}" class="flex-1 py-2 rounded-xl border border-[#6b1d38] text-[#6b1d38] text-sm font-semibold">💬 שליחה ללקוחה</button>` : ''}
+        </div>
+      </div>`;
+  }
+
   function renderDay() {
+    if (!activeKey) return;
     const k = activeKey;
     const day = getDay(k);
     const state = dayState(k);
@@ -464,19 +664,20 @@
     const body = $('dayModalBody');
     const footer = $('dayModalFooter');
 
-    if (state === 'booked') {
+    if (day.status === 'booked') {
       const bride = day.leads.find(l => l.id === day.bookedLeadId);
       const others = day.leads.filter(l => l.id !== day.bookedLeadId);
+      const maternity = isMaternity(day);
       body.innerHTML = `
-        <div class="rounded-2xl border-2 border-wine bg-white p-4">
-          <div class="text-xs font-bold text-zinc-500 tracking-wide mb-1">👰 הכלה של התאריך</div>
+        <div class="rounded-2xl border-2 ${maternity ? 'border-blue-600' : 'border-red-500'} bg-white p-4">
+          <div class="text-xs font-bold ${maternity ? 'text-blue-700' : 'text-red-600'} tracking-wide mb-1">${maternity ? '🤰 סגירה לצילומי הריון' : '👰 הכלה של התאריך'}</div>
           <div class="text-lg font-bold text-wine-dark">${esc(bride ? fullName(bride) : 'כלה')}</div>
-          ${bride ? leadDetails(bride) + financeBlock(bride, true) + contactLinks(bride) : ''}
+          ${bride ? leadDetails(bride) + packageBlock(bride) + financeBlock(bride, true) + contactLinks(bride) : ''}
           ${bride ? `<button data-act="edit" data-id="${bride.id}" class="mt-3 text-sm text-wine underline">עריכת פרטים</button>` : ''}
         </div>
         ${others.length ? `
           <div class="pt-2">
-            <div class="text-sm font-semibold text-zinc-500 mb-2">מתעניינות נוספות לתאריך זה (${others.length})</div>
+            <div class="text-sm font-semibold text-zinc-500 mb-2">פניות נוספות לתאריך זה (${others.length})</div>
             ${others.map(l => `
               <div class="rounded-xl border border-zinc-200 p-3 mb-2 bg-zinc-50">
                 <div class="flex justify-between items-center">
@@ -489,123 +690,169 @@
           </div>` : ''}
       `;
       footer.innerHTML = `<button data-act="unbook" class="w-full py-3 mb-1 rounded-2xl border-2 border-wine text-wine font-semibold">ביטול סגירה / שחרור התאריך</button>`;
-    } else {
-      const leads = [...openLeads(day), ...day.leads.filter(l => l.state === 'cancelled')];
-      body.innerHTML = leads.length ? leads.map(l => l.state === 'cancelled' ? `
-        <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 opacity-75">
-          <div class="flex items-start justify-between gap-2">
-            <div>
-              <div class="text-base font-semibold text-zinc-500 line-through">${esc(fullName(l))}</div>
-              <span class="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-600">מבוטל</span>
-            </div>
-            <div class="flex gap-1 shrink-0">
-              <button data-act="edit" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-wine text-sm" aria-label="עריכה">✎</button>
-              <button data-act="delete" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-zinc-500 text-sm" aria-label="מחיקה">🗑</button>
-            </div>
-          </div>
-          ${leadDetails(l)}
-        </div>` : `
-        <div class="rounded-2xl border border-zinc-200 bg-white shadow-sm p-4">
-          <div class="flex items-start justify-between gap-2">
-            <div class="text-lg font-bold text-wine-dark">${esc(fullName(l))}</div>
-            <div class="flex gap-1 shrink-0">
-              <button data-act="edit" data-id="${l.id}" class="w-8 h-8 rounded-full bg-zinc-100 text-wine text-sm" aria-label="עריכה">✎</button>
-              <button data-act="delete" data-id="${l.id}" class="w-8 h-8 rounded-full bg-zinc-100 text-zinc-500 text-sm" aria-label="מחיקה">🗑</button>
-            </div>
-          </div>
-          ${leadDetails(l)}
-          ${financeBlock(l)}
-          ${contactLinks(l)}
-          ${past ? '' : `<button data-act="book" data-id="${l.id}" class="mt-3 w-full py-3 rounded-xl bg-wine text-white font-semibold shadow-soft">
-            💍 סגור עסקה / הפוך לתאריך תפוס
-          </button>`}
-        </div>`).join('')
-        : `<div class="text-center py-8">
-             <div class="text-4xl mb-2">🤍</div>
-             <div class="text-zinc-600 font-semibold">${past ? 'לא נקבע אירוע בתאריך זה' : 'התאריך פנוי לחלוטין'}</div>
-             <div class="text-sm text-zinc-500">${past ? 'התאריך כבר עבר' : 'עדיין אין מתעניינות ליום זה'}</div>
-           </div>`;
-      footer.innerHTML = past ? `<div class="w-full py-3 mb-1 rounded-2xl bg-zinc-100 text-zinc-500 text-sm text-center">🔒 התאריך עבר – לא ניתן לתאם או להוסיף מתעניינות</div>` : `<button data-act="add" class="w-full py-3 mb-1 rounded-2xl bg-wine text-white font-semibold shadow-soft">+ הוסף מתעניינת חדשה</button>`;
+      return;
     }
+
+    const leads = [...tourLeads(day), ...openLeads(day), ...day.leads.filter(l => l.state === 'cancelled')];
+    body.innerHTML = leads.length ? leads.map(l => l.state === 'cancelled' ? `
+      <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 opacity-75">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="text-base font-semibold text-zinc-500 line-through">${esc(fullName(l))}</div>
+            <span class="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-600">מבוטל</span>
+          </div>
+          <div class="flex gap-1 shrink-0">
+            <button data-act="edit" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-wine text-sm" aria-label="עריכה">✎</button>
+            <button data-act="delete" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-zinc-500 text-sm" aria-label="מחיקה">🗑</button>
+          </div>
+        </div>
+        ${leadDetails(l)}
+      </div>` : `
+      <div class="rounded-2xl border ${l.state === 'tour' ? 'border-[#6b1d38]/40' : 'border-zinc-200'} bg-white shadow-sm p-4">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="text-lg font-bold text-wine-dark">${esc(fullName(l))}</div>
+            ${kindBadge(l.state === 'tour' ? 'tour' : 'pending')}
+          </div>
+          <div class="flex gap-1 shrink-0">
+            <button data-act="edit" data-id="${l.id}" class="w-8 h-8 rounded-full bg-zinc-100 text-wine text-sm" aria-label="עריכה">✎</button>
+            <button data-act="delete" data-id="${l.id}" class="w-8 h-8 rounded-full bg-zinc-100 text-zinc-500 text-sm" aria-label="מחיקה">🗑</button>
+          </div>
+        </div>
+        ${leadDetails(l)}
+        ${l.state === 'tour' ? tourBlock(l) : ''}
+        ${financeBlock(l)}
+        ${contactLinks(l)}
+        ${past ? '' : `<button data-act="book" data-id="${l.id}" class="mt-3 w-full py-3 rounded-xl bg-wine text-white font-semibold shadow-soft">
+          💍 סגור עסקה / הפוך לתאריך תפוס
+        </button>`}
+      </div>`).join('')
+      : `<div class="text-center py-8">
+           <div class="text-4xl mb-2">🤍</div>
+           <div class="text-zinc-600 font-semibold">${past ? 'לא נקבע אירוע בתאריך זה' : 'התאריך פנוי לחלוטין'}</div>
+           <div class="text-sm text-zinc-500">${past ? 'התאריך כבר עבר' : 'עדיין אין מתעניינות או סיורים ליום זה'}</div>
+         </div>`;
+    footer.innerHTML = past
+      ? `<div class="w-full py-3 mb-1 rounded-2xl bg-zinc-100 text-zinc-500 text-sm text-center">🔒 התאריך עבר – לא ניתן לתאם או להוסיף מתעניינות/סיורים</div>`
+      : `<div class="flex gap-2 mb-1">
+           <button data-act="add" class="flex-1 py-3 rounded-2xl bg-wine text-white font-semibold shadow-soft">+ מתעניינת חדשה</button>
+           <button data-act="addTour" class="flex-1 py-3 rounded-2xl bg-[#6b1d38] text-white font-semibold shadow-soft">🍇 תיאום סיור</button>
+         </div>`;
   }
+
+  function findLead(k, id) { return getDay(k).leads.find(l => l.id === id) || null; }
 
   function handleDayAction(e) {
     const btn = e.target.closest('[data-act]');
     if (!btn) return;
     const act = btn.dataset.act;
     const id = btn.dataset.id;
-    const day = getDay(activeKey);
-    const lead = id ? day.leads.find(l => l.id === id) : null;
+    const lead = id ? findLead(activeKey, id) : null;
 
-    if ((act === 'add' || act === 'book') && isPast(activeKey)) { toast(PAST_MSG); return; }
+    if ((act === 'add' || act === 'addTour' || act === 'book') && isPast(activeKey)) { toast(PAST_MSG); return; }
     if (act === 'add') openForm(null);
+    else if (act === 'addTour') openForm(null, 'tour');
     else if (act === 'edit' && lead) openForm(lead);
+    else if (act === 'book' && lead) openForm(lead, 'won');
+    else if (act === 'share' && lead) shareTour(activeKey, lead, false);
+    else if (act === 'shareWa' && lead) shareTour(activeKey, lead, true);
     else if (act === 'delete' && lead) {
-      confirmBox(`למחוק את <b>${esc(fullName(lead))}</b> מרשימת המתעניינות?`, 'מחיקה', 'bg-zinc-700', () => {
+      confirmBox(`למחוק את <b>${esc(fullName(lead))}</b> מהיומן?`, 'מחיקה', 'bg-zinc-700', () => {
         const d = ensureDay(activeKey);
         d.leads = d.leads.filter(l => l.id !== id);
-        cleanupDay(activeKey); save(); renderDay(); renderCalendar(); toast('המתעניינת נמחקה');
+        cleanupDay(activeKey); save(); refresh(); toast('הרישום נמחק');
       });
-    }
-    else if (act === 'book' && lead) {
-      const others = openLeads(day).length - 1;
-      confirmBox(
-        `לסגור את התאריך <b>${prettyDate(activeKey)}</b><br>עבור <b>${esc(fullName(lead))}</b>?` +
-        (others > 0 ? `<div class="text-sm text-zinc-500 mt-2">${others} מתעניינות נוספות יסומנו כ״התאריך נתפס״.</div>` : ''),
-        'אישור סגירה', 'bg-wine',
-        () => bookDay(activeKey, lead.id)
-      );
     }
     else if (act === 'unbook') {
-      confirmBox('לשחרר את התאריך? הכלה וכל המתעניינות יחזרו לסטטוס ״בטיפול״.', 'שחרור', 'bg-wine', () => {
+      confirmBox('לשחרר את התאריך? הפניות יחזרו לסטטוס הקודם שלהן (מתעניינת / סיור).', 'שחרור', 'bg-wine', () => {
         unbookDay(activeKey);
-        save(); renderDay(); renderCalendar(); toast('התאריך שוחרר');
+        save(); refresh(); toast('התאריך שוחרר');
       });
     }
   }
 
-  // Cancelled leads keep their state through booking and release.
+  // Booking keeps each lead's previous state so releasing the date restores it.
+  // Cancelled leads stay cancelled through booking and release.
   function unbookDay(k) {
     const d = ensureDay(k);
-    d.status = null; d.bookedLeadId = null;
-    d.leads.forEach(l => { if (l.state !== 'cancelled') l.state = 'open'; });
-  }
-
-  function markBooked(k, leadId) {
-    const d = ensureDay(k);
-    d.status = 'booked';
-    d.bookedLeadId = leadId;
+    d.status = null; d.bookedLeadId = null; d.bookingType = null;
     d.leads.forEach(l => {
-      if (l.id === leadId) l.state = 'won';
-      else if (l.state !== 'cancelled') l.state = 'lost';
+      if (l.state !== 'cancelled') l.state = l.prevState === 'tour' ? 'tour' : 'open';
+      delete l.prevState;
     });
   }
 
-  function bookDay(k, leadId) {
-    markBooked(k, leadId);
-    save(); renderDay(); renderCalendar();
-    toast('💍 מזל טוב! התאריך נסגר');
+  function markBooked(k, leadId, type) {
+    const d = ensureDay(k);
+    d.status = 'booked';
+    d.bookingType = type;
+    d.bookedLeadId = leadId;
+    d.leads.forEach(l => {
+      if (l.state === 'cancelled') return;
+      if (l.state === 'open' || l.state === 'tour') l.prevState = l.state;
+      l.state = l.id === leadId ? 'won' : 'lost';
+    });
+  }
+
+  // ---------- Tour sharing ----------
+  function tourText(k, l) {
+    return [
+      '🍇 סיור בהכרם – הבית להתארגנות לכלות',
+      `📅 ${prettyDate(k)}`,
+      `🕐 שעה: ${l.tourTime || 'טרם נקבעה'}`,
+      `👤 ${fullName(l)}`,
+      l.phone ? `📞 ${l.phone}` : '',
+      l.notes ? `📝 ${l.notes}` : ''
+    ].filter(Boolean).join('\n');
+  }
+  function shareTour(k, l, toClient) {
+    const text = tourText(k, l);
+    if (toClient) { window.open(`https://wa.me/${intlPhone(l.phone)}?text=${encodeURIComponent(text)}`, '_blank'); return; }
+    if (navigator.share) {
+      navigator.share({ title: 'סיור בהכרם', text }).catch(() => {});
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
   }
 
   // ---------- Lead form ----------
-  function openForm(lead) {
-    $('formTitle').textContent = lead ? 'עריכת פרטי מתעניינת' : 'מתעניינת חדשה';
+  const checkedValue = (name) => (document.querySelector(`input[name="${name}"]:checked`) || {}).value;
+  const setChecked = (name, value) => { const el = document.querySelector(`input[name="${name}"][value="${value}"]`); if (el) el.checked = true; };
+
+  function syncFormSections() {
+    const status = checkedValue('fStatus');
+    const booked = status === 'won' || status === 'maternity';
+    $('fTourSec').classList.toggle('hidden', status !== 'tour');
+    $('fPkgSec').classList.toggle('hidden', !booked);
+    $('fLeaveDateWrap').classList.toggle('hidden', checkedValue('fPkg') !== 'lodging');
+  }
+
+  function openForm(lead, presetStatus) {
+    const day = getDay(activeKey);
+    $('formTitle').textContent = lead ? 'עריכת פרטים' : presetStatus === 'tour' ? 'תיאום סיור' : 'רישום חדש';
+    $('formDate').textContent = prettyDate(activeKey);
     $('fLeadId').value = lead ? lead.id : '';
     $('fFirst').value = lead ? lead.firstName : '';
     $('fLast').value = lead ? (lead.lastName || '') : '';
     $('fPhone').value = lead ? (lead.phone || '') : '';
     $('fEmail').value = lead ? (lead.email || '') : '';
     $('fNotes').value = lead ? (lead.notes || '') : '';
+    $('fTourTime').value = (lead && lead.tourTime) || '';
+    setChecked('fPkg', (lead && lead.pkg) || 'lodging');
+    $('fArrive').value = (lead && lead.arriveTime) || '';
+    $('fLeave').value = (lead && lead.leaveTime) || '';
+    $('fLeaveDate').value = (lead && lead.leaveDate) || nextKey(activeKey);
+    $('fLeaveDate').min = nextKey(activeKey);
     $('fTotal').value = lead && lead.total > 0 ? lead.total : '';
     $('fContract').checked = !!(lead && lead.contractSigned);
     $('fDepositPaid').checked = !!(lead && (lead.depositPaid || lead.paidInFull));
     $('fPaidFull').checked = !!(lead && lead.paidInFull);
     updateFinancePreview();
-    const status = !lead ? 'open' : lead.state === 'won' ? 'won' : lead.state === 'cancelled' ? 'cancelled' : 'open';
-    document.querySelector(`input[name="fStatus"][value="${status}"]`).checked = true;
+    setChecked('fStatus', presetStatus || statusOf(lead, day) || 'open');
+    syncFormSections();
     $('formError').classList.add('hidden');
     show('formModal');
-    setTimeout(() => $('fFirst').focus(), 250);
+    if (!lead) setTimeout(() => $('fFirst').focus(), 250);
   }
 
   function submitForm(e) {
@@ -617,6 +864,16 @@
     const notes = $('fNotes').value.trim();
     const totalRaw = $('fTotal').value.trim();
     const total = totalRaw === '' ? 0 : round2(Number(totalRaw));
+    const status = checkedValue('fStatus');
+    const booking = status === 'won' || status === 'maternity';
+    const pkg = checkedValue('fPkg');
+    const schedule = {
+      tourTime: $('fTourTime').value,
+      pkg: booking ? pkg : undefined,
+      arriveTime: $('fArrive').value,
+      leaveTime: $('fLeave').value,
+      leaveDate: pkg === 'lodging' ? $('fLeaveDate').value : ''
+    };
     const payment = {
       total,
       contractSigned: $('fContract').checked,
@@ -624,6 +881,9 @@
       paidInFull: $('fPaidFull').checked
     };
     const err = $('formError');
+    const id = $('fLeadId').value;
+    const d = getDay(activeKey);
+    const current = id ? d.leads.find(l => l.id === id) : null;
 
     let msg = '';
     if (!first) msg = 'יש להזין שם פרטי';
@@ -631,46 +891,213 @@
     else if (phone.replace(/\D/g, '').length < 9) msg = 'מספר הטלפון אינו תקין';
     else if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) msg = 'כתובת הדוא״ל אינה תקינה';
     else if (!Number.isFinite(total) || total < 0) msg = 'סכום העסקה אינו תקין';
-    const status = document.querySelector('input[name="fStatus"]:checked').value;
-    const id = $('fLeadId').value;
+    else if (status === 'tour' && !schedule.tourTime) msg = 'יש לבחור שעת סיור';
+    else if (booking && pkg === 'lodging' && (!schedule.leaveDate || schedule.leaveDate <= activeKey)) msg = 'בחבילה עם לינה תאריך העזיבה חייב להיות אחרי תאריך ההגעה';
+    // Iron rule: past dates accept detail edits and cancellations only.
     if (!msg && isPast(activeKey)) {
-      const current = getDay(activeKey).leads.find(l => l.id === id);
-      const currentStatus = !current ? null : current.state === 'won' ? 'won' : current.state === 'cancelled' ? 'cancelled' : 'open';
-      if (!current || (status !== currentStatus && status !== 'cancelled')) msg = PAST_MSG;
+      if (!current || (status !== statusOf(current, d) && status !== 'cancelled')) msg = PAST_MSG;
     }
-    const d = getDay(activeKey);
-    if (!msg && status === 'won' && d.status === 'booked' && d.bookedLeadId !== id) {
-      const bride = d.leads.find(l => l.id === d.bookedLeadId);
-      msg = `התאריך כבר תפוס עבור ${bride ? fullName(bride) : 'כלה אחרת'}`;
+    if (!msg && booking && d.status === 'booked' && d.bookedLeadId !== id) {
+      const holder = d.leads.find(l => l.id === d.bookedLeadId);
+      msg = `התאריך כבר תפוס עבור ${holder ? fullName(holder) : 'לקוחה אחרת'}`;
     }
     if (msg) { err.textContent = msg; err.classList.remove('hidden'); return; }
 
     db.days[activeKey] = d;
-    let lead = id ? d.leads.find(x => x.id === id) : null;
+    let lead = current;
     if (lead) {
-      Object.assign(lead, { firstName: first, lastName: last, phone, email, notes }, payment);
+      Object.assign(lead, { firstName: first, lastName: last, phone, email, notes }, schedule, payment);
     } else {
-      lead = { id: uid(), firstName: first, lastName: last, phone, email, notes, ...payment, createdAt: new Date().toISOString(), state: 'open' };
+      lead = { id: uid(), firstName: first, lastName: last, phone, email, notes, ...schedule, ...payment, createdAt: new Date().toISOString(), state: 'open' };
       d.leads.push(lead);
     }
 
-    const wasBride = d.status === 'booked' && d.bookedLeadId === lead.id;
-    if (status === 'won') {
-      markBooked(activeKey, lead.id);
-      toast(wasBride ? 'הפרטים עודכנו' : '💍 מזל טוב! התאריך נסגר');
+    const wasHolder = d.status === 'booked' && d.bookedLeadId === lead.id;
+    if (booking) {
+      markBooked(activeKey, lead.id, status === 'maternity' ? 'maternity' : 'bride');
+      toast(wasHolder ? 'הפרטים עודכנו' : status === 'maternity' ? '🤰 התאריך נסגר לצילומי הריון' : '💍 מזל טוב! התאריך נסגר');
     } else {
-      if (wasBride) unbookDay(activeKey);
-      lead.state = status;
-      toast(status === 'cancelled' ? 'הפנייה סומנה כמבוטלת' : wasBride ? 'התאריך שוחרר' : id ? 'הפרטים עודכנו' : 'המתעניינת נוספה');
+      if (wasHolder) unbookDay(activeKey);
+      // A lead added to a date that another client already holds stays in "date taken".
+      const heldByOther = d.status === 'booked' && d.bookedLeadId !== lead.id;
+      lead.state = status === 'cancelled' ? 'cancelled' : heldByOther ? 'lost' : status;
+      if (heldByOther && status !== 'cancelled') lead.prevState = status;
+      toast(status === 'cancelled' ? 'הפנייה סומנה כמבוטלת' : wasHolder ? 'התאריך שוחרר' : status === 'tour' ? '🍇 הסיור נשמר' : id ? 'הפרטים עודכנו' : 'המתעניינת נוספה');
     }
-    save(); hide('formModal'); renderDay(); renderCalendar();
+    save(); hide('formModal'); refresh();
+  }
+
+  // ---------- Lists panel ----------
+  const TABS = [
+    { id: 'booked',    label: '👰 כלות' },
+    { id: 'pending',   label: '🟡 מתעניינות' },
+    { id: 'tour',      label: '🍇 סיורים' },
+    { id: 'maternity', label: '🤰 צילומי הריון' },
+    { id: 'all',       label: '📋 הכל' }
+  ];
+  let listTab = 'booked';
+
+  function openList(tab) {
+    listTab = tab;
+    $('listSearch').value = '';
+    renderList();
+    show('listModal');
+  }
+
+  function listRecords() {
+    const q = $('listSearch').value.trim().toLowerCase();
+    const withPast = $('listPast').checked;
+    return allRecords().filter(r =>
+      (listTab === 'all' || r.kind === listTab) &&
+      (withPast || !isPast(r.key)) &&
+      (!q || [fullName(r.lead), r.lead.phone, r.lead.email, r.lead.notes].join(' ').toLowerCase().includes(q))
+    );
+  }
+
+  function renderList() {
+    $('listTabs').innerHTML = TABS.map(t => `
+      <button data-tab="${t.id}" class="shrink-0 text-sm px-3 py-1.5 rounded-full border ${t.id === listTab ? 'bg-wine text-white border-wine' : 'border-zinc-200 text-zinc-600 bg-white'}">${t.label}</button>`).join('');
+    const records = listRecords();
+    $('listCount').textContent = `${records.length} רשומות`;
+    $('listBody').innerHTML = records.length ? records.map(r => {
+      const sched = scheduleText(r);
+      const editable = r.kind !== 'lost';
+      return `
+        <div class="rounded-2xl border border-zinc-200 bg-white p-3 ${isPast(r.key) ? 'opacity-70' : ''}">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="text-xs text-zinc-500">${prettyDate(r.key)}</div>
+              <div class="font-bold text-wine-dark truncate">${esc(fullName(r.lead))}</div>
+              ${r.lead.phone ? `<div class="text-sm text-zinc-600" dir="ltr" style="text-align:right">${esc(r.lead.phone)}</div>` : ''}
+              ${sched ? `<div class="text-xs text-zinc-600 mt-1">${esc(sched)}</div>` : ''}
+              ${r.lead.total > 0 ? `<div class="text-xs text-zinc-600 mt-1">סכום ${money(r.lead.total)} · יתרה ${money(balanceDue(r.lead))}${r.lead.contractSigned ? ' · ✔ חוזה' : ''}</div>` : ''}
+            </div>
+            ${kindBadge(r.kind)}
+          </div>
+          <div class="flex gap-2 mt-2">
+            <button data-lact="open" data-key="${r.key}" class="flex-1 py-1.5 rounded-xl bg-zinc-100 text-wine text-sm">📅 פתח יום</button>
+            ${editable ? `<button data-lact="edit" data-key="${r.key}" data-id="${r.lead.id}" class="flex-1 py-1.5 rounded-xl border border-wine text-wine text-sm">✎ עריכה</button>` : ''}
+          </div>
+        </div>`;
+    }).join('') : `<div class="text-center text-sm text-zinc-500 py-10">אין רשומות להצגה</div>`;
+  }
+
+  function handleListAction(e) {
+    const tab = e.target.closest('[data-tab]');
+    if (tab) { listTab = tab.dataset.tab; renderList(); return; }
+    const btn = e.target.closest('[data-lact]');
+    if (!btn) return;
+    const key = btn.dataset.key;
+    if (btn.dataset.lact === 'open') openDay(key);
+    else if (btn.dataset.lact === 'edit') {
+      const lead = findLead(key, btn.dataset.id);
+      if (lead) { activeKey = key; openForm(lead); }
+    }
+  }
+
+  // ---------- Export: CSV (Excel) & PDF (print) ----------
+  const tabLabel = () => TABS.find(t => t.id === listTab).label.replace(/^\S+\s/, '');
+  function exportRows(records) {
+    return records.map(r => {
+      const l = r.lead, f = finance(l.total);
+      return {
+        'תאריך': shortDate(r.key),
+        'יום': HE_DAYS[parseKey(r.key).getDay()],
+        'סטטוס': KIND[r.kind].label,
+        'שם פרטי': l.firstName,
+        'שם משפחה': l.lastName || '',
+        'טלפון': l.phone || '',
+        'דוא״ל': l.email || '',
+        'שעת סיור': r.kind === 'tour' ? (l.tourTime || '') : '',
+        'חבילה': l.state === 'won' && l.pkg ? (l.pkg === 'lodging' ? 'חבילה 1 – כולל לינה' : 'חבילה 2 – התארגנות בלבד') : '',
+        'שעת הגעה': l.state === 'won' ? (l.arriveTime || '') : '',
+        'תאריך עזיבה': l.state === 'won' && l.pkg === 'lodging' ? shortDate(l.leaveDate) : '',
+        'שעת עזיבה': l.state === 'won' ? (l.leaveTime || '') : '',
+        'סכום עסקה': f.total || '',
+        'מקדמה 15%': f.total ? f.deposit : '',
+        'יתרה': f.total ? balanceDue(l) : '',
+        'חוזה נחתם': l.contractSigned ? 'כן' : 'לא',
+        'מקדמה שולמה': l.depositPaid || l.paidInFull ? 'כן' : 'לא',
+        'שולם במלואו': l.paidInFull ? 'כן' : 'לא',
+        'הערות': l.notes || ''
+      };
+    });
+  }
+
+  function exportCsv() {
+    const rows = exportRows(listRecords());
+    if (!rows.length) { toast('אין רשומות לייצוא'); return; }
+    const headers = Object.keys(rows[0]);
+    const cell = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const csv = '﻿' + [headers.map(cell).join(','), ...rows.map(r => headers.map(h => cell(r[h])).join(','))].join('\r\n');
+    downloadBlob(new Blob([csv], { type: 'text/csv;charset=utf-8' }), `hakerem-${listTab}-${todayKey()}.csv`);
+    toast('קובץ Excel ירד למכשיר');
+  }
+
+  function exportPdf() {
+    const records = listRecords();
+    if (!records.length) { toast('אין רשומות לייצוא'); return; }
+    const rows = records.map(r => {
+      const l = r.lead, f = finance(l.total);
+      const pay = [l.contractSigned ? 'חוזה ✔' : '', l.paidInFull ? 'שולם במלואו ✔' : (l.depositPaid ? 'מקדמה ✔' : '')].filter(Boolean).join(' · ');
+      return `<tr>
+        <td>${shortDate(r.key)}<br><small>${HE_DAYS[parseKey(r.key).getDay()]}</small></td>
+        <td><span class="b b-${r.kind}">${KIND[r.kind].label}</span></td>
+        <td><b>${esc(fullName(l))}</b><br><small dir="ltr">${esc(l.phone || '')}</small></td>
+        <td>${esc(scheduleText(r))}${l.notes ? `<br><small>${esc(l.notes)}</small>` : ''}</td>
+        <td>${f.total ? money(f.total) : ''}</td>
+        <td>${f.total ? money(f.deposit) : ''}</td>
+        <td>${f.total ? money(balanceDue(l)) : ''}</td>
+        <td>${pay}</td>
+      </tr>`;
+    }).join('');
+    const html = `<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">
+      <title>הכרם – ${esc(tabLabel())}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;700&family=Frank+Ruhl+Libre:wght@500&display=swap" rel="stylesheet">
+      <style>
+        body { font-family: Assistant, Arial, sans-serif; color: #3b1115; margin: 24px; }
+        h1 { font-family: 'Frank Ruhl Libre', serif; font-weight: 500; letter-spacing: .25em; color: #4a151b; margin: 0; font-size: 30px; }
+        .sub { color: #71717a; margin: 4px 0 18px; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { background: #4a151b; color: #fff; text-align: right; padding: 6px; font-weight: 600; }
+        td { border-bottom: 1px solid #e4e4e7; padding: 6px; vertical-align: top; }
+        tr:nth-child(even) td { background: #faf9f8; }
+        small { color: #71717a; }
+        .b { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+        .b-booked { background: #e5484d; color: #fff; } .b-maternity { background: #2563eb; color: #fff; }
+        .b-tour { background: #6b1d38; color: #fff; } .b-pending { background: #fff6d6; color: #8a6a00; }
+        .b-lost, .b-cancelled { background: #e4e4e7; color: #52525b; }
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        @page { size: A4 landscape; margin: 12mm; }
+      </style></head><body>
+      <h1>הכרם</h1>
+      <div class="sub">יומן כלות · ${esc(tabLabel())} · ${records.length} רשומות · הופק ב-${shortDate(todayKey())}</div>
+      <table><thead><tr><th>תאריך</th><th>סטטוס</th><th>שם</th><th>פרטים</th><th>סכום</th><th>מקדמה</th><th>יתרה</th><th>תשלום</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      <script>window.onload = function () { setTimeout(function () { window.print(); }, 400); };<\/script>
+      </body></html>`;
+    const w = window.open('', '_blank');
+    if (w) { w.document.open(); w.document.write(html); w.document.close(); return; }
+    // Popup blocked: print through a hidden frame instead.
+    const frame = document.createElement('iframe');
+    frame.style.cssText = 'position:fixed;width:0;height:0;border:0;';
+    document.body.appendChild(frame);
+    frame.contentDocument.open(); frame.contentDocument.write(html.replace(/<script>[\s\S]*?<\/script>/, '')); frame.contentDocument.close();
+    setTimeout(() => { frame.contentWindow.print(); setTimeout(() => frame.remove(), 1000); }, 500);
   }
 
   // ---------- UI utils ----------
+  const MODALS = ['listModal', 'dayModal', 'formModal', 'confirmModal'];
   function show(id) { $(id).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
   function hide(id) {
     $(id).classList.add('hidden');
-    if (['dayModal', 'formModal', 'confirmModal'].every(m => $(m).classList.contains('hidden'))) document.body.style.overflow = '';
+    if (MODALS.every(m => $(m).classList.contains('hidden'))) document.body.style.overflow = '';
+  }
+  const isOpen = (id) => !$(id).classList.contains('hidden');
+  function refresh() {
+    renderCalendar();
+    if (isOpen('dayModal')) renderDay();
+    if (isOpen('listModal')) renderList();
   }
 
   let confirmCb = null;
@@ -691,14 +1118,19 @@
     toastTimer = setTimeout(() => $('toast').classList.add('hidden'), 2200);
   }
 
-  // ---------- Backup ----------
-  function exportData() {
-    const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+  function downloadBlob(blob, filename) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `bridal-calendar-${todayKey()}.json`;
+    a.download = filename;
+    document.body.appendChild(a);
     a.click();
+    a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // ---------- Backup ----------
+  function exportData() {
+    downloadBlob(new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }), `bridal-calendar-${todayKey()}.json`);
   }
   function importData(file) {
     const reader = new FileReader();
@@ -707,7 +1139,7 @@
         const data = JSON.parse(reader.result);
         if (!data || typeof data.days !== 'object') throw new Error();
         confirmBox('הייבוא יחליף את כל הנתונים הקיימים. להמשיך?', 'ייבוא', 'bg-wine', () => {
-          db = data; save(); renderCalendar(); toast('הגיבוי יובא בהצלחה');
+          db = data; save(); refresh(); toast('הגיבוי יובא בהצלחה');
         });
       } catch { toast('קובץ גיבוי לא תקין'); }
     };
@@ -721,16 +1153,24 @@
   $('dayModalBody').addEventListener('click', handleDayAction);
   $('dayModalFooter').addEventListener('click', handleDayAction);
   $('leadForm').addEventListener('submit', submitForm);
+  $('leadForm').addEventListener('change', (e) => { if (e.target.name === 'fStatus' || e.target.name === 'fPkg') syncFormSections(); });
   $('fTotal').addEventListener('input', updateFinancePreview);
   // Paid in full implies the deposit was paid as well.
   $('fPaidFull').addEventListener('change', () => { if ($('fPaidFull').checked) $('fDepositPaid').checked = true; });
   $('fDepositPaid').addEventListener('change', () => { if (!$('fDepositPaid').checked) $('fPaidFull').checked = false; });
+  document.querySelectorAll('[data-list]').forEach(el => el.addEventListener('click', () => openList(el.dataset.list)));
+  $('listTabs').addEventListener('click', handleListAction);
+  $('listBody').addEventListener('click', handleListAction);
+  $('listSearch').addEventListener('input', renderList);
+  $('listPast').addEventListener('change', renderList);
+  $('listCsv').addEventListener('click', exportCsv);
+  $('listPdf').addEventListener('click', exportPdf);
   $('confirmYes').addEventListener('click', () => { hide('confirmModal'); const cb = confirmCb; confirmCb = null; cb && cb(); });
   $('confirmNo').addEventListener('click', () => { hide('confirmModal'); confirmCb = null; });
   document.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', () => hide(el.dataset.close)));
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    for (const m of ['confirmModal', 'formModal', 'dayModal']) if (!$(m).classList.contains('hidden')) { hide(m); break; }
+    for (const m of [...MODALS].reverse()) if (isOpen(m)) { hide(m); break; }
   });
   $('btnExport').addEventListener('click', exportData);
   $('fileImport').addEventListener('change', (e) => { const f = e.target.files[0]; if (f) importData(f); e.target.value = ''; });
@@ -747,7 +1187,7 @@
     (dx > 0 ? $('btnNext') : $('btnPrev')).click();
   }, { passive: true });
 
-  window.addEventListener('storage', (e) => { if (e.key === STORAGE_KEY) { db = load(); renderCalendar(); } });
+  window.addEventListener('storage', (e) => { if (e.key === STORAGE_KEY) { db = load(); refresh(); } });
 
   renderCalendar();
 })();

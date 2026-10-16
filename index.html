@@ -1934,12 +1934,41 @@
   function exportData() {
     downloadBlob(new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' }), `bridal-calendar-${todayKey()}.json`);
   }
+  // Adds records from an import file (e.g. converted from a spreadsheet) without touching existing ones.
+  // A record already in the diary (same id, or same date + phone / name) is skipped; a booking is not
+  // added on a date that is already held by someone else.
+  function mergeData(data) {
+    const digits = (p) => String(p || '').replace(/\D/g, '').replace(/^972/, '0');
+    const same = (a, b) => a.id === b.id || (digits(a.phone) && digits(a.phone) === digits(b.phone)) ||
+      (fullName(a) === fullName(b) && a.state === b.state);
+    const r = { added: 0, skipped: 0, clashes: [] };
+    Object.entries(data.days).forEach(([k, inDay]) => {
+      const d = db.days[k] || { status: null, bookedLeadId: null, leads: [] };
+      inDay.leads.forEach(l => {
+        if (d.leads.some(x => same(x, l))) { r.skipped++; return; }
+        const holds = inDay.status === 'booked' && inDay.bookedLeadId === l.id;
+        if (holds && d.status === 'booked') { r.clashes.push(`${fullName(l)} (${shortDate(k)})`); return; }
+        d.leads.push(l); r.added++;
+        if (holds) { d.status = 'booked'; d.bookedLeadId = l.id; if (inDay.bookingType) d.bookingType = inDay.bookingType; }
+      });
+      if (d.leads.length) db.days[k] = d;
+    });
+    return r;
+  }
   function importData(file) {
     const reader = new FileReader();
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result);
         if (!data || typeof data.days !== 'object') throw new Error();
+        if (data.importMode === 'merge') {
+          const n = Object.values(data.days).reduce((s, d) => s + d.leads.length, 0);
+          confirmBox(`להוסיף ${n} רשומות ליומן?<div class="text-sm text-zinc-500 mt-2">הנתונים הקיימים נשמרים; רשומה שכבר קיימת לא תוכפל.</div>`, 'הוספה ליומן', 'bg-wine', () => {
+            const r = mergeData(migrate(data)); save(); refresh();
+            toast(`נוספו ${r.added} רשומות` + (r.skipped ? ` · ${r.skipped} כבר היו קיימות` : '') + (r.clashes.length ? ` · ${r.clashes.length} לא נוספו (התאריך תפוס)` : ''));
+          });
+          return;
+        }
         confirmBox('הייבוא יחליף את כל הנתונים הקיימים. להמשיך?', 'ייבוא', 'bg-wine', () => {
           db = migrate(data); save(); refresh(); toast('הגיבוי יובא בהצלחה');
         });

@@ -12,6 +12,8 @@ request from the owner, the newer request wins; point out the conflict.
 - Data lives in `localStorage` (`bridalCabinCalendar.v1`); JSON backup import/export. Optional cloud sync
   (☁️ button) to a Google Apps Script web app that keeps the data as a JSON file in Drive (+ Sheet mirror):
   `sync/apps-script.gs`, setup in `sync/README.md`. Last write wins by `db.updatedAt`; offline changes queue.
+  An import file with `"importMode": "merge"` (e.g. converted from the owner's Excel) is added to the existing
+  data instead of replacing it; records already present (same id / date + phone or name) are skipped.
 - Deploy: push to `main`; Netlify publishes it automatically.
 - Statuses: interested (orange), tour (own date + time), bride booking (locks the date,
   package 1: arrive 20:00 the day before → leave 16:30; package 2: 08:00 → 16:30), maternity shoot

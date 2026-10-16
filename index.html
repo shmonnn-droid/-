@@ -45,6 +45,7 @@
     .hair-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); }
     /* Day status colors – fixed by the app's iron rules */
     .day-free      { background: #ffffff; color: #3f3f46; border-color: #e4e4e7; }
+    .day-event     { background: #16a34a; color: #fff;    border-color: #15803d; box-shadow: 0 4px 12px -4px rgba(22,163,74,.55); }
     .day-pending   { background: #ffedd5; color: #9a3412; border-color: #fb923c; }
     /* Secondary bookings show as small dots on the day instead of filling it */
     .day-dots { position: absolute; bottom: 3px; left: 0; right: 0; display: flex; justify-content: center; gap: 3px; }
@@ -139,6 +140,12 @@
       </button>
     </section>
 
+    <!-- Quick search across the whole diary -->
+    <section class="relative mb-4">
+      <input id="mainSearch" type="search" autocomplete="off" placeholder="🔍 חיפוש מהיר לפי שם או טלפון..." class="w-full rounded-2xl border border-zinc-200 bg-white/90 backdrop-blur-md shadow-soft px-4 py-3 focus:outline-none focus:ring-2 focus:ring-wine" />
+      <div id="mainSearchResults" class="hidden absolute z-30 inset-x-0 mt-1 max-h-80 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-2xl"></div>
+    </section>
+
     <!-- Calendar card -->
     <section class="bg-white/90 backdrop-blur-md rounded-3xl shadow-soft border border-zinc-200 overflow-hidden">
       <div class="bg-wine text-white px-4 py-4 flex items-center justify-between">
@@ -183,6 +190,7 @@
         <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded day-free border"></span>פנוי</span>
         <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded day-pending border"></span>מתעניינת</span>
         <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded day-booked border"></span>תפוס (כלה)</span>
+        <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded day-event border"></span>אירוע אחר</span>
         <span class="w-full h-0"></span>
         <span class="flex items-center gap-1.5"><span class="dot dot-tour"></span>סיור</span>
         <span class="flex items-center gap-1.5"><span class="dot dot-maternity"></span>צילומי הריון</span>
@@ -192,18 +200,20 @@
 
     <!-- Upcoming bookings -->
     <section class="mt-5">
-      <h2 class="font-display text-lg font-bold text-wine mb-2">אירועים קרובים</h2>
+      <h2 class="font-display text-lg font-bold text-wine mb-2">אירועים קרובים <span class="text-sm font-normal text-zinc-500">· החודש הקרוב</span></h2>
       <div id="upcomingList" class="space-y-2"></div>
     </section>
 
     <!-- Backup -->
     <section class="mt-6 flex flex-wrap gap-2 justify-center text-base">
       <button data-list="all" class="px-4 py-2 rounded-full bg-wine text-white">📋 כל הרשימות וייצוא</button>
+      <button id="btnSync" class="px-4 py-2 rounded-full border border-wine text-wine hover:bg-zinc-100">☁️ סנכרון ענן</button>
       <button id="btnExport" class="px-4 py-2 rounded-full border border-wine text-wine hover:bg-zinc-100">ייצוא גיבוי</button>
       <label class="px-4 py-2 rounded-full border border-wine text-wine hover:bg-zinc-100 cursor-pointer">
         ייבוא גיבוי<input id="fileImport" type="file" accept="application/json" class="hidden" />
       </label>
     </section>
+    <div id="syncStatus" class="mt-2 text-center text-sm text-zinc-500"></div>
   </main>
 
   <!-- Lists Modal -->
@@ -269,9 +279,16 @@
         </div>
         <div id="formDate" class="text-base text-zinc-500 mb-2"></div>
         <input type="hidden" id="fLeadId" />
+        <!-- Smart paste: fill the form from a WhatsApp message or any free text -->
+        <details id="fPasteSec" class="mb-2 rounded-xl border border-dashed border-wine/40 bg-wine-soft/40 px-3 py-2">
+          <summary class="cursor-pointer text-base font-semibold text-wine">📋 הדבקה חכמה (וואטסאפ / טקסט חופשי)</summary>
+          <textarea id="fPaste" rows="3" class="mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="הדביקי כאן הודעה, למשל: היי, אני דנה כהן 052-1234567, מתעניינת ב-12/3 חבילה עם לינה"></textarea>
+          <button type="button" id="fPasteBtn" class="mt-1 w-full py-2 rounded-xl bg-wine text-white font-semibold">✨ מלא שדות אוטומטית</button>
+          <div id="fPasteResult" class="text-sm text-zinc-600 mt-1"></div>
+        </details>
         <div class="grid grid-cols-2 gap-2">
           <label class="block">
-            <span class="text-base text-zinc-500">שם פרטי *</span>
+            <span id="fFirstLabel" class="text-base text-zinc-500">שם פרטי *</span>
             <input id="fFirst" required class="mt-0.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
           </label>
           <label class="block">
@@ -280,7 +297,7 @@
           </label>
         </div>
         <label class="block mt-2">
-          <span class="text-base text-zinc-500">טלפון *</span>
+          <span id="fPhoneLabel" class="text-base text-zinc-500">טלפון *</span>
           <input id="fPhone" type="tel" inputmode="tel" dir="ltr" required class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="050-0000000" />
         </label>
         <label class="block mt-2">
@@ -328,6 +345,14 @@
                 <span class="text-[13px] text-zinc-500">תפיסת התאריך</span>
               </div>
             </label>
+            <label class="cursor-pointer col-span-3 grid">
+              <input type="radio" name="fStatus" value="event" class="peer sr-only" />
+              <div class="rounded-xl border-2 border-zinc-200 px-2 py-2 text-center transition peer-checked:border-green-600 peer-checked:bg-green-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+                <span class="text-lg leading-none">🟢</span>
+                <span class="text-base font-semibold text-zinc-700">אירוע אחר / יום סגור</span>
+                <span class="text-[13px] text-zinc-500">סוגר את התאריך</span>
+              </div>
+            </label>
             <!-- maternity is a separate hourly service: opened only from the day window, never offered here -->
             <label class="hidden">
               <input type="radio" name="fStatus" value="maternity" class="peer sr-only" />
@@ -352,6 +377,26 @@
               <span class="text-base text-zinc-500">שעת הסיור *</span>
               <input id="fTourTime" type="time" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
             </label>
+          </div>
+        </fieldset>
+
+        <!-- Requested package, already at the interested stage -->
+        <fieldset id="fWantSec" class="mt-3 rounded-2xl border border-orange-300 bg-orange-50/60 p-3 hidden">
+          <legend class="px-1 text-base font-semibold text-orange-700">📦 חבילה מבוקשת</legend>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="fWantPkg" value="lodging" class="peer sr-only" />
+              <div class="h-full rounded-xl border-2 border-zinc-200 bg-white px-1 py-2 text-center text-base font-semibold text-zinc-700 transition peer-checked:border-orange-500 peer-checked:bg-orange-100">🛏️ חבילה 1</div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="fWantPkg" value="prep" class="peer sr-only" />
+              <div class="h-full rounded-xl border-2 border-zinc-200 bg-white px-1 py-2 text-center text-base font-semibold text-zinc-700 transition peer-checked:border-orange-500 peer-checked:bg-orange-100">💄 חבילה 2</div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="fWantPkg" value="" class="peer sr-only" checked />
+              <div class="h-full rounded-xl border-2 border-zinc-200 bg-white px-1 py-2 text-center text-base font-semibold text-zinc-700 transition peer-checked:border-orange-500 peer-checked:bg-orange-100">לא נקבע</div>
+            </label>
+            
           </div>
         </fieldset>
 
@@ -408,6 +453,32 @@
 
         </fieldset>
 
+        <!-- Special notes for a closed booking, highlighted in yellow -->
+        <fieldset id="fSpecialSec" class="mt-3 rounded-2xl border-2 border-yellow-400 bg-yellow-100 p-3 hidden">
+          <legend class="px-1 text-base font-semibold text-yellow-800">⚠️ הערות מיוחדות</legend>
+          <textarea id="fSpecial" rows="2" class="w-full rounded-xl border border-yellow-300 bg-yellow-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="אלרגיות, בקשות מיוחדות לאירוע, ספקים..."></textarea>
+        </fieldset>
+
+        <!-- A bride can have up to two more days linked: her tour and a held/interest day -->
+        <fieldset id="fLinkSec" class="mt-3 rounded-2xl border border-zinc-200 bg-white/60 p-3 hidden">
+          <legend class="px-1 text-base font-semibold text-wine">📌 ימים מקושרים לכלה</legend>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="block">
+              <span class="text-base text-zinc-500">🍇 יום סיור</span>
+              <input id="fLinkTourDate" type="date" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+            </label>
+            <label class="block">
+              <span class="text-base text-zinc-500">שעת הסיור</span>
+              <input id="fLinkTourTime" type="time" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+            </label>
+          </div>
+          <label class="block mt-2">
+            <span class="text-base text-zinc-500">🟠 יום שריון / מתעניינת נוסף</span>
+            <input id="fHoldDate" type="date" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+          </label>
+          <div class="text-sm text-zinc-500 mt-1">הימים יסומנו ביומן ויקושרו לכרטיס הכלה. אפשר להשאיר ריק.</div>
+        </fieldset>
+
         <!-- Finance (bookings only) -->
         <fieldset id="fFinSec" class="mt-3 rounded-2xl border border-zinc-200 bg-white/60 p-3 hidden">
           <legend class="px-1 text-base font-semibold text-wine">💰 פרטי עסקה ותשלום</legend>
@@ -438,6 +509,34 @@
           <button type="button" data-close="formModal" class="px-5 py-3 rounded-2xl border border-zinc-200 text-zinc-500">ביטול</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Cloud sync settings -->
+  <div data-app id="syncModal" class="fixed inset-0 z-[55] hidden">
+    <div class="absolute inset-0 bg-black/50 fade-in" data-close="syncModal"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="modal-enter bg-white rounded-3xl p-5 w-full max-w-md shadow-2xl">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="font-display text-xl font-bold text-wine">☁️ סנכרון לענן (Google Drive)</h3>
+          <button class="w-9 h-9 rounded-full bg-zinc-100 text-wine text-xl leading-none" data-close="syncModal" aria-label="סגירה">&times;</button>
+        </div>
+        <p class="text-base text-zinc-600 mb-3">הנתונים נשמרים קודם כל במכשיר. כשמחוברים לענן, כל שינוי נשלח לקובץ ב-Google Drive שלך, וכל מכשיר מחובר מקבל את העדכונים. בלי אינטרנט – השינויים ממתינים ונשלחים כשהחיבור חוזר.</p>
+        <label class="block">
+          <span class="text-base text-zinc-500">כתובת ה-Web App (Google Apps Script)</span>
+          <input id="syncUrl" type="url" dir="ltr" placeholder="https://script.google.com/macros/s/.../exec" class="mt-0.5 w-full text-left rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+        </label>
+        <label class="block mt-2">
+          <span class="text-base text-zinc-500">קוד סודי (TOKEN – כמו בסקריפט)</span>
+          <input id="syncToken" type="password" dir="ltr" class="mt-0.5 w-full text-left rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+        </label>
+        <p id="syncMsg" class="text-base mt-2 hidden"></p>
+        <div class="grid grid-cols-2 gap-2 mt-4">
+          <button id="syncSave" class="py-3 rounded-2xl bg-wine text-white font-semibold">חיבור וסנכרון</button>
+          <button id="syncOff" class="py-3 rounded-2xl border border-zinc-300 text-zinc-600">ניתוק</button>
+        </div>
+        <p class="text-sm text-zinc-500 mt-3">הוראות התקנה חד-פעמיות: קובץ <span dir="ltr">sync/README.md</span> במאגר הקוד.</p>
+      </div>
     </div>
   </div>
 
@@ -475,7 +574,7 @@
   //         pkg: 'lodging'|'prep', arriveDate, arriveTime, leaveTime, (bride booking)
   //         total, contractSigned, depositPaid, paidInFull }
   let db = load();
-  save(); // persist any data-format migration done while loading
+  saveLocal(); // persist any data-format migration done while loading (not a user change)
 
   function load() {
     try {
@@ -506,9 +605,16 @@
     });
     return data;
   }
-  function save() {
+  function saveLocal() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
     catch (e) { toast('שגיאה בשמירה במכשיר'); }
+  }
+  // Every user change: stamp, keep locally, then push to the cloud (if connected).
+  function save() {
+    // always newer than the version this change builds on (even if it came from a device with a faster clock)
+    db.updatedAt = Math.max(Date.now(), (db.updatedAt || 0) + 1);
+    saveLocal();
+    if (typeof scheduleSync === 'function') scheduleSync();
   }
 
   // ---------- Helpers ----------
@@ -558,12 +664,16 @@
     return [absMin(k, l.arriveTime || d.arrive), absMin(k, l.leaveTime || d.leave)];
   }
   const shootSlot = (k, l) => [absMin(k, l.shootStart), absMin(k, l.shootEnd)];
+  const eventSlot = (k) => [absMin(k, '00:00'), absMin(nextKey(k), '00:00')]; // an "other event" closes the whole day
   // Every booked time slot in the calendar, except the lead being edited.
   function allSlots(exceptId) {
     const out = [];
     Object.entries(db.days).forEach(([k, day]) => day.leads.forEach(l => {
       if (l.id === exceptId) return;
-      if (l.state === 'won' && day.status === 'booked' && day.bookedLeadId === l.id) out.push({ slot: brideSlot(k, l), k, l, what: 'כלה' });
+      if (day.status === 'booked' && day.bookedLeadId === l.id) {
+        if (l.state === 'won') out.push({ slot: brideSlot(k, l), k, l, what: 'כלה' });
+        if (l.state === 'event') out.push({ slot: eventSlot(k), k, l, what: 'אירוע' });
+      }
       if (l.state === 'maternity' && l.shootStart && l.shootEnd) out.push({ slot: shootSlot(k, l), k, l, what: 'צילומי הריון' });
     }));
     return out;
@@ -571,8 +681,9 @@
   const TOUR_MINUTES = 60; // a tour is treated as a one-hour visit when checking for overlaps
   const tourSlot = (date, time) => [absMin(date, time), absMin(date, time) + TOUR_MINUTES];
   // withTours: tours count as busy too (used when placing a tour or a shoot)
-  function findClash(slot, exceptId, withTours) {
-    const others = allSlots(exceptId);
+  // ignoreShootsOn: maternity shoots on this date don't count (closing a bride/event there cancels them)
+  function findClash(slot, exceptId, withTours, ignoreShootsOn) {
+    const others = allSlots(exceptId).filter(o => !(ignoreShootsOn && o.k === ignoreShootsOn && o.what === 'צילומי הריון'));
     if (withTours) Object.entries(db.days).forEach(([key, day]) => day.leads.forEach(l => {
       if (l.id === exceptId || l.state !== 'tour' || !l.tourTime) return;
       const date = tourDateOf(l, key);
@@ -606,18 +717,31 @@
     return out.sort((a, b) => String(a.lead.tourTime || '').localeCompare(String(b.lead.tourTime || '')));
   }
 
-  // Only two fills: bride (red) and interested (orange). Everything else is a dot on the day.
-  const interestedCount = (k) => getDay(k).leads.filter(l => l.state === 'open' || l.state === 'tour').length;
+  // Days linked to a bride (up to two): her tour day and an extra held / interest day.
+  function linkedOn(k) {
+    const out = [];
+    Object.entries(db.days).forEach(([key, day]) => day.leads.forEach(lead => {
+      if (lead.state !== 'won') return;
+      if (lead.linkTourDate === k) out.push({ key, lead, type: 'tour' });
+      if (lead.holdDate === k) out.push({ key, lead, type: 'hold' });
+    }));
+    return out;
+  }
+
+  // Fills: bride (red), other event (green), interested or a bride's held day (orange). The rest are dots.
+  const interestedCount = (k) => getDay(k).leads.filter(l => l.state === 'open' || l.state === 'tour').length
+    + linkedOn(k).filter(x => x.type === 'hold').length;
+  const holderOf = (day) => day.status === 'booked' ? day.leads.find(l => l.id === day.bookedLeadId) : null;
   function dayState(k) {
     const d = getDay(k);
-    if (d.status === 'booked') return 'booked';
+    if (d.status === 'booked') return (holderOf(d) || {}).state === 'event' ? 'event' : 'booked';
     if (interestedCount(k)) return 'pending';
     return 'free';
   }
   // Secondary bookings on date k, shown as dots: tours visiting, maternity shoots, lodging arrival evening.
   function dayDots(k) {
     return {
-      tour: toursOn(k).length,
+      tour: toursOn(k).length + linkedOn(k).filter(x => x.type === 'tour').length,
       maternity: maternityLeads(getDay(k)).length,
       arrival: arrivalsOn(k).length
     };
@@ -626,7 +750,7 @@
   // Form status value for an existing lead
   function statusOf(lead, day) {
     if (!lead) return null;
-    if (lead.state === 'won' || lead.state === 'maternity' || lead.state === 'tour' || lead.state === 'cancelled') return lead.state;
+    if (['won', 'event', 'maternity', 'tour', 'cancelled'].includes(lead.state)) return lead.state;
     return 'open';
   }
 
@@ -637,7 +761,7 @@
   let activeKey = null;
 
   // ---------- Calendar ----------
-  const STATE_LABEL = { free: 'פנוי', pending: 'מתעניינת', booked: 'תפוס' };
+  const STATE_LABEL = { free: 'פנוי', pending: 'מתעניינת', booked: 'תפוס', event: 'אירוע אחר' };
 
   function renderCalendar() {
     $('monthTitle').textContent = `${HE_MONTHS[viewMonth]} ${viewYear}`;
@@ -661,7 +785,7 @@
 
       let badge = '';
       if (state === 'pending') badge = `<span class="absolute top-0.5 left-1 text-xs font-bold">${interestedCount(k)}</span>`;
-      if (state === 'booked') badge = `<span class="text-[11px] leading-none mt-0.5">תפוס</span>`;
+      if (state === 'booked' || state === 'event') badge = `<span class="text-[11px] leading-none mt-0.5">${state === 'event' ? 'אירוע' : 'תפוס'}</span>`;
       const dots = dayDots(k);
       const dotsHtml = (dots.tour ? '<span class="dot dot-tour"></span>' : '') +
         (dots.maternity ? '<span class="dot dot-maternity"></span>' : '') +
@@ -685,19 +809,19 @@
   }
 
   function renderUpcoming() {
+    const until = addDays(todayKey(), 30);
     const items = allRecords()
-      .filter(r => !isPast(r.key) && (r.kind === 'booked' || r.kind === 'maternity'))
-      .slice(0, 6);
+      .filter(r => !isPast(r.date) && r.date <= until && ['booked', 'event', 'maternity', 'tour'].includes(r.kind));
     const list = $('upcomingList');
     if (!items.length) {
-      list.innerHTML = `<div class="text-base text-zinc-500 text-center py-4 bg-white/90 backdrop-blur-md rounded-2xl border border-zinc-200">אין אירועים סגורים קרובים</div>`;
+      list.innerHTML = `<div class="text-base text-zinc-500 text-center py-4 bg-white/90 backdrop-blur-md rounded-2xl border border-zinc-200">אין אירועים מתוכננים בחודש הקרוב</div>`;
       return;
     }
     list.innerHTML = items.map(r => `
-      <button data-key="${r.key}" class="w-full text-right bg-white/90 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-sm px-4 py-3 flex items-center justify-between gap-3">
+      <button data-key="${r.date}" class="w-full text-right bg-white/90 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-sm px-4 py-3 flex items-center justify-between gap-3">
         <div>
           <div class="font-semibold text-wine-dark">${esc(fullName(r.lead))}</div>
-          <div class="text-sm text-zinc-500">${prettyDate(r.key)}</div>
+          <div class="text-sm text-zinc-500">${prettyDate(r.date)}</div>
           ${scheduleText(r) ? `<div class="text-sm text-zinc-500 mt-0.5">${esc(scheduleText(r))}</div>` : ''}
         </div>
         ${kindBadge(r.kind)}
@@ -708,6 +832,7 @@
   // ---------- Records (used by lists, stats and exports) ----------
   const KIND = {
     booked:    { label: 'כלה – תפוס',   cls: 'day-booked' },
+    event:     { label: 'אירוע אחר',    cls: 'day-event' },
     maternity: { label: 'צילומי הריון', cls: 'day-maternity' },
     tour:      { label: 'סיור',         cls: 'day-tour' },
     pending:   { label: 'מתעניינת',     cls: 'day-pending' },
@@ -718,6 +843,7 @@
 
   function recordKind(day, lead) {
     if (lead.state === 'won') return 'booked';
+    if (lead.state === 'event') return 'event';
     if (lead.state === 'maternity') return 'maternity';
     if (lead.state === 'tour') return 'tour';
     if (lead.state === 'open') return 'pending';
@@ -762,7 +888,8 @@
     const map = {
       free: ['day-free', 'פנוי'],
       pending: ['day-pending', 'יש מתעניינות'],
-      booked: ['day-booked', 'תפוס – נסגר עבור כלה']
+      booked: ['day-booked', 'תפוס – נסגר עבור כלה'],
+      event: ['day-event', 'סגור – אירוע אחר']
     };
     const [cls, txt] = map[state];
     return `<span class="inline-block text-sm font-semibold px-3 py-1 rounded-full border ${cls}">${txt}</span>`;
@@ -785,11 +912,11 @@
   const money = (n) => '₪' + Number(n || 0).toLocaleString('he-IL', { maximumFractionDigits: 2 });
   function finance(total) {
     const t = Number(total) > 0 ? Number(total) : 0;
-    const deposit = round2(t * DEPOSIT_RATE);
+    const deposit = Math.ceil(t * DEPOSIT_RATE - 1e-9); // 15%, rounded up to a whole shekel
     return { total: t, deposit, balance: round2(t - deposit) };
   }
   const balanceDue = (l) => l.paidInFull ? 0 : finance(l.total).balance;
-  const isBookingKind = (kind) => kind === 'booked' || kind === 'maternity';
+  const isBookingKind = (kind) => kind === 'booked' || kind === 'maternity' || kind === 'event';
   function hasFinance(l) { return l.total > 0 || l.contractSigned || l.depositPaid || l.paidInFull; }
   function financeBlock(l, always) {
     if (!always && !hasFinance(l)) return '';
@@ -840,6 +967,29 @@
         <div class="mt-1 text-base text-wine-dark">הגעה בשעה <b dir="ltr">${esc(lead.arriveTime || PKG_DEFAULTS.lodging.arrive)}</b> · האירוע ב${prettyDate(key)}</div>
         <div class="text-sm text-zinc-600 mt-0.5">מ-${esc(lead.arriveTime || PKG_DEFAULTS.lodging.arrive)} המתחם תפוס – לא ניתן לתאם סיורים או צילומים בשעות האלה.</div>
         <button data-act="gotoDay" data-key="${key}" class="mt-2 w-full py-2 rounded-xl bg-white border border-red-300 text-red-700 text-base font-semibold">📅 פתח את יום האירוע</button>
+      </div>`).join('');
+  }
+
+  const specialBlock = (l) => l.special
+    ? `<div class="mt-3 rounded-xl border-2 border-yellow-400 bg-yellow-100 p-3 text-yellow-900"><div class="font-bold mb-0.5">⚠️ הערות מיוחדות</div><div class="whitespace-pre-wrap">${esc(l.special)}</div></div>` : '';
+  // The bride's linked days, inside her card.
+  function linkedDaysBlock(l) {
+    if (!l.linkTourDate && !l.holdDate) return '';
+    const row = (icon, text, date) => `<button data-act="gotoDay" data-key="${date}" class="w-full text-right flex items-center justify-between gap-2 py-1.5 px-2 rounded-lg bg-white border border-zinc-200 mt-1"><span>${icon} ${text}</span><span class="text-wine text-sm">פתח ›</span></button>`;
+    return `<div class="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 p-2">
+      <div class="text-base font-semibold text-wine">📌 ימים מקושרים</div>
+      ${l.linkTourDate ? row('🍇', `סיור ב-${shortDate(l.linkTourDate)}${l.linkTourTime ? ' בשעה ' + esc(l.linkTourTime) : ''}`, l.linkTourDate) : ''}
+      ${l.holdDate ? row('🟠', `שריון ב-${shortDate(l.holdDate)}`, l.holdDate) : ''}
+    </div>`;
+  }
+  // On a linked day: which bride it belongs to.
+  function linkedBlock(k) {
+    return linkedOn(k).map(({ key, lead, type }) => `
+      <div class="rounded-2xl border-2 ${type === 'tour' ? 'border-[#6b1d38]/50 bg-[#f6e8ed]/60' : 'border-orange-400 bg-orange-50/70'} p-4">
+        <div class="text-lg font-bold ${type === 'tour' ? 'text-[#6b1d38]' : 'text-orange-700'}">${type === 'tour' ? '🍇 סיור של כלה' : '🟠 יום שריון של כלה'} – ${esc(fullName(lead))}</div>
+        <div class="text-base text-wine-dark mt-0.5">${type === 'tour' && lead.linkTourTime ? `בשעה <b dir="ltr">${esc(lead.linkTourTime)}</b> · ` : ''}האירוע ב${prettyDate(key)}</div>
+        ${lead.phone ? `<div class="text-base text-zinc-600" dir="ltr" style="text-align:right">${esc(lead.phone)}</div>` : ''}
+        <button data-act="gotoDay" data-key="${key}" class="mt-2 w-full py-2 rounded-xl bg-white border border-zinc-300 text-wine text-base font-semibold">📅 פתח את יום האירוע</button>
       </div>`).join('');
   }
 
@@ -932,12 +1082,13 @@
 
     if (day.status === 'booked') {
       const bride = day.leads.find(l => l.id === day.bookedLeadId);
+      const isEvent = bride && bride.state === 'event';
       const others = day.leads.filter(l => l.id !== day.bookedLeadId && l.state !== 'maternity' && l.state !== 'tour');
       body.innerHTML = `
-        <div class="rounded-2xl border-2 border-red-500 bg-white p-4">
-          <div class="text-sm font-bold text-red-600 tracking-wide mb-1">👰 הכלה של התאריך</div>
+        <div class="rounded-2xl border-2 ${isEvent ? 'border-green-600' : 'border-red-500'} bg-white p-4">
+          <div class="text-sm font-bold ${isEvent ? 'text-green-700' : 'text-red-600'} tracking-wide mb-1">${isEvent ? '🟢 אירוע אחר / יום סגור' : '👰 הכלה של התאריך'}</div>
           <div class="text-lg font-bold text-wine-dark">${esc(bride ? fullName(bride) : 'כלה')}</div>
-          ${bride ? leadDetails(bride) + packageBlock(bride) + financeBlock(bride, true) + contactLinks(bride) : ''}
+          ${bride ? leadDetails(bride) + specialBlock(bride) + (isEvent ? '' : packageBlock(bride) + linkedDaysBlock(bride)) + financeBlock(bride, true) + contactLinks(bride) : ''}
           ${bride ? `<button data-act="edit" data-id="${bride.id}" class="mt-3 text-base text-wine underline">עריכת פרטים</button>` : ''}
         </div>
         ${others.length ? `
@@ -958,19 +1109,19 @@
           </div>` : ''}
         ${maternityBlock(k, past)}
         ${arrivalBlock(k)}
+        ${linkedBlock(k)}
         ${visitingToursBlock(k, true)}
       `;
-      footer.innerHTML = `<div class="grid ${past ? 'grid-cols-1' : 'grid-cols-3'} gap-2 mb-1">
-        ${past ? '' : `<button data-act="addTour" class="py-3 rounded-2xl bg-[#6b1d38] text-white font-semibold">🍇 סיור</button>
-        <button data-act="addMaternity" class="py-3 rounded-2xl bg-blue-600 text-white font-semibold">🤰 הריון</button>`}
-        <button data-act="unbook" class="py-3 rounded-2xl border-2 border-wine text-wine font-semibold">שחרור</button>
+      footer.innerHTML = `<div class="grid ${past ? 'grid-cols-1' : 'grid-cols-2'} gap-2 mb-1">
+        ${past ? '' : `<button data-act="addTour" class="py-3 rounded-2xl bg-[#6b1d38] text-white font-semibold">🍇 סיור</button>`}
+        <button data-act="unbook" class="py-3 rounded-2xl border-2 border-wine text-wine font-semibold">שחרור התאריך</button>
       </div>
-      <div class="text-sm text-zinc-500 text-center">יום תפוס – ניתן להוסיף סיור או צילומי הריון בשעות פנויות בלבד</div>`;
+      <div class="text-sm text-zinc-500 text-center">יום תפוס – ניתן להוסיף סיור בשעות פנויות בלבד</div>`;
       return;
     }
 
     const leads = [...tourLeads(day), ...openLeads(day), ...day.leads.filter(l => l.state === 'cancelled')];
-    const visiting = arrivalBlock(k) + maternityBlock(k, past) + visitingToursBlock(k);
+    const visiting = arrivalBlock(k) + linkedBlock(k) + maternityBlock(k, past) + visitingToursBlock(k);
     body.innerHTML = visiting + (leads.length ? leads.map(l => l.state === 'cancelled' ? `
       <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 opacity-75">
         <div class="flex items-start justify-between gap-2">
@@ -990,6 +1141,7 @@
           <div>
             <div class="text-lg font-bold text-wine-dark">${esc(fullName(l))}</div>
             ${kindBadge(l.state === 'tour' ? 'tour' : 'pending')}
+            ${l.wantPkg ? `<span class="inline-block mr-1 text-[13px] font-semibold px-2.5 py-1 rounded-full bg-orange-100 text-orange-800 border border-orange-300">📦 ${l.wantPkg === 'lodging' ? 'חבילה 1 – לינה' : 'חבילה 2 – התארגנות'}</span>` : ''}
           </div>
           <div class="flex gap-1 shrink-0">
             <button data-act="edit" data-id="${l.id}" class="w-8 h-8 rounded-full bg-zinc-100 text-wine text-base" aria-label="עריכה">✎</button>
@@ -1021,6 +1173,7 @@
            <button data-act="addTour" class="py-3 rounded-2xl bg-[#6b1d38] text-white font-semibold shadow-soft">🍇 תיאום סיור</button>
            <button data-act="addBride" class="py-3 rounded-2xl bg-red-600 text-white font-semibold shadow-soft">💍 סגור עסקה (כלה)</button>
            <button data-act="addMaternity" class="py-3 rounded-2xl bg-blue-600 text-white font-semibold shadow-soft">🤰 צילומי הריון</button>
+           <button data-act="addEvent" class="col-span-2 py-2.5 rounded-2xl bg-green-600 text-white font-semibold shadow-soft">🟢 אירוע אחר / יום סגור</button>
          </div>`;
   }
 
@@ -1034,8 +1187,9 @@
     const leadKey = btn.dataset.key || activeKey;
     const lead = id ? findLead(leadKey, id) : null;
 
-    if (['add', 'addTour', 'addBride', 'addMaternity', 'book', 'toTour', 'toOpen', 'toMaternity'].includes(act) && isPast(activeKey)) { toast(PAST_MSG); return; }
+    if (['add', 'addTour', 'addBride', 'addMaternity', 'addEvent', 'book', 'toTour', 'toOpen', 'toMaternity'].includes(act) && isPast(activeKey)) { toast(PAST_MSG); return; }
     if (act === 'add') openForm(null);
+    else if (act === 'addEvent') openForm(null, 'event');
     else if (act === 'addBride') openForm(null, 'won');
     else if (act === 'cancelLead' && lead) cancelLead(leadKey, lead.id);
     else if (act === 'addTour') openForm(null, 'tour');
@@ -1075,15 +1229,16 @@
     });
   }
 
-  // A bride holds the whole date; maternity shoots (separate time slots) are left as they are.
-  function markBooked(k, leadId) {
+  // A bride ('won') or another event ('event') holds the whole date. Maternity shoots that day are
+  // cancelled by the caller after the user confirms.
+  function markBooked(k, leadId, holderState = 'won') {
     const d = ensureDay(k);
     d.status = 'booked';
     d.bookedLeadId = leadId;
     d.leads.forEach(l => {
       if ((l.state === 'cancelled' || l.state === 'maternity') && l.id !== leadId) return;
       if (l.state === 'open' || l.state === 'tour') l.prevState = l.state;
-      l.state = l.id === leadId ? 'won' : 'lost';
+      l.state = l.id === leadId ? holderState : 'lost';
     });
   }
 
@@ -1137,7 +1292,13 @@
     $('fMatSec').classList.toggle('hidden', status !== 'maternity');
     $('fPkgSec').classList.toggle('hidden', status !== 'won');
     $('fArriveDateWrap').classList.toggle('hidden', checkedValue('fPkg') !== 'lodging');
-    const showFinance = status === 'won' || status === 'maternity' || (status === 'cancelled' && formHadFinance);
+    $('fWantSec').classList.toggle('hidden', status !== 'open' && status !== 'tour');
+    $('fSpecialSec').classList.toggle('hidden', status !== 'won' && status !== 'event');
+    $('fLinkSec').classList.toggle('hidden', status !== 'won');
+    $('fPasteSec').classList.toggle('hidden', !!$('fLeadId').value);
+    $('fPhoneLabel').textContent = status === 'event' ? 'טלפון (לא חובה)' : 'טלפון *';
+    $('fFirstLabel').textContent = status === 'event' ? 'שם האירוע / איש קשר *' : 'שם פרטי *';
+    const showFinance = status === 'won' || status === 'maternity' || status === 'event' || (status === 'cancelled' && formHadFinance);
     $('fFinSec').classList.toggle('hidden', !showFinance);
   }
   // Switching package fills that package's default hours (still editable by hand).
@@ -1149,7 +1310,7 @@
   }
 
   // Unsaved new-client drafts, per date, so closing the form never loses typed details.
-  const DRAFT_FIELDS = ['fFirst', 'fLast', 'fPhone', 'fEmail', 'fNotes', 'fTotal', 'fTourDate', 'fTourTime', 'fShootStart', 'fShootEnd', 'fArriveDate', 'fArrive', 'fLeave'];
+  const DRAFT_FIELDS = ['fFirst', 'fLast', 'fPhone', 'fEmail', 'fNotes', 'fTotal', 'fTourDate', 'fTourTime', 'fShootStart', 'fShootEnd', 'fArriveDate', 'fArrive', 'fLeave', 'fSpecial', 'fLinkTourDate', 'fLinkTourTime', 'fHoldDate'];
   const drafts = {};
   let formSaved = false;
   function keepDraft() {
@@ -1160,11 +1321,15 @@
     }
   }
 
+  let shootCancelConfirmed = false;
+  let pasteFromKey = null; // the day the form was opened on, if smart paste moved it to another date
   function openForm(lead, presetStatus) {
+    pasteFromKey = null;
     formSaved = false;
+    shootCancelConfirmed = false;
     const day = getDay(activeKey);
     $('formTitle').textContent = lead ? 'עריכת פרטים'
-      : { tour: 'תיאום סיור', won: 'סגירת עסקה – כלה', maternity: '🤰 צילומי הריון' }[presetStatus] || 'מתעניינת חדשה';
+      : { tour: 'תיאום סיור', won: 'סגירת עסקה – כלה', maternity: '🤰 צילומי הריון', event: '🟢 אירוע אחר / יום סגור' }[presetStatus] || 'מתעניינת חדשה';
     $('formDate').textContent = prettyDate(activeKey);
     $('fLeadId').value = lead ? lead.id : '';
     $('fFirst').value = lead ? lead.firstName : '';
@@ -1177,12 +1342,20 @@
     $('fTourDate').min = todayKey();
     $('fShootStart').value = (lead && lead.shootStart) || '';
     $('fShootEnd').value = (lead && lead.shootEnd) || '';
-    const pkg = (lead && lead.pkg) || 'lodging';
+    // a package requested at the interested stage becomes the default when she books
+    const pkg = (lead && (lead.pkg || lead.wantPkg)) || 'lodging';
+    setChecked('fWantPkg', (lead && lead.wantPkg) || '');
+    $('fSpecial').value = (lead && lead.special) || '';
+    $('fLinkTourDate').value = (lead && lead.linkTourDate) || '';
+    $('fLinkTourTime').value = (lead && lead.linkTourTime) || '';
+    $('fHoldDate').value = (lead && lead.holdDate) || '';
+    $('fLinkTourDate').min = $('fHoldDate').min = todayKey();
+    $('fPaste').value = ''; $('fPasteResult').textContent = ''; $('fPasteSec').open = false;
     setChecked('fPkg', pkg);
     $('fArriveDate').value = (lead && lead.arriveDate) || prevKey(activeKey);
     $('fArriveDate').max = activeKey;
-    $('fArrive').value = (lead && lead.pkg && lead.arriveTime) || PKG_DEFAULTS[pkg].arrive;
-    $('fLeave').value = (lead && lead.pkg && lead.leaveTime) || PKG_DEFAULTS[pkg].leave;
+    $('fArrive').value = (lead && lead.pkg === pkg && lead.arriveTime) || PKG_DEFAULTS[pkg].arrive;
+    $('fLeave').value = (lead && lead.pkg === pkg && lead.leaveTime) || PKG_DEFAULTS[pkg].leave;
     formHadFinance = !!(lead && hasFinance(lead));
     $('fTotal').value = lead && lead.total > 0 ? lead.total : '';
     $('fContract').checked = !!(lead && lead.contractSigned);
@@ -1203,6 +1376,66 @@
     if (!lead) setTimeout(() => $('fFirst').focus(), 250);
   }
 
+  // Smart paste: pull name, phone, email, event date and package out of a free-text / WhatsApp message.
+  function parseLeadText(text) {
+    const out = {};
+    const t = text.replace(/[\u200e\u200f]/g, '');
+    const phone = t.match(/(?:\+?972[\s-]?|0)5\d(?:[\s-]?\d){7}/);
+    if (phone) out.phone = phone[0].replace(/\s/g, '').replace(/^\+?972-?/, '0');
+    const email = t.match(/[^\s@]+@[^\s@]+\.[^\s@]+/);
+    if (email) out.email = email[0];
+    const date = t.match(/\b(\d{1,2})[./-](\d{1,2})(?:[./-](\d{2,4}))?\b/);
+    if (date) {
+      const dd = +date[1], mm = +date[2];
+      let yy = date[3] ? +date[3] : null;
+      if (yy !== null && yy < 100) yy += 2000;
+      if (dd >= 1 && dd <= 31 && mm >= 1 && mm <= 12) {
+        if (yy === null) { // no year: the next time that date comes around
+          const today = todayKey();
+          yy = new Date().getFullYear();
+          if (keyOf(yy, mm - 1, dd) < today) yy++;
+        }
+        out.date = keyOf(yy, mm - 1, dd);
+      }
+    }
+    if (/חבילה\s*1|חבילה\s*א|לינה|ללון|לישון/.test(t)) out.pkg = 'lodging';
+    else if (/חבילה\s*2|חבילה\s*ב|התארגנות|ללא לינה|בלי לינה/.test(t)) out.pkg = 'prep';
+    const named = t.match(/(?:שמי|קוראים לי|אני|שם)\s*[:\-]?\s*([\u0590-\u05FFA-Za-z'"]+(?:\s+[\u0590-\u05FFA-Za-z'"]+)?)/);
+    let name = named ? named[1] : '';
+    if (!name) {
+      const first = t.split('\n').map(x => x.trim()).find(x => x && !/\d/.test(x) && x.split(/\s+/).length <= 3 && !/היי|שלום|הי\b|בוקר|ערב/.test(x));
+      if (first) name = first;
+    }
+    if (name) {
+      const parts = name.replace(/[,.!]/g, '').trim().split(/\s+/);
+      out.firstName = parts[0];
+      if (parts[1] && !/מתעניינת|רוצה|מחפשת/.test(parts[1])) out.lastName = parts[1];
+    }
+    return out;
+  }
+  function applySmartPaste() {
+    const text = $('fPaste').value.trim();
+    if (!text) return;
+    const p = parseLeadText(text);
+    const found = [];
+    if (p.firstName) { $('fFirst').value = p.firstName; found.push('שם'); }
+    if (p.lastName) $('fLast').value = p.lastName;
+    if (p.phone) { $('fPhone').value = p.phone; found.push('טלפון'); }
+    if (p.email) { $('fEmail').value = p.email; found.push('דוא״ל'); }
+    if (p.pkg) { setChecked('fWantPkg', p.pkg); setChecked('fPkg', p.pkg); applyPackageDefaults(); found.push('חבילה'); }
+    if (p.date && p.date !== activeKey) {
+      pasteFromKey = pasteFromKey || activeKey;
+      activeKey = p.date;
+      $('formDate').textContent = prettyDate(activeKey) + ' (לפי הטקסט)';
+      $('fTourDate').value = activeKey;
+      $('fArriveDate').value = prevKey(activeKey);
+      found.push('תאריך');
+    } else if (p.date) found.push('תאריך');
+    if (!$('fNotes').value.trim()) $('fNotes').value = text;
+    syncFormSections();
+    $('fPasteResult').textContent = found.length ? `✓ מולאו: ${found.join(', ')} – כדאי לבדוק לפני שמירה` : 'לא זוהו פרטים – אפשר למלא ידנית';
+  }
+
   function submitForm(e) {
     e.preventDefault();
     const first = $('fFirst').value.trim();
@@ -1214,6 +1447,8 @@
     const total = totalRaw === '' ? 0 : round2(Number(totalRaw));
     const status = checkedValue('fStatus');
     const booking = status === 'won';
+    const isEvent = status === 'event';
+    const holder = booking || isEvent;          // takes the whole date
     const maternity = status === 'maternity';
     const pkg = checkedValue('fPkg');
     const existing = findLead(activeKey, $('fLeadId').value) || {};
@@ -1229,6 +1464,13 @@
       leaveTime: booking ? $('fLeave').value : existing.leaveTime,
       leaveDate: booking ? '' : existing.leaveDate
     };
+    const extras = {
+      wantPkg: status === 'open' || status === 'tour' ? checkedValue('fWantPkg') : existing.wantPkg,
+      special: holder ? $('fSpecial').value.trim() : existing.special,
+      linkTourDate: booking ? $('fLinkTourDate').value : existing.linkTourDate,
+      linkTourTime: booking ? $('fLinkTourTime').value : existing.linkTourTime,
+      holdDate: booking ? $('fHoldDate').value : existing.holdDate
+    };
     const payment = {
       total,
       contractSigned: $('fContract').checked,
@@ -1241,9 +1483,9 @@
     const current = id ? d.leads.find(l => l.id === id) : null;
 
     let msg = '';
-    if (!first) msg = 'יש להזין שם פרטי';
-    else if (!phone) msg = 'יש להזין מספר טלפון';
-    else if (phone.replace(/\D/g, '').length < 9) msg = 'מספר הטלפון אינו תקין';
+    if (!first) msg = isEvent ? 'יש להזין שם לאירוע' : 'יש להזין שם פרטי';
+    else if (!phone && !isEvent) msg = 'יש להזין מספר טלפון';
+    else if (phone && phone.replace(/\D/g, '').length < 9) msg = 'מספר הטלפון אינו תקין';
     else if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) msg = 'כתובת הדוא״ל אינה תקינה';
     else if (!Number.isFinite(total) || total < 0) msg = 'סכום העסקה אינו תקין';
     else if (status === 'tour' && !schedule.tourDate) msg = 'יש לבחור תאריך סיור';
@@ -1256,14 +1498,20 @@
     else if (booking && pkg === 'lodging' && (!schedule.arriveDate || schedule.arriveDate > activeKey)) msg = 'בחבילה עם לינה תאריך ההגעה הוא עד יום האירוע (בדרך כלל ערב לפני)';
     else if (booking && !schedule.arriveTime) msg = 'יש לבחור שעת הגעה';
     else if (booking && !schedule.leaveTime) msg = 'יש לבחור שעת עזיבה';
+    else if (maternity && d.status === 'booked') msg = 'התאריך סגור לכלה / לאירוע – לא ניתן לקבוע בו צילומי הריון';
+    // Linked days: different from the event date and (when new or changed) not in the past.
+    else if (booking && extras.holdDate && extras.holdDate === activeKey) msg = 'יום השריון חייב להיות שונה מתאריך האירוע';
+    else if (booking && extras.linkTourDate && extras.linkTourDate !== existing.linkTourDate && isPast(extras.linkTourDate)) msg = PAST_MSG;
+    else if (booking && extras.holdDate && extras.holdDate !== existing.holdDate && isPast(extras.holdDate)) msg = PAST_MSG;
     // Bookings, shoots and tours may share a day, but never overlapping hours (a bride on a lodging
     // package holds the venue from her arrival the evening before).
-    if (!msg && (booking || maternity || status === 'tour')) {
+    if (!msg && (holder || maternity || status === 'tour')) {
       const slot = maternity ? shootSlot(activeKey, schedule)
         : status === 'tour' ? tourSlot(schedule.tourDate, schedule.tourTime)
+        : isEvent ? eventSlot(activeKey)
         : brideSlot(activeKey, schedule);
       if (booking && slot[1] <= slot[0]) msg = 'שעת העזיבה חייבת להיות אחרי שעת ההגעה';
-      const clash = !msg && findClash(slot, $('fLeadId').value, !booking);
+      const clash = !msg && findClash(slot, $('fLeadId').value, !holder, holder ? activeKey : null);
       if (clash) msg = `השעות חופפות ל${clash.what} של ${fullName(clash.l)} (${shortDate(clash.k)}) – בחרי שעות אחרות`;
     }
     // A bride's date never takes a new interested client.
@@ -1272,25 +1520,35 @@
     if (!msg && isPast(activeKey)) {
       if (!current || (status !== statusOf(current, d) && status !== 'cancelled')) msg = PAST_MSG;
     }
-    if (!msg && booking && d.status === 'booked' && d.bookedLeadId !== id) {
-      const holder = d.leads.find(l => l.id === d.bookedLeadId);
-      msg = `התאריך כבר תפוס עבור ${holder ? fullName(holder) : 'לקוחה אחרת'}`;
+    if (!msg && holder && d.status === 'booked' && d.bookedLeadId !== id) {
+      const h = holderOf(d);
+      msg = `התאריך כבר תפוס עבור ${h ? fullName(h) : 'לקוחה אחרת'}`;
     }
     if (msg) { err.textContent = msg; err.classList.remove('hidden'); return; }
+
+    // Closing a bride / event on a day with maternity shoots cancels them – after confirmation.
+    const shootsToCancel = holder ? maternityLeads(d).filter(l => l.id !== id) : [];
+    if (shootsToCancel.length && !shootCancelConfirmed) {
+      confirmBox(`ביום זה יש ${shootsToCancel.length === 1 ? 'צילומי הריון' : shootsToCancel.length + ' צילומי הריון'} (${shootsToCancel.map(l => esc(fullName(l))).join(', ')}).<br>סגירת ה${isEvent ? 'אירוע' : 'כלה'} תבטל אותם. להמשיך?`,
+        'כן, לבטל ולסגור', 'bg-red-600', () => { shootCancelConfirmed = true; $('leadForm').requestSubmit(); });
+      return;
+    }
 
     db.days[activeKey] = d;
     let lead = current;
     if (lead) {
-      Object.assign(lead, { firstName: first, lastName: last, phone, email, notes }, schedule, payment);
+      Object.assign(lead, { firstName: first, lastName: last, phone, email, notes }, schedule, extras, payment);
     } else {
-      lead = { id: uid(), firstName: first, lastName: last, phone, email, notes, ...schedule, ...payment, createdAt: new Date().toISOString(), state: 'open' };
+      lead = { id: uid(), firstName: first, lastName: last, phone, email, notes, ...schedule, ...extras, ...payment, createdAt: new Date().toISOString(), state: 'open' };
       d.leads.push(lead);
     }
 
     const wasHolder = d.status === 'booked' && d.bookedLeadId === lead.id;
-    if (booking) {
-      markBooked(activeKey, lead.id);
-      toast(wasHolder ? 'הפרטים עודכנו' : '💍 מזל טוב! התאריך נסגר');
+    if (holder) {
+      markBooked(activeKey, lead.id, status);
+      shootsToCancel.forEach(l => { l.state = 'cancelled'; });
+      const cancelledNote = shootsToCancel.length ? ` · ${shootsToCancel.length} צילומי הריון בוטלו` : '';
+      toast((wasHolder ? 'הפרטים עודכנו' : isEvent ? '🟢 התאריך נסגר לאירוע' : '💍 מזל טוב! התאריך נסגר') + cancelledNote);
     } else if (maternity) {
       if (wasHolder) unbookDay(activeKey);
       lead.state = 'maternity';
@@ -1307,6 +1565,7 @@
     }
     delete drafts[activeKey];
     formSaved = true;
+    shootCancelConfirmed = false;
     save(); hide('formModal'); refresh();
   }
 
@@ -1316,6 +1575,7 @@
     { id: 'pending',   label: '🟠 מתעניינות' },
     { id: 'tour',      label: '🍇 סיורים' },
     { id: 'maternity', label: '🤰 צילומי הריון' },
+    { id: 'event',     label: '🟢 אירועים' },
     { id: 'all',       label: '📋 הכל' }
   ];
   let listTab = 'booked';
@@ -1335,6 +1595,12 @@
       (withPast || !isPast(r.date)) &&
       (!q || [fullName(r.lead), r.lead.phone, r.lead.email, r.lead.notes].join(' ').toLowerCase().includes(q))
     );
+  }
+
+  // Small ✓ marks for what was already done (contract, deposit, paid in full)
+  function payChecks(l) {
+    const marks = [l.contractSigned && 'חוזה', (l.depositPaid || l.paidInFull) && 'מקדמה', l.paidInFull && 'שולם במלואו'].filter(Boolean);
+    return marks.length ? `<div class="flex flex-wrap gap-1 mt-1">${marks.map(m => `<span class="text-[13px] font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-800 border border-green-300">✓ ${m}</span>`).join('')}</div>` : '';
   }
 
   function renderList() {
@@ -1359,7 +1625,8 @@
               <div class="font-bold text-wine-dark truncate">${esc(fullName(r.lead))}</div>
               ${r.lead.phone ? `<div class="text-base text-zinc-600" dir="ltr" style="text-align:right">${esc(r.lead.phone)}</div>` : ''}
               ${sched ? `<div class="text-sm text-zinc-600 mt-1">${esc(sched)}</div>` : ''}
-              ${isBookingKind(r.kind) && r.lead.total > 0 ? `<div class="text-sm text-zinc-600 mt-1">סכום ${money(r.lead.total)} · יתרה ${money(balanceDue(r.lead))}${r.lead.contractSigned ? ' · ✔ חוזה' : ''}</div>` : ''}
+              ${isBookingKind(r.kind) && r.lead.total > 0 ? `<div class="text-sm text-zinc-600 mt-1">סכום ${money(r.lead.total)} · יתרה ${money(balanceDue(r.lead))}</div>` : ''}
+              ${isBookingKind(r.kind) ? payChecks(r.lead) : ''}
             </div>
             ${kindBadge(r.kind)}
           </div>
@@ -1429,6 +1696,33 @@
     }
   }
 
+  // ---------- Quick search on the main screen ----------
+  function renderMainSearch() {
+    const q = $('mainSearch').value.trim().toLowerCase();
+    const box = $('mainSearchResults');
+    if (!q) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+    const digits = q.replace(/\D/g, '');
+    const hits = allRecords().filter(r =>
+      fullName(r.lead).toLowerCase().includes(q) ||
+      (digits.length >= 3 && String(r.lead.phone || '').replace(/\D/g, '').includes(digits))
+    ).slice(0, 12);
+    box.innerHTML = hits.length ? hits.map(r => `
+      <button type="button" data-skey="${r.key}" class="w-full text-right px-4 py-2.5 border-b border-zinc-100 flex items-center justify-between gap-2 hover:bg-zinc-50">
+        <span class="min-w-0">
+          <span class="block font-semibold text-wine-dark truncate">${esc(fullName(r.lead))}</span>
+          <span class="block text-sm text-zinc-500">${shortDate(r.date)}${r.lead.phone ? ' · <span dir="ltr">' + esc(r.lead.phone) + '</span>' : ''}</span>
+        </span>
+        ${kindBadge(r.kind)}
+      </button>`).join('') : `<div class="px-4 py-3 text-zinc-500">לא נמצאו תוצאות</div>`;
+    box.classList.remove('hidden');
+  }
+  function goToDate(k) {
+    const d = parseKey(k);
+    viewYear = d.getFullYear(); viewMonth = d.getMonth();
+    renderCalendar();
+    openDay(k);
+  }
+
   // ---------- Export: CSV (Excel) & PDF (print) ----------
   const tabLabel = () => TABS.find(t => t.id === listTab).label.replace(/^\S+\s/, '');
   function exportRows(records) {
@@ -1455,6 +1749,10 @@
         'חוזה נחתם': deal ? (l.contractSigned ? 'כן' : 'לא') : '',
         'מקדמה שולמה': deal ? (l.depositPaid || l.paidInFull ? 'כן' : 'לא') : '',
         'שולם במלואו': deal ? (l.paidInFull ? 'כן' : 'לא') : '',
+        'חבילה מבוקשת': l.wantPkg ? (l.wantPkg === 'lodging' ? 'חבילה 1' : 'חבילה 2') : '',
+        'הערות מיוחדות': l.special || '',
+        'יום סיור מקושר': l.linkTourDate ? `${shortDate(l.linkTourDate)} ${l.linkTourTime || ''}`.trim() : '',
+        'יום שריון מקושר': l.holdDate ? shortDate(l.holdDate) : '',
         'הערות': l.notes || ''
       };
     });
@@ -1500,7 +1798,7 @@
         tr:nth-child(even) td { background: #faf9f8; }
         small { color: #71717a; }
         .b { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
-        .b-booked { background: #e5484d; color: #fff; } .b-maternity { background: #2563eb; color: #fff; }
+        .b-booked { background: #e5484d; color: #fff; } .b-event { background: #16a34a; color: #fff; } .b-maternity { background: #2563eb; color: #fff; }
         .b-tour { background: #6b1d38; color: #fff; } .b-pending { background: #ffedd5; color: #9a3412; }
         .b-lost, .b-cancelled { background: #e4e4e7; color: #52525b; }
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -1523,10 +1821,13 @@
   }
 
   // ---------- UI utils ----------
-  const MODALS = ['listModal', 'dayModal', 'formModal', 'confirmModal'];
+  const MODALS = ['listModal', 'dayModal', 'formModal', 'syncModal', 'confirmModal'];
   function show(id) { $(id).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
   function hide(id) {
-    if (id === 'formModal' && isOpen('formModal')) keepDraft();
+    if (id === 'formModal' && isOpen('formModal')) {
+      keepDraft();
+      if (!formSaved && pasteFromKey) { activeKey = pasteFromKey; pasteFromKey = null; }
+    }
     $(id).classList.add('hidden');
     if (MODALS.every(m => $(m).classList.contains('hidden'))) document.body.style.overflow = '';
   }
@@ -1587,7 +1888,7 @@
         const data = JSON.parse(reader.result);
         if (!data || typeof data.days !== 'object') throw new Error();
         confirmBox('הייבוא יחליף את כל הנתונים הקיימים. להמשיך?', 'ייבוא', 'bg-wine', () => {
-          db = data; save(); refresh(); toast('הגיבוי יובא בהצלחה');
+          db = migrate(data); save(); refresh(); toast('הגיבוי יובא בהצלחה');
         });
       } catch { toast('קובץ גיבוי לא תקין'); }
     };
@@ -1638,6 +1939,16 @@
     if (e.target.name === 'fStatus' || e.target.name === 'fPkg') syncFormSections();
   });
   $('fTotal').addEventListener('input', updateFinancePreview);
+  $('fPasteBtn').addEventListener('click', applySmartPaste);
+  $('mainSearch').addEventListener('input', renderMainSearch);
+  $('mainSearchResults').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-skey]');
+    if (!b) return;
+    $('mainSearch').value = ''; renderMainSearch();
+    goToDate(b.dataset.skey);
+  });
+  document.addEventListener('click', (e) => { if (!e.target.closest('#mainSearch, #mainSearchResults')) $('mainSearchResults').classList.add('hidden'); });
+  $('mainSearch').addEventListener('focus', renderMainSearch);
   $('leadForm').addEventListener('input', () => $('formError').classList.add('hidden'));
   // Paid in full implies the deposit was paid as well.
   $('fPaidFull').addEventListener('change', () => { if ($('fPaidFull').checked) $('fDepositPaid').checked = true; });
@@ -1673,6 +1984,109 @@
   }, { passive: true });
 
   window.addEventListener('storage', (e) => { if (e.key === STORAGE_KEY) { db = load(); refresh(); } });
+
+  // ---------- Cloud sync (Google Apps Script web app → JSON file in Google Drive) ----------
+  // localStorage stays the source the app works from; the cloud copy is kept in step with it.
+  // Conflicts resolve by last write (db.updatedAt). Offline changes are queued and pushed later.
+  const SYNC_KEY = 'hakerem.sync';
+  const PENDING_KEY = 'hakerem.syncPending';
+  const readSync = () => { try { return JSON.parse(localStorage.getItem(SYNC_KEY)) || {}; } catch { return {}; } };
+  let syncCfg = readSync();
+  let syncTimer = null, syncBusy = false, lastSyncAt = null;
+  const syncOn = () => !!(syncCfg.url && syncCfg.token);
+  const setPending = (v) => { try { v ? localStorage.setItem(PENDING_KEY, '1') : localStorage.removeItem(PENDING_KEY); } catch {} };
+  const isPending = () => { try { return localStorage.getItem(PENDING_KEY) === '1'; } catch { return false; } };
+  function showSyncStatus(state) {
+    const el = $('syncStatus');
+    if (!syncOn()) { el.textContent = '☁️ סנכרון ענן כבוי – הנתונים שמורים במכשיר בלבד'; return; }
+    const time = lastSyncAt ? lastSyncAt.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) : '';
+    el.textContent = {
+      ok: `☁️ מסונכרן${time ? ' · ' + time : ''}`,
+      busy: '☁️ מסנכרן…',
+      pending: '☁️ ממתין לאינטרנט – השינויים שמורים במכשיר וישלחו אוטומטית',
+      error: '☁️ שגיאת סנכרון – השינויים שמורים במכשיר, ננסה שוב'
+    }[state] || '';
+  }
+  async function cloudCall(method, payload) {
+    const url = method === 'GET' ? `${syncCfg.url}?token=${encodeURIComponent(syncCfg.token)}` : syncCfg.url;
+    // text/plain keeps it a "simple" request, which Apps Script web apps accept without CORS preflight
+    const res = await fetch(url, method === 'GET' ? { method } : { method, headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'sync failed');
+    return json;
+  }
+  function adoptRemote(data) {
+    db = migrate(data);
+    saveLocal();
+    refresh();
+  }
+  async function pushNow() {
+    if (!syncOn()) return;
+    if (!navigator.onLine) { setPending(true); showSyncStatus('pending'); return; }
+    syncBusy = true; showSyncStatus('busy');
+    try {
+      const r = await cloudCall('POST', { token: syncCfg.token, data: db });
+      if (r.stale && r.data) { adoptRemote(r.data); toast('☁️ התקבלו עדכונים חדשים יותר ממכשיר אחר'); }
+      setPending(false); lastSyncAt = new Date(); showSyncStatus('ok');
+    } catch (e) { setPending(true); showSyncStatus(navigator.onLine ? 'error' : 'pending'); }
+    finally { syncBusy = false; }
+  }
+  async function pullNow() {
+    if (!syncOn() || syncBusy || !navigator.onLine) { if (syncOn()) showSyncStatus(isPending() ? 'pending' : 'ok'); return; }
+    if (isPending()) return pushNow(); // local changes waiting – they go first
+    syncBusy = true; showSyncStatus('busy');
+    try {
+      const r = await cloudCall('GET');
+      const remote = r.data || {};
+      if ((remote.updatedAt || 0) > (db.updatedAt || 0)) adoptRemote(remote);
+      else if ((db.updatedAt || 0) > (remote.updatedAt || 0)) { syncBusy = false; return pushNow(); }
+      lastSyncAt = new Date(); showSyncStatus('ok');
+    } catch (e) { showSyncStatus('error'); }
+    finally { syncBusy = false; }
+  }
+  function scheduleSync() {
+    if (!syncOn()) return;
+    setPending(true);
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(pushNow, 1200);
+  }
+  window.addEventListener('online', () => { if (syncOn()) (isPending() ? pushNow() : pullNow()); });
+  window.addEventListener('offline', () => { if (syncOn()) showSyncStatus('pending'); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') pullNow(); });
+  setInterval(() => { if (document.visibilityState === 'visible') pullNow(); }, 60000);
+
+  $('btnSync').addEventListener('click', () => {
+    $('syncUrl').value = syncCfg.url || '';
+    $('syncToken').value = syncCfg.token || '';
+    $('syncMsg').classList.add('hidden');
+    show('syncModal');
+  });
+  $('syncSave').addEventListener('click', async () => {
+    const url = $('syncUrl').value.trim(), token = $('syncToken').value.trim();
+    const msg = $('syncMsg');
+    const say = (text, ok) => { msg.textContent = text; msg.className = `text-base mt-2 ${ok ? 'text-green-700' : 'text-red-600'}`; };
+    if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(url) || !token) { say('יש להזין כתובת Web App של Google Apps Script וקוד סודי', false); return; }
+    syncCfg = { url, token };
+    say('בודק חיבור…', true);
+    try {
+      const r = await cloudCall('GET');
+      try { localStorage.setItem(SYNC_KEY, JSON.stringify(syncCfg)); } catch {}
+      const remote = r.data || {};
+      if ((remote.updatedAt || 0) > (db.updatedAt || 0)) { adoptRemote(remote); say('✓ מחובר – הנתונים מהענן נטענו', true); }
+      else { db.updatedAt = db.updatedAt || Date.now(); saveLocal(); await pushNow(); say('✓ מחובר – הנתונים במכשיר נשמרו בענן', true); }
+      lastSyncAt = new Date(); showSyncStatus('ok');
+    } catch (e) {
+      syncCfg = readSync();
+      say('החיבור נכשל – בדקי את הכתובת, את הקוד הסודי ושהסקריפט פורסם עם גישה ל-"Anyone"', false);
+    }
+  });
+  $('syncOff').addEventListener('click', () => {
+    try { localStorage.removeItem(SYNC_KEY); } catch {}
+    syncCfg = {}; setPending(false);
+    showSyncStatus(); hide('syncModal'); toast('הסנכרון לענן נותק – הנתונים נשארים במכשיר');
+  });
+  showSyncStatus(isPending() ? 'pending' : 'ok');
+  pullNow();
 
   renderCalendar();
 })();

@@ -58,6 +58,18 @@
     .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
     input, textarea { font-size: 16px; } /* prevents iOS zoom */
     input[type=checkbox] { accent-color: #4a151b; }
+    /* One brand font everywhere, including form controls */
+    html, body, button, input, select, textarea { font-family: 'Frank Ruhl Libre', serif; }
+    /* הסרת באדג' Netlify */
+    [id*="netlify"],
+    [class*="netlify-badge"],
+    div:has(> a[href*="netlify.com"]),
+    iframe[src*="netlify"] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { scrollbar-width: none; }
   </style>

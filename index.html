@@ -62,6 +62,23 @@
     input[type=date]::-webkit-date-and-time-value, input[type=time]::-webkit-date-and-time-value { text-align: right; }
     input, select, textarea { font-size: 17px; } /* 16px+ prevents iOS zoom */
     input[type=checkbox] { accent-color: #4a151b; }
+    /* Form theme follows the selected status */
+    #leadForm { --st: #ea580c; --st-soft: #fff7ed; border-top: 6px solid var(--st); background: linear-gradient(var(--st-soft), #fff 160px); }
+    #leadForm[data-status="tour"]      { --st: #6b1d38; --st-soft: #f6e8ed; }
+    #leadForm[data-status="won"]       { --st: #b8282d; --st-soft: #fdecec; }
+    #leadForm[data-status="maternity"] { --st: #2563eb; --st-soft: #eff6ff; }
+    #leadForm[data-status="cancelled"] { --st: #71717a; --st-soft: #f4f4f5; }
+    #formTitle { color: var(--st); }
+    .btn-status { background: var(--st); }
+    /* Payment checkboxes: green when done, red when still open */
+    .pay-row { display: flex; align-items: center; gap: .6rem; padding: .45rem .7rem; border-radius: .75rem; cursor: pointer;
+               background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+    .pay-row:has(.paychk:checked) { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+    .paychk { appearance: none; -webkit-appearance: none; flex: none; width: 22px; height: 22px; border-radius: 6px;
+              border: 2px solid #dc2626; background: #fff; display: grid; place-content: center; cursor: pointer; }
+    .paychk::before { content: '✕'; color: #dc2626; font-size: 13px; font-weight: 700; line-height: 1; }
+    .paychk:checked { background: #16a34a; border-color: #16a34a; }
+    .paychk:checked::before { content: '✓'; color: #fff; font-size: 15px; }
     /* One brand font everywhere, including form controls */
     /* Brand font: November when the device has it, otherwise Assistant (loaded from Google Fonts) */
     html, body, button, input, select, textarea { font-family: 'November', 'Assistant', sans-serif; }
@@ -219,8 +236,11 @@
     <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
       <form id="leadForm" class="modal-enter pointer-events-auto bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto shadow-2xl px-5 pt-4 safe-bottom" novalidate>
         <div class="flex items-center justify-between mb-1">
-          <h3 id="formTitle" class="font-display text-xl font-bold text-wine">רישום חדש</h3>
-          <button type="button" class="w-9 h-9 rounded-full bg-zinc-100 text-wine text-xl leading-none" data-close="formModal" aria-label="סגירה">&times;</button>
+          <h3 id="formTitle" class="font-display text-xl font-bold">רישום חדש</h3>
+          <div class="flex items-center gap-2">
+            <button type="submit" class="btn-status px-5 py-2 rounded-xl text-white font-semibold shadow-soft">שמירה</button>
+            <button type="button" class="w-9 h-9 rounded-full bg-zinc-100 text-wine text-xl leading-none" data-close="formModal" aria-label="סגירה">&times;</button>
+          </div>
         </div>
         <div id="formDate" class="text-base text-zinc-500 mb-2"></div>
         <input type="hidden" id="fLeadId" />
@@ -253,7 +273,7 @@
           <div class="grid grid-cols-3 gap-2">
             <label class="cursor-pointer">
               <input type="radio" name="fStatus" value="open" class="peer sr-only" checked />
-              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2 text-center transition peer-checked:border-yellow-400 peer-checked:bg-yellow-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2 text-center transition peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
                 <div class="text-lg leading-none">🟡</div>
                 <div class="text-base font-semibold mt-1 text-zinc-700">מתעניינת</div>
                 <div class="text-[13px] text-zinc-500">בטיפול</div>
@@ -287,8 +307,8 @@
               <input type="radio" name="fStatus" value="maternity" class="peer sr-only" />
               <div class="rounded-xl border-2 border-zinc-200 px-2 py-2 text-center transition peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
                 <span class="text-lg leading-none">🔵</span>
-                <span class="text-base font-semibold text-zinc-700">סגירה לצילומי הריון</span>
-                <span class="text-[13px] text-zinc-500">תפיסת התאריך</span>
+                <span class="text-base font-semibold text-zinc-700">צילומי הריון</span>
+                <span class="text-[13px] text-zinc-500">שעות בלבד – היום נשאר פתוח</span>
               </div>
             </label>
           </div>
@@ -307,6 +327,22 @@
               <input id="fTourTime" type="time" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
             </label>
           </div>
+        </fieldset>
+
+        <!-- Maternity shoot hours (the day stays open) -->
+        <fieldset id="fMatSec" class="mt-3 rounded-2xl border border-blue-300 bg-blue-50/60 p-3 hidden">
+          <legend class="px-1 text-base font-semibold text-blue-700">🤰 שעות הצילום</legend>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="block">
+              <span class="text-base text-zinc-500">משעה *</span>
+              <input id="fShootStart" type="time" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+            </label>
+            <label class="block">
+              <span class="text-base text-zinc-500">עד שעה *</span>
+              <input id="fShootEnd" type="time" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+            </label>
+          </div>
+          <div class="text-sm text-zinc-500 mt-1">שאר שעות היום נשארות פנויות לסיורים ולאירועים.</div>
         </fieldset>
 
         <!-- Package details (booked days) -->
@@ -328,6 +364,11 @@
               </div>
             </label>
           </div>
+          <label id="fArriveDateWrap" class="block mt-2">
+            <span class="text-base text-zinc-500">תאריך הגעה (לינה – בדרך כלל ערב לפני האירוע)</span>
+            <input id="fArriveDate" type="date" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+          </label>
+          <div class="text-sm text-zinc-500 mt-1">שעות ברירת מחדל – ניתן לשנות ידנית.</div>
           <div class="grid grid-cols-2 gap-2 mt-2">
             <label class="block">
               <span class="text-base text-zinc-500">שעת הגעה</span>
@@ -338,14 +379,11 @@
               <input id="fLeave" type="time" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
             </label>
           </div>
-          <label id="fLeaveDateWrap" class="block mt-2">
-            <span class="text-base text-zinc-500">תאריך עזיבה (לינה)</span>
-            <input id="fLeaveDate" type="date" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
-          </label>
+
         </fieldset>
 
-        <!-- Finance -->
-        <fieldset class="mt-3 rounded-2xl border border-zinc-200 bg-white/60 p-3">
+        <!-- Finance (bookings only) -->
+        <fieldset id="fFinSec" class="mt-3 rounded-2xl border border-zinc-200 bg-white/60 p-3 hidden">
           <legend class="px-1 text-base font-semibold text-wine">💰 פרטי עסקה ותשלום</legend>
           <label class="block">
             <span class="text-base text-zinc-500">הכנס את סכום העסקה הכולל (₪)</span>
@@ -362,15 +400,15 @@
             </div>
           </div>
           <div class="mt-2 space-y-1.5 text-base text-wine-dark">
-            <label class="flex items-center gap-2 cursor-pointer"><input id="fContract" type="checkbox" class="w-5 h-5" /> 📝 נחתם חוזה</label>
-            <label class="flex items-center gap-2 cursor-pointer"><input id="fDepositPaid" type="checkbox" class="w-5 h-5" /> שולמה מקדמה</label>
-            <label class="flex items-center gap-2 cursor-pointer"><input id="fPaidFull" type="checkbox" class="w-5 h-5" /> שולמה היתרה / שולם במלואו</label>
+            <label class="pay-row"><input id="fContract" type="checkbox" class="paychk" /> 📝 נחתם חוזה</label>
+            <label class="pay-row"><input id="fDepositPaid" type="checkbox" class="paychk" /> שולמה מקדמה</label>
+            <label class="pay-row"><input id="fPaidFull" type="checkbox" class="paychk" /> שולמה היתרה / שולם במלואו</label>
           </div>
         </fieldset>
 
         <p id="formError" class="text-base text-red-600 mt-2 hidden"></p>
         <div class="flex gap-2 mt-4">
-          <button type="submit" class="flex-1 py-3 rounded-2xl bg-wine text-white font-semibold shadow-soft">שמירה</button>
+          <button type="submit" class="btn-status flex-1 py-3 rounded-2xl text-white font-semibold shadow-soft">שמירה</button>
           <button type="button" data-close="formModal" class="px-5 py-3 rounded-2xl border border-zinc-200 text-zinc-500">ביטול</button>
         </div>
       </form>
@@ -403,20 +441,44 @@
   // ---------- Storage ----------
   const STORAGE_KEY = 'bridalCabinCalendar.v1';
   // Data shape: { days: { 'YYYY-MM-DD': Day } }
-  // Day:  { status: 'booked'|null, bookingType: 'bride'|'maternity', bookedLeadId, leads: [Lead] }
+  // Day:  { status: 'booked'|null (a bride holds the whole date), bookedLeadId, leads: [Lead] }
   // Lead: { id, firstName, lastName, phone, email, notes, createdAt,
-  //         state: 'open'|'tour'|'won'|'lost'|'cancelled', prevState,
-  //         tourDate, tourTime, pkg: 'lodging'|'prep', arriveTime, leaveTime, leaveDate,
+  //         state: 'open'|'tour'|'won'|'maternity'|'lost'|'cancelled', prevState,
+  //         tourDate, tourTime,                       (tour)
+  //         shootStart, shootEnd,                     (maternity shoot: hours only, the day stays open)
+  //         pkg: 'lodging'|'prep', arriveDate, arriveTime, leaveTime, (bride booking)
   //         total, contractSigned, depositPaid, paidInFull }
   let db = load();
+  save(); // persist any data-format migration done while loading
 
   function load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       const parsed = raw ? JSON.parse(raw) : null;
-      if (parsed && typeof parsed.days === 'object') return parsed;
+      if (parsed && typeof parsed.days === 'object') return migrate(parsed);
     } catch (e) { /* ignore */ }
     return { days: {} };
+  }
+  // Older data locked a whole day for a maternity shoot; it is now a time slot that keeps the day open.
+  function migrate(data) {
+    Object.values(data.days).forEach(day => {
+      if (day.status === 'booked' && day.bookingType === 'maternity') {
+        day.leads.forEach(l => {
+          if (l.id === day.bookedLeadId) {
+            l.state = 'maternity';
+            l.shootStart = l.shootStart || l.arriveTime || '';
+            l.shootEnd = l.shootEnd || l.leaveTime || '';
+          } else if (l.state === 'lost') {
+            l.state = l.prevState === 'tour' ? 'tour' : 'open';
+          }
+          delete l.prevState;
+        });
+        day.status = null;
+        day.bookedLeadId = null;
+      }
+      delete day.bookingType;
+    });
+    return data;
   }
   function save() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
@@ -431,7 +493,9 @@
   const keyOf = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
   const parseKey = (k) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
   const todayKey = () => { const t = new Date(); return keyOf(t.getFullYear(), t.getMonth(), t.getDate()); };
-  const nextKey = (k) => { const d = parseKey(k); d.setDate(d.getDate() + 1); return keyOf(d.getFullYear(), d.getMonth(), d.getDate()); };
+  const addDays = (k, n) => { const d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d.getFullYear(), d.getMonth(), d.getDate()); };
+  const nextKey = (k) => addDays(k, 1);
+  const prevKey = (k) => addDays(k, -1);
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
   const fullName = (l) => `${l.firstName} ${l.lastName || ''}`.trim();
@@ -443,13 +507,42 @@
   const isPast = (k) => k < todayKey();
   const PAST_MSG = 'לא ניתן לתאם או להוסיף מתעניינות/סיורים בתאריך שעבר';
 
-  function getDay(k) { return db.days[k] || { status: null, bookingType: null, bookedLeadId: null, leads: [] }; }
+  function getDay(k) { return db.days[k] || { status: null, bookedLeadId: null, leads: [] }; }
   function ensureDay(k) { if (!db.days[k]) db.days[k] = getDay(k); return db.days[k]; }
   function cleanupDay(k) { const d = db.days[k]; if (d && !d.status && d.leads.length === 0) delete db.days[k]; }
   const openLeads = (day) => day.leads.filter(l => l.state === 'open');
   const tourLeads = (day) => day.leads.filter(l => l.state === 'tour');
   const activeLeads = (day) => day.leads.filter(l => l.state === 'open' || l.state === 'tour');
-  const isMaternity = (day) => day.status === 'booked' && day.bookingType === 'maternity';
+  const maternityLeads = (day) => day.leads.filter(l => l.state === 'maternity')
+    .sort((a, b) => String(a.shootStart || '').localeCompare(String(b.shootStart || '')));
+
+  // ---------- Time slots (for maternity shoots sharing a day with other bookings) ----------
+  const PKG_DEFAULTS = { lodging: { arrive: '20:00', leave: '16:30' }, prep: { arrive: '08:00', leave: '16:30' } };
+  const toMin = (t) => { const [h, m] = String(t || '').split(':').map(Number); return h * 60 + (m || 0); };
+  const absMin = (k, t) => Math.round(parseKey(k).getTime() / 60000) + toMin(t);
+  // Absolute [start, end) of a bride booking on date k.
+  function brideSlot(k, l) {
+    const pkg = l.pkg || 'prep';
+    const d = PKG_DEFAULTS[pkg];
+    if (pkg === 'lodging') {
+      // legacy lodging stored arrival on k and a later departure date
+      if (!l.arriveDate && l.leaveDate && l.leaveDate > k) return [absMin(k, l.arriveTime || '14:00'), absMin(l.leaveDate, l.leaveTime || '11:00')];
+      return [absMin(l.arriveDate || prevKey(k), l.arriveTime || d.arrive), absMin(k, l.leaveTime || d.leave)];
+    }
+    return [absMin(k, l.arriveTime || d.arrive), absMin(k, l.leaveTime || d.leave)];
+  }
+  const shootSlot = (k, l) => [absMin(k, l.shootStart), absMin(k, l.shootEnd)];
+  // Every booked time slot in the calendar, except the lead being edited.
+  function allSlots(exceptId) {
+    const out = [];
+    Object.entries(db.days).forEach(([k, day]) => day.leads.forEach(l => {
+      if (l.id === exceptId) return;
+      if (l.state === 'won' && day.status === 'booked' && day.bookedLeadId === l.id) out.push({ slot: brideSlot(k, l), k, l, what: 'כלה' });
+      if (l.state === 'maternity' && l.shootStart && l.shootEnd) out.push({ slot: shootSlot(k, l), k, l, what: 'צילומי הריון' });
+    }));
+    return out;
+  }
+  const findClash = (slot, exceptId) => allSlots(exceptId).find(o => slot[0] < o.slot[1] && o.slot[0] < slot[1]);
 
   // A tour lead belongs to its event date (the day key) but the visit happens on tourDate.
   const tourDateOf = (lead, key) => lead.tourDate || key;
@@ -464,10 +557,11 @@
   // Leads waiting on date k as their event date: interested ones, and tours scheduled for another day.
   const pendingCount = (k) => getDay(k).leads.filter(l => l.state === 'open' || (l.state === 'tour' && tourDateOf(l, k) !== k)).length;
 
-  // Day color priority: booked (red / blue) > tour (purple) > interested (yellow) > free (green)
+  // Day color priority: bride (red) > maternity shoot (blue) > tour (purple) > interested (yellow) > free (green)
   function dayState(k) {
     const d = getDay(k);
-    if (d.status === 'booked') return isMaternity(d) ? 'maternity' : 'booked';
+    if (d.status === 'booked') return 'booked';
+    if (maternityLeads(d).length) return 'maternity';
     if (toursOn(k).length) return 'tour';
     if (pendingCount(k)) return 'pending';
     return 'free';
@@ -476,8 +570,7 @@
   // Form status value for an existing lead
   function statusOf(lead, day) {
     if (!lead) return null;
-    if (lead.state === 'won') return isMaternity(day) ? 'maternity' : 'won';
-    if (lead.state === 'tour' || lead.state === 'cancelled') return lead.state;
+    if (lead.state === 'won' || lead.state === 'maternity' || lead.state === 'tour' || lead.state === 'cancelled') return lead.state;
     return 'open';
   }
 
@@ -545,7 +638,7 @@
         <div>
           <div class="font-semibold text-wine-dark">${esc(fullName(r.lead))}</div>
           <div class="text-sm text-zinc-500">${prettyDate(r.key)}</div>
-          ${packageText(r.lead) ? `<div class="text-sm text-zinc-500 mt-0.5">${esc(packageText(r.lead))}</div>` : ''}
+          ${scheduleText(r) ? `<div class="text-sm text-zinc-500 mt-0.5">${esc(scheduleText(r))}</div>` : ''}
         </div>
         ${kindBadge(r.kind)}
       </button>`).join('');
@@ -564,7 +657,8 @@
   const kindBadge = (kind) => `<span class="shrink-0 text-[13px] font-semibold px-2.5 py-1 rounded-full border ${KIND[kind].cls}">${KIND[kind].label}</span>`;
 
   function recordKind(day, lead) {
-    if (lead.state === 'won') return isMaternity(day) ? 'maternity' : 'booked';
+    if (lead.state === 'won') return 'booked';
+    if (lead.state === 'maternity') return 'maternity';
     if (lead.state === 'tour') return 'tour';
     if (lead.state === 'open') return 'pending';
     return lead.state === 'cancelled' ? 'cancelled' : 'lost';
@@ -585,12 +679,15 @@
   function packageText(l) {
     if (l.state !== 'won' || !l.pkg) return '';
     if (l.pkg === 'lodging') {
-      return `חבילה 1 – כולל לינה · הגעה ${l.arriveTime || '—'} · עזיבה ${shortDate(l.leaveDate)} ${l.leaveTime || ''}`.trim();
+      if (!l.arriveDate && l.leaveDate) return `חבילה 1 – כולל לינה · הגעה ${l.arriveTime || '—'} · עזיבה ${shortDate(l.leaveDate)} ${l.leaveTime || ''}`.trim();
+      return `חבילה 1 – כולל לינה · הגעה ${shortDate(l.arriveDate)} ${l.arriveTime || '—'} · עזיבה ${l.leaveTime || '—'}`;
     }
     return `חבילה 2 – התארגנות בלבד (חצי יום) · ${l.arriveTime || '—'}–${l.leaveTime || '—'}`;
   }
+  const shootText = (l) => `צילומי הריון ${l.shootStart || '—'}–${l.shootEnd || '—'}`;
   function scheduleText(r) {
     if (r.kind === 'tour') return `סיור ב-${shortDate(r.date)} בשעה ${r.lead.tourTime || '—'}${r.date !== r.key ? ` · לתאריך אירוע ${shortDate(r.key)}` : ''}`;
+    if (r.kind === 'maternity') return shootText(r.lead);
     return packageText(r.lead);
   }
 
@@ -607,7 +704,7 @@
       pending: ['day-pending', 'בטיפול – יש מתעניינות'],
       tour: ['day-tour', 'יום סיור'],
       booked: ['day-booked', 'תפוס – נסגר עבור כלה'],
-      maternity: ['day-maternity', 'תפוס – צילומי הריון']
+      maternity: ['day-maternity', 'צילומי הריון – שאר היום פנוי']
     };
     const [cls, txt] = map[state];
     return `<span class="inline-block text-sm font-semibold px-3 py-1 rounded-full border ${cls}">${txt}</span>`;
@@ -633,11 +730,12 @@
     return { total: t, deposit, balance: round2(t - deposit) };
   }
   const balanceDue = (l) => l.paidInFull ? 0 : finance(l.total).balance;
+  const isBookingKind = (kind) => kind === 'booked' || kind === 'maternity';
   function hasFinance(l) { return l.total > 0 || l.contractSigned || l.depositPaid || l.paidInFull; }
   function financeBlock(l, always) {
     if (!always && !hasFinance(l)) return '';
     const f = finance(l.total);
-    const flag = (on, text) => `<span class="inline-flex items-center gap-1 text-[13px] px-2 py-1 rounded-full ${on ? 'bg-wine text-white' : 'bg-zinc-100 text-zinc-500'}">${on ? '✔' : '○'} ${text}</span>`;
+    const flag = (on, text) => `<span class="inline-flex items-center gap-1 text-[13px] font-semibold px-2 py-1 rounded-full border ${on ? 'bg-green-600 border-green-600 text-white' : 'bg-red-50 border-red-200 text-red-700'}">${on ? '✓' : '✕'} ${text}</span>`;
     return `
       <div class="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
         <div class="grid grid-cols-3 gap-2 text-center">
@@ -662,15 +760,43 @@
     if (!l.pkg) return `<div class="mt-3 text-sm text-zinc-500 bg-zinc-50 rounded-xl p-2 text-center">לא הוגדרה חבילה – ניתן להוסיף דרך "עריכת פרטים"</div>`;
     const cell = (label, value) => `<div><div class="text-[13px] text-zinc-500">${label}</div><div class="font-bold text-wine-dark" dir="ltr">${esc(value || '—')}</div></div>`;
     const lodging = l.pkg === 'lodging';
+    const legacy = lodging && !l.arriveDate && l.leaveDate;
     return `
       <div class="mt-3 rounded-xl border border-wine/20 bg-wine-soft/60 p-3">
         <div class="text-base font-semibold text-wine mb-2">${lodging ? '🛏️ חבילה 1 – כוללת לינה' : '💄 חבילה 2 – התארגנות בלבד (חצי יום)'}</div>
         <div class="grid ${lodging ? 'grid-cols-3' : 'grid-cols-2'} gap-2 text-center">
+          ${lodging && !legacy ? cell('תאריך הגעה', shortDate(l.arriveDate)) : ''}
           ${cell('שעת הגעה', l.arriveTime)}
-          ${lodging ? cell('תאריך עזיבה', shortDate(l.leaveDate)) : ''}
+          ${legacy ? cell('תאריך עזיבה', shortDate(l.leaveDate)) : ''}
           ${cell('שעת עזיבה', l.leaveTime)}
         </div>
       </div>`;
+  }
+
+  // Maternity shoots on date k: hour slots that leave the rest of the day open.
+  function maternityBlock(k, past) {
+    const shoots = maternityLeads(getDay(k));
+    if (!shoots.length) return '';
+    return shoots.map(l => `
+      <div class="rounded-2xl border-2 border-blue-600 bg-blue-50/40 p-4">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="text-sm font-bold text-blue-700 tracking-wide mb-1">🤰 צילומי הריון</div>
+            <div class="text-lg font-bold text-wine-dark">${esc(fullName(l))}</div>
+          </div>
+          <div class="flex gap-1 shrink-0">
+            <button data-act="edit" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-wine text-base" aria-label="עריכה">✎</button>
+            <button data-act="delete" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-zinc-500 text-base" aria-label="מחיקה">🗑</button>
+          </div>
+        </div>
+        <div class="mt-2 rounded-xl bg-white border border-blue-200 p-2 text-center">
+          <div class="text-[13px] text-zinc-500">שעות הצילום</div>
+          <div class="font-bold text-blue-700 text-lg" dir="ltr">${esc(l.shootStart || '—')} – ${esc(l.shootEnd || '—')}</div>
+        </div>
+        ${leadDetails(l)}
+        ${financeBlock(l, true)}
+        ${contactLinks(l)}
+      </div>`).join('');
   }
 
   function leadDetails(l) {
@@ -729,11 +855,10 @@
 
     if (day.status === 'booked') {
       const bride = day.leads.find(l => l.id === day.bookedLeadId);
-      const others = day.leads.filter(l => l.id !== day.bookedLeadId);
-      const maternity = isMaternity(day);
+      const others = day.leads.filter(l => l.id !== day.bookedLeadId && l.state !== 'maternity');
       body.innerHTML = `
-        <div class="rounded-2xl border-2 ${maternity ? 'border-blue-600' : 'border-red-500'} bg-white p-4">
-          <div class="text-sm font-bold ${maternity ? 'text-blue-700' : 'text-red-600'} tracking-wide mb-1">${maternity ? '🤰 סגירה לצילומי הריון' : '👰 הכלה של התאריך'}</div>
+        <div class="rounded-2xl border-2 border-red-500 bg-white p-4">
+          <div class="text-sm font-bold text-red-600 tracking-wide mb-1">👰 הכלה של התאריך</div>
           <div class="text-lg font-bold text-wine-dark">${esc(bride ? fullName(bride) : 'כלה')}</div>
           ${bride ? leadDetails(bride) + packageBlock(bride) + financeBlock(bride, true) + contactLinks(bride) : ''}
           ${bride ? `<button data-act="edit" data-id="${bride.id}" class="mt-3 text-base text-wine underline">עריכת פרטים</button>` : ''}
@@ -754,14 +879,18 @@
                 ${contactLinks(l)}
               </div>`).join('')}
           </div>` : ''}
+        ${maternityBlock(k, past)}
         ${visitingToursBlock(k)}
       `;
-      footer.innerHTML = `<button data-act="unbook" class="w-full py-3 mb-1 rounded-2xl border-2 border-wine text-wine font-semibold">ביטול סגירה / שחרור התאריך</button>`;
+      footer.innerHTML = `<div class="flex gap-2 mb-1">
+        <button data-act="unbook" class="flex-1 py-3 rounded-2xl border-2 border-wine text-wine font-semibold">שחרור התאריך</button>
+        ${past ? '' : `<button data-act="addMaternity" class="flex-1 py-3 rounded-2xl bg-blue-600 text-white font-semibold">🤰 צילומי הריון</button>`}
+      </div>`;
       return;
     }
 
     const leads = [...tourLeads(day), ...openLeads(day), ...day.leads.filter(l => l.state === 'cancelled')];
-    const visiting = visitingToursBlock(k);
+    const visiting = maternityBlock(k, past) + visitingToursBlock(k);
     body.innerHTML = visiting + (leads.length ? leads.map(l => l.state === 'cancelled' ? `
       <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 opacity-75">
         <div class="flex items-start justify-between gap-2">
@@ -776,7 +905,7 @@
         </div>
         ${leadDetails(l)}
       </div>` : `
-      <div class="rounded-2xl border ${l.state === 'tour' ? 'border-[#6b1d38]/40' : 'border-zinc-200'} bg-white shadow-sm p-4">
+      <div class="rounded-2xl ${l.state === 'tour' ? 'border border-[#6b1d38]/40 bg-white' : 'border-2 border-orange-400 bg-orange-50/70'} shadow-sm p-4">
         <div class="flex items-start justify-between gap-2">
           <div>
             <div class="text-lg font-bold text-wine-dark">${esc(fullName(l))}</div>
@@ -789,14 +918,13 @@
         </div>
         ${leadDetails(l)}
         ${l.state === 'tour' ? tourBlock(l, k) : ''}
-        ${financeBlock(l)}
         ${contactLinks(l)}
         ${past ? '' : `<button data-act="book" data-id="${l.id}" class="mt-3 w-full py-3 rounded-xl bg-wine text-white font-semibold shadow-soft">
           💍 סגור עסקה / הפוך לתאריך תפוס
         </button>
         <div class="grid grid-cols-2 gap-2 mt-2">
           ${l.state === 'tour'
-            ? `<button data-act="toOpen" data-id="${l.id}" class="py-2 rounded-xl border border-yellow-400 bg-yellow-50 text-yellow-800 text-base font-semibold">🟡 החזר למתעניינת</button>`
+            ? `<button data-act="toOpen" data-id="${l.id}" class="py-2 rounded-xl border border-orange-400 bg-orange-50 text-orange-700 text-base font-semibold">🟠 החזר למתעניינת</button>`
             : `<button data-act="toTour" data-id="${l.id}" class="py-2 rounded-xl border border-[#6b1d38] text-[#6b1d38] text-base font-semibold">🍇 תיאום סיור</button>`}
           <button data-act="toMaternity" data-id="${l.id}" class="py-2 rounded-xl border border-blue-600 text-blue-700 text-base font-semibold">🤰 צילומי הריון</button>
         </div>`}
@@ -808,9 +936,10 @@
          </div>`);
     footer.innerHTML = past
       ? `<div class="w-full py-3 mb-1 rounded-2xl bg-zinc-100 text-zinc-500 text-base text-center">🔒 התאריך עבר – לא ניתן לתאם או להוסיף מתעניינות/סיורים</div>`
-      : `<div class="flex gap-2 mb-1">
-           <button data-act="add" class="flex-1 py-3 rounded-2xl bg-wine text-white font-semibold shadow-soft">+ מתעניינת חדשה</button>
-           <button data-act="addTour" class="flex-1 py-3 rounded-2xl bg-[#6b1d38] text-white font-semibold shadow-soft">🍇 תיאום סיור</button>
+      : `<div class="grid grid-cols-3 gap-2 mb-1">
+           <button data-act="add" class="py-3 rounded-2xl bg-orange-500 text-white font-semibold shadow-soft">+ מתעניינת</button>
+           <button data-act="addTour" class="py-3 rounded-2xl bg-[#6b1d38] text-white font-semibold shadow-soft">🍇 סיור</button>
+           <button data-act="addMaternity" class="py-3 rounded-2xl bg-blue-600 text-white font-semibold shadow-soft">🤰 הריון</button>
          </div>`;
   }
 
@@ -824,9 +953,10 @@
     const leadKey = btn.dataset.key || activeKey;
     const lead = id ? findLead(leadKey, id) : null;
 
-    if (['add', 'addTour', 'book', 'toTour', 'toOpen', 'toMaternity'].includes(act) && isPast(activeKey)) { toast(PAST_MSG); return; }
+    if (['add', 'addTour', 'addMaternity', 'book', 'toTour', 'toOpen', 'toMaternity'].includes(act) && isPast(activeKey)) { toast(PAST_MSG); return; }
     if (act === 'add') openForm(null);
     else if (act === 'addTour') openForm(null, 'tour');
+    else if (act === 'addMaternity') openForm(null, 'maternity');
     else if (act === 'edit' && lead) openForm(lead);
     else if (act === 'book' && lead) openForm(lead, 'won');
     else if (act === 'toTour' && lead) openForm(lead, 'tour');
@@ -854,20 +984,21 @@
   // Cancelled leads stay cancelled through booking and release.
   function unbookDay(k) {
     const d = ensureDay(k);
-    d.status = null; d.bookedLeadId = null; d.bookingType = null;
+    d.status = null; d.bookedLeadId = null;
     d.leads.forEach(l => {
+      if (l.state === 'maternity') return;
       if (l.state !== 'cancelled') l.state = l.prevState === 'tour' ? 'tour' : 'open';
       delete l.prevState;
     });
   }
 
-  function markBooked(k, leadId, type) {
+  // A bride holds the whole date; maternity shoots (separate time slots) are left as they are.
+  function markBooked(k, leadId) {
     const d = ensureDay(k);
     d.status = 'booked';
-    d.bookingType = type;
     d.bookedLeadId = leadId;
     d.leads.forEach(l => {
-      if (l.state === 'cancelled') return;
+      if ((l.state === 'cancelled' || l.state === 'maternity') && l.id !== leadId) return;
       if (l.state === 'open' || l.state === 'tour') l.prevState = l.state;
       l.state = l.id === leadId ? 'won' : 'lost';
     });
@@ -899,16 +1030,29 @@
   const checkedValue = (name) => (document.querySelector(`input[name="${name}"]:checked`) || {}).value;
   const setChecked = (name, value) => { const el = document.querySelector(`input[name="${name}"][value="${value}"]`); if (el) el.checked = true; };
 
+  // Deal & payment details belong to bookings only (bride / maternity shoot); for a cancelled
+  // client they stay visible only if she already had payment details.
+  let formHadFinance = false;
   function syncFormSections() {
     const status = checkedValue('fStatus');
-    const booked = status === 'won' || status === 'maternity';
+    $('leadForm').dataset.status = status;
     $('fTourSec').classList.toggle('hidden', status !== 'tour');
-    $('fPkgSec').classList.toggle('hidden', !booked);
-    $('fLeaveDateWrap').classList.toggle('hidden', checkedValue('fPkg') !== 'lodging');
+    $('fMatSec').classList.toggle('hidden', status !== 'maternity');
+    $('fPkgSec').classList.toggle('hidden', status !== 'won');
+    $('fArriveDateWrap').classList.toggle('hidden', checkedValue('fPkg') !== 'lodging');
+    const showFinance = status === 'won' || status === 'maternity' || (status === 'cancelled' && formHadFinance);
+    $('fFinSec').classList.toggle('hidden', !showFinance);
+  }
+  // Switching package fills that package's default hours (still editable by hand).
+  function applyPackageDefaults() {
+    const pkg = checkedValue('fPkg');
+    $('fArrive').value = PKG_DEFAULTS[pkg].arrive;
+    $('fLeave').value = PKG_DEFAULTS[pkg].leave;
+    if (pkg === 'lodging' && !$('fArriveDate').value) $('fArriveDate').value = prevKey(activeKey);
   }
 
   // Unsaved new-client drafts, per date, so closing the form never loses typed details.
-  const DRAFT_FIELDS = ['fFirst', 'fLast', 'fPhone', 'fEmail', 'fNotes', 'fTotal', 'fTourDate', 'fTourTime', 'fArrive', 'fLeave', 'fLeaveDate'];
+  const DRAFT_FIELDS = ['fFirst', 'fLast', 'fPhone', 'fEmail', 'fNotes', 'fTotal', 'fTourDate', 'fTourTime', 'fShootStart', 'fShootEnd', 'fArriveDate', 'fArrive', 'fLeave'];
   const drafts = {};
   let formSaved = false;
   function keepDraft() {
@@ -933,11 +1077,15 @@
     $('fTourTime').value = (lead && lead.tourTime) || '';
     $('fTourDate').value = lead ? tourDateOf(lead, activeKey) : activeKey;
     $('fTourDate').min = todayKey();
-    setChecked('fPkg', (lead && lead.pkg) || 'lodging');
-    $('fArrive').value = (lead && lead.arriveTime) || '';
-    $('fLeave').value = (lead && lead.leaveTime) || '';
-    $('fLeaveDate').value = (lead && lead.leaveDate) || nextKey(activeKey);
-    $('fLeaveDate').min = nextKey(activeKey);
+    $('fShootStart').value = (lead && lead.shootStart) || '';
+    $('fShootEnd').value = (lead && lead.shootEnd) || '';
+    const pkg = (lead && lead.pkg) || 'lodging';
+    setChecked('fPkg', pkg);
+    $('fArriveDate').value = (lead && lead.arriveDate) || prevKey(activeKey);
+    $('fArriveDate').max = activeKey;
+    $('fArrive').value = (lead && lead.pkg && lead.arriveTime) || PKG_DEFAULTS[pkg].arrive;
+    $('fLeave').value = (lead && lead.pkg && lead.leaveTime) || PKG_DEFAULTS[pkg].leave;
+    formHadFinance = !!(lead && hasFinance(lead));
     $('fTotal').value = lead && lead.total > 0 ? lead.total : '';
     $('fContract').checked = !!(lead && lead.contractSigned);
     $('fDepositPaid').checked = !!(lead && (lead.depositPaid || lead.paidInFull));
@@ -967,16 +1115,21 @@
     const totalRaw = $('fTotal').value.trim();
     const total = totalRaw === '' ? 0 : round2(Number(totalRaw));
     const status = checkedValue('fStatus');
-    const booking = status === 'won' || status === 'maternity';
+    const booking = status === 'won';
+    const maternity = status === 'maternity';
     const pkg = checkedValue('fPkg');
+    const existing = findLead(activeKey, $('fLeadId').value) || {};
+    // Details of other statuses are kept as they were, so switching back restores them.
     const schedule = {
       tourDate: $('fTourDate').value,
       tourTime: $('fTourTime').value,
-      // keep the saved package when moving away from a booking, so it's there if she books again
-      pkg: booking ? pkg : (findLead(activeKey, $('fLeadId').value) || {}).pkg,
-      arriveTime: $('fArrive').value,
-      leaveTime: $('fLeave').value,
-      leaveDate: $('fLeaveDate').value
+      shootStart: $('fShootStart').value,
+      shootEnd: $('fShootEnd').value,
+      pkg: booking ? pkg : existing.pkg,
+      arriveDate: booking ? (pkg === 'lodging' ? $('fArriveDate').value : '') : existing.arriveDate,
+      arriveTime: booking ? $('fArrive').value : existing.arriveTime,
+      leaveTime: booking ? $('fLeave').value : existing.leaveTime,
+      leaveDate: booking ? '' : existing.leaveDate
     };
     const payment = {
       total,
@@ -1000,7 +1153,18 @@
     // Iron rule: a tour can't be scheduled (or moved) to a past date.
     else if (status === 'tour' && isPast(schedule.tourDate) &&
              !(current && current.state === 'tour' && tourDateOf(current, activeKey) === schedule.tourDate)) msg = PAST_MSG;
-    else if (booking && pkg === 'lodging' && (!schedule.leaveDate || schedule.leaveDate <= activeKey)) msg = 'בחבילה עם לינה תאריך העזיבה חייב להיות אחרי תאריך ההגעה';
+    else if (maternity && (!schedule.shootStart || !schedule.shootEnd)) msg = 'יש לבחור שעות לצילומי ההריון';
+    else if (maternity && schedule.shootEnd <= schedule.shootStart) msg = 'שעת הסיום חייבת להיות אחרי שעת ההתחלה';
+    else if (booking && pkg === 'lodging' && (!schedule.arriveDate || schedule.arriveDate > activeKey)) msg = 'בחבילה עם לינה תאריך ההגעה הוא עד יום האירוע (בדרך כלל ערב לפני)';
+    else if (booking && !schedule.arriveTime) msg = 'יש לבחור שעת הגעה';
+    else if (booking && !schedule.leaveTime) msg = 'יש לבחור שעת עזיבה';
+    // Maternity shoots and bride bookings may share a day, but never overlapping hours.
+    if (!msg && (booking || maternity)) {
+      const slot = maternity ? shootSlot(activeKey, schedule) : brideSlot(activeKey, schedule);
+      if (booking && slot[1] <= slot[0]) msg = 'שעת העזיבה חייבת להיות אחרי שעת ההגעה';
+      const clash = !msg && findClash(slot, $('fLeadId').value);
+      if (clash) msg = `השעות חופפות ל${clash.what} של ${fullName(clash.l)} (${shortDate(clash.k)}) – בחרי שעות אחרות`;
+    }
     // Iron rule: past dates accept detail edits and cancellations only.
     if (!msg && isPast(activeKey)) {
       if (!current || (status !== statusOf(current, d) && status !== 'cancelled')) msg = PAST_MSG;
@@ -1022,8 +1186,13 @@
 
     const wasHolder = d.status === 'booked' && d.bookedLeadId === lead.id;
     if (booking) {
-      markBooked(activeKey, lead.id, status === 'maternity' ? 'maternity' : 'bride');
-      toast(wasHolder ? 'הפרטים עודכנו' : status === 'maternity' ? '🤰 התאריך נסגר לצילומי הריון' : '💍 מזל טוב! התאריך נסגר');
+      markBooked(activeKey, lead.id);
+      toast(wasHolder ? 'הפרטים עודכנו' : '💍 מזל טוב! התאריך נסגר');
+    } else if (maternity) {
+      if (wasHolder) unbookDay(activeKey);
+      lead.state = 'maternity';
+      delete lead.prevState;
+      toast(id ? 'הפרטים עודכנו' : '🤰 צילומי ההריון נקבעו – שאר היום נשאר פתוח');
     } else {
       if (wasHolder) unbookDay(activeKey);
       // A lead added to a date that another client already holds stays in "date taken".
@@ -1079,7 +1248,7 @@
               <div class="font-bold text-wine-dark truncate">${esc(fullName(r.lead))}</div>
               ${r.lead.phone ? `<div class="text-base text-zinc-600" dir="ltr" style="text-align:right">${esc(r.lead.phone)}</div>` : ''}
               ${sched ? `<div class="text-sm text-zinc-600 mt-1">${esc(sched)}</div>` : ''}
-              ${r.lead.total > 0 ? `<div class="text-sm text-zinc-600 mt-1">סכום ${money(r.lead.total)} · יתרה ${money(balanceDue(r.lead))}${r.lead.contractSigned ? ' · ✔ חוזה' : ''}</div>` : ''}
+              ${isBookingKind(r.kind) && r.lead.total > 0 ? `<div class="text-sm text-zinc-600 mt-1">סכום ${money(r.lead.total)} · יתרה ${money(balanceDue(r.lead))}${r.lead.contractSigned ? ' · ✔ חוזה' : ''}</div>` : ''}
             </div>
             ${kindBadge(r.kind)}
           </div>
@@ -1108,7 +1277,7 @@
   const tabLabel = () => TABS.find(t => t.id === listTab).label.replace(/^\S+\s/, '');
   function exportRows(records) {
     return records.map(r => {
-      const l = r.lead, f = finance(l.total);
+      const l = r.lead, f = finance(l.total), deal = isBookingKind(r.kind);
       return {
         'תאריך': shortDate(r.date),
         'יום': HE_DAYS[parseKey(r.date).getDay()],
@@ -1119,16 +1288,17 @@
         'טלפון': l.phone || '',
         'דוא״ל': l.email || '',
         'שעת סיור': r.kind === 'tour' ? (l.tourTime || '') : '',
+        'שעות צילום': r.kind === 'maternity' ? `${l.shootStart || ''}–${l.shootEnd || ''}` : '',
         'חבילה': l.state === 'won' && l.pkg ? (l.pkg === 'lodging' ? 'חבילה 1 – כולל לינה' : 'חבילה 2 – התארגנות בלבד') : '',
+        'תאריך הגעה': l.state === 'won' && l.pkg === 'lodging' ? shortDate(l.arriveDate || r.key) : '',
         'שעת הגעה': l.state === 'won' ? (l.arriveTime || '') : '',
-        'תאריך עזיבה': l.state === 'won' && l.pkg === 'lodging' ? shortDate(l.leaveDate) : '',
         'שעת עזיבה': l.state === 'won' ? (l.leaveTime || '') : '',
-        'סכום עסקה': f.total || '',
-        'מקדמה 15%': f.total ? f.deposit : '',
-        'יתרה': f.total ? balanceDue(l) : '',
-        'חוזה נחתם': l.contractSigned ? 'כן' : 'לא',
-        'מקדמה שולמה': l.depositPaid || l.paidInFull ? 'כן' : 'לא',
-        'שולם במלואו': l.paidInFull ? 'כן' : 'לא',
+        'סכום עסקה': deal && f.total ? f.total : '',
+        'מקדמה 15%': deal && f.total ? f.deposit : '',
+        'יתרה': deal && f.total ? balanceDue(l) : '',
+        'חוזה נחתם': deal ? (l.contractSigned ? 'כן' : 'לא') : '',
+        'מקדמה שולמה': deal ? (l.depositPaid || l.paidInFull ? 'כן' : 'לא') : '',
+        'שולם במלואו': deal ? (l.paidInFull ? 'כן' : 'לא') : '',
         'הערות': l.notes || ''
       };
     });
@@ -1148,8 +1318,8 @@
     const records = listRecords();
     if (!records.length) { toast('אין רשומות לייצוא'); return; }
     const rows = records.map(r => {
-      const l = r.lead, f = finance(l.total);
-      const pay = [l.contractSigned ? 'חוזה ✔' : '', l.paidInFull ? 'שולם במלואו ✔' : (l.depositPaid ? 'מקדמה ✔' : '')].filter(Boolean).join(' · ');
+      const l = r.lead, f = finance(isBookingKind(r.kind) ? l.total : 0);
+      const pay = !isBookingKind(r.kind) ? '' : [l.contractSigned ? 'חוזה ✔' : '', l.paidInFull ? 'שולם במלואו ✔' : (l.depositPaid ? 'מקדמה ✔' : '')].filter(Boolean).join(' · ');
       return `<tr>
         <td>${shortDate(r.date)}<br><small>${HE_DAYS[parseKey(r.date).getDay()]}</small></td>
         <td><span class="b b-${r.kind}">${KIND[r.kind].label}</span></td>
@@ -1264,8 +1434,12 @@
   $('dayModalBody').addEventListener('click', handleDayAction);
   $('dayModalFooter').addEventListener('click', handleDayAction);
   $('leadForm').addEventListener('submit', submitForm);
-  $('leadForm').addEventListener('change', (e) => { if (e.target.name === 'fStatus' || e.target.name === 'fPkg') syncFormSections(); });
+  $('leadForm').addEventListener('change', (e) => {
+    if (e.target.name === 'fPkg') applyPackageDefaults();
+    if (e.target.name === 'fStatus' || e.target.name === 'fPkg') syncFormSections();
+  });
   $('fTotal').addEventListener('input', updateFinancePreview);
+  $('leadForm').addEventListener('input', () => $('formError').classList.add('hidden'));
   // Paid in full implies the deposit was paid as well.
   $('fPaidFull').addEventListener('change', () => { if ($('fPaidFull').checked) $('fDepositPaid').checked = true; });
   $('fDepositPaid').addEventListener('change', () => { if (!$('fDepositPaid').checked) $('fPaidFull').checked = false; });

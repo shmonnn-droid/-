@@ -56,14 +56,18 @@
     .fade-in { animation: fadeIn .2s ease-out; }
     @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
     /* Keep action buttons well clear of the phone's bottom edge and any floating badge */
-    .safe-bottom { padding-bottom: max(90px, calc(env(safe-area-inset-bottom) + 24px)); }
+    .safe-bottom { padding-bottom: max(120px, calc(env(safe-area-inset-bottom) + 32px)); }
+    /* Date/time fields read right-to-left (iOS centers them by default) */
+    input[type=date], input[type=time] { text-align: right; direction: rtl; -webkit-appearance: none; appearance: none; min-height: 2.5rem; }
+    input[type=date]::-webkit-date-and-time-value, input[type=time]::-webkit-date-and-time-value { text-align: right; }
     input, textarea { font-size: 16px; } /* prevents iOS zoom */
     input[type=checkbox] { accent-color: #4a151b; }
     /* One brand font everywhere, including form controls */
     html, body, button, input, select, textarea { font-family: 'Frank Ruhl Libre', serif; }
     /* הסרת באדג' Netlify */
     [id*="netlify"],
-    [class*="netlify-badge"],
+    [class*="netlify"],
+    a[href*="netlify"],
     div:has(> a[href*="netlify.com"]),
     iframe[src*="netlify"] {
       display: none !important;
@@ -76,10 +80,10 @@
   </style>
 </head>
 <body class="font-sans text-wine-dark">
-  <div class="brand-bg" aria-hidden="true"></div>
+  <div data-app class="brand-bg" aria-hidden="true"></div>
 
   <!-- Header -->
-  <header class="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-wine/15">
+  <header data-app class="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-wine/15">
     <div class="max-w-xl mx-auto px-4 py-2 grid grid-cols-[1fr_auto_1fr] items-center">
       <div></div>
       <div class="text-center">
@@ -91,7 +95,7 @@
     </div>
   </header>
 
-  <main class="relative z-10 max-w-xl mx-auto px-4 pt-4 pb-[110px]">
+  <main data-app class="relative z-10 max-w-xl mx-auto px-4 pt-4 pb-[140px]">
 
     <!-- Stats: tap a tile to open its list -->
     <section class="grid grid-cols-3 gap-2 mb-4">
@@ -160,7 +164,7 @@
   </main>
 
   <!-- Lists Modal -->
-  <div id="listModal" class="fixed inset-0 z-30 hidden">
+  <div data-app id="listModal" class="fixed inset-0 z-30 hidden">
     <div class="absolute inset-0 bg-black/40 fade-in" data-close="listModal"></div>
     <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
       <div class="modal-enter pointer-events-auto bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl h-[92vh] sm:h-[85vh] flex flex-col shadow-2xl">
@@ -188,7 +192,7 @@
   </div>
 
   <!-- Day Modal -->
-  <div id="dayModal" class="fixed inset-0 z-40 hidden">
+  <div data-app id="dayModal" class="fixed inset-0 z-40 hidden">
     <div class="absolute inset-0 bg-black/40 fade-in" data-close="dayModal"></div>
     <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
       <div class="modal-enter pointer-events-auto bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col shadow-2xl">
@@ -209,46 +213,46 @@
   </div>
 
   <!-- Lead Form Modal -->
-  <div id="formModal" class="fixed inset-0 z-50 hidden">
+  <div data-app id="formModal" class="fixed inset-0 z-50 hidden">
     <div class="absolute inset-0 bg-black/50 fade-in" data-close="formModal"></div>
     <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
-      <form id="leadForm" class="modal-enter pointer-events-auto bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto shadow-2xl px-5 pt-5 safe-bottom" novalidate>
+      <form id="leadForm" class="modal-enter pointer-events-auto bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto shadow-2xl px-5 pt-4 safe-bottom" novalidate>
         <div class="flex items-center justify-between mb-1">
           <h3 id="formTitle" class="font-display text-xl font-bold text-wine">רישום חדש</h3>
           <button type="button" class="w-9 h-9 rounded-full bg-zinc-100 text-wine text-xl leading-none" data-close="formModal" aria-label="סגירה">&times;</button>
         </div>
-        <div id="formDate" class="text-sm text-zinc-500 mb-4"></div>
+        <div id="formDate" class="text-sm text-zinc-500 mb-2"></div>
         <input type="hidden" id="fLeadId" />
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-2">
           <label class="block">
             <span class="text-sm text-zinc-500">שם פרטי *</span>
-            <input id="fFirst" required class="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+            <input id="fFirst" required class="mt-0.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
           </label>
           <label class="block">
             <span class="text-sm text-zinc-500">שם משפחה</span>
-            <input id="fLast" class="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+            <input id="fLast" class="mt-0.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
           </label>
         </div>
-        <label class="block mt-3">
+        <label class="block mt-2">
           <span class="text-sm text-zinc-500">טלפון *</span>
-          <input id="fPhone" type="tel" inputmode="tel" dir="ltr" required class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="050-0000000" />
+          <input id="fPhone" type="tel" inputmode="tel" dir="ltr" required class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="050-0000000" />
         </label>
-        <label class="block mt-3">
+        <label class="block mt-2">
           <span class="text-sm text-zinc-500">דוא״ל</span>
-          <input id="fEmail" type="email" inputmode="email" dir="ltr" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="name@example.com" />
+          <input id="fEmail" type="email" inputmode="email" dir="ltr" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="name@example.com" />
         </label>
-        <label class="block mt-3">
+        <label class="block mt-2">
           <span class="text-sm text-zinc-500">הערות</span>
-          <textarea id="fNotes" rows="3" class="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="מספר אורחות, בקשות מיוחדות..."></textarea>
+          <textarea id="fNotes" rows="2" class="mt-0.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="מספר אורחות, בקשות מיוחדות..."></textarea>
         </label>
 
         <!-- Status -->
-        <fieldset class="mt-4">
+        <fieldset class="mt-3">
           <legend class="text-sm text-zinc-500 mb-2">סטטוס / סוג רישום</legend>
           <div class="grid grid-cols-3 gap-2">
             <label class="cursor-pointer">
               <input type="radio" name="fStatus" value="open" class="peer sr-only" checked />
-              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2.5 text-center transition peer-checked:border-yellow-400 peer-checked:bg-yellow-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2 text-center transition peer-checked:border-yellow-400 peer-checked:bg-yellow-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
                 <div class="text-lg leading-none">🟡</div>
                 <div class="text-sm font-semibold mt-1 text-zinc-700">מתעניינת</div>
                 <div class="text-[11px] text-zinc-500">בטיפול</div>
@@ -256,7 +260,7 @@
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="fStatus" value="tour" class="peer sr-only" />
-              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2.5 text-center transition peer-checked:border-[#6b1d38] peer-checked:bg-[#f6e8ed] peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2 text-center transition peer-checked:border-[#6b1d38] peer-checked:bg-[#f6e8ed] peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
                 <div class="text-lg leading-none">🟣</div>
                 <div class="text-sm font-semibold mt-1 text-zinc-700">יום סיור</div>
                 <div class="text-[11px] text-zinc-500">תיאום ביקור</div>
@@ -264,7 +268,7 @@
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="fStatus" value="cancelled" class="peer sr-only" />
-              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2.5 text-center transition peer-checked:border-zinc-500 peer-checked:bg-zinc-100 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+              <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2 text-center transition peer-checked:border-zinc-500 peer-checked:bg-zinc-100 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
                 <div class="text-lg leading-none">⚪</div>
                 <div class="text-sm font-semibold mt-1 text-zinc-700">מבוטל</div>
                 <div class="text-[11px] text-zinc-500">הפנייה בוטלה</div>
@@ -272,7 +276,7 @@
             </label>
             <label class="cursor-pointer col-span-3 sm:col-span-1 grid">
               <input type="radio" name="fStatus" value="won" class="peer sr-only" />
-              <div class="rounded-xl border-2 border-zinc-200 px-2 py-2.5 text-center transition peer-checked:border-red-500 peer-checked:bg-red-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+              <div class="rounded-xl border-2 border-zinc-200 px-2 py-2 text-center transition peer-checked:border-red-500 peer-checked:bg-red-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
                 <span class="text-lg leading-none">🔴</span>
                 <span class="text-sm font-semibold text-zinc-700">סגור – כלה</span>
                 <span class="text-[11px] text-zinc-500">תפיסת התאריך</span>
@@ -280,7 +284,7 @@
             </label>
             <label class="cursor-pointer col-span-3 sm:col-span-2 grid">
               <input type="radio" name="fStatus" value="maternity" class="peer sr-only" />
-              <div class="rounded-xl border-2 border-zinc-200 px-2 py-2.5 text-center transition peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
+              <div class="rounded-xl border-2 border-zinc-200 px-2 py-2 text-center transition peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
                 <span class="text-lg leading-none">🔵</span>
                 <span class="text-sm font-semibold text-zinc-700">סגירה לצילומי הריון</span>
                 <span class="text-[11px] text-zinc-500">תפיסת התאריך</span>
@@ -290,16 +294,22 @@
         </fieldset>
 
         <!-- Tour details -->
-        <fieldset id="fTourSec" class="mt-4 rounded-2xl border border-[#6b1d38]/30 bg-[#f6e8ed]/60 p-3 hidden">
+        <fieldset id="fTourSec" class="mt-3 rounded-2xl border border-[#6b1d38]/30 bg-[#f6e8ed]/60 p-3 hidden">
           <legend class="px-1 text-sm font-semibold text-[#6b1d38]">🍇 פרטי הסיור</legend>
-          <label class="block">
-            <span class="text-sm text-zinc-500">שעת הסיור *</span>
-            <input id="fTourTime" type="time" dir="ltr" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
-          </label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="block">
+              <span class="text-sm text-zinc-500">תאריך הסיור *</span>
+              <input id="fTourDate" type="date" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+            </label>
+            <label class="block">
+              <span class="text-sm text-zinc-500">שעת הסיור *</span>
+              <input id="fTourTime" type="time" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+            </label>
+          </div>
         </fieldset>
 
         <!-- Package details (booked days) -->
-        <fieldset id="fPkgSec" class="mt-4 rounded-2xl border border-zinc-200 bg-white/60 p-3 hidden">
+        <fieldset id="fPkgSec" class="mt-3 rounded-2xl border border-zinc-200 bg-white/60 p-3 hidden">
           <legend class="px-1 text-sm font-semibold text-wine">🌗 חבילה ושעות</legend>
           <div class="grid grid-cols-2 gap-2">
             <label class="cursor-pointer">
@@ -317,30 +327,30 @@
               </div>
             </label>
           </div>
-          <div class="grid grid-cols-2 gap-2 mt-3">
+          <div class="grid grid-cols-2 gap-2 mt-2">
             <label class="block">
               <span class="text-sm text-zinc-500">שעת הגעה</span>
-              <input id="fArrive" type="time" dir="ltr" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+              <input id="fArrive" type="time" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
             </label>
             <label class="block">
               <span class="text-sm text-zinc-500">שעת עזיבה</span>
-              <input id="fLeave" type="time" dir="ltr" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+              <input id="fLeave" type="time" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
             </label>
           </div>
           <label id="fLeaveDateWrap" class="block mt-2">
             <span class="text-sm text-zinc-500">תאריך עזיבה (לינה)</span>
-            <input id="fLeaveDate" type="date" dir="ltr" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+            <input id="fLeaveDate" type="date" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
           </label>
         </fieldset>
 
         <!-- Finance -->
-        <fieldset class="mt-4 rounded-2xl border border-zinc-200 bg-white/60 p-3">
+        <fieldset class="mt-3 rounded-2xl border border-zinc-200 bg-white/60 p-3">
           <legend class="px-1 text-sm font-semibold text-wine">💰 פרטי עסקה ותשלום</legend>
           <label class="block">
             <span class="text-sm text-zinc-500">הכנס את סכום העסקה הכולל (₪)</span>
-            <input id="fTotal" type="number" inputmode="decimal" min="0" step="any" dir="ltr" placeholder="0" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+            <input id="fTotal" type="number" inputmode="decimal" min="0" step="any" dir="ltr" placeholder="0" class="mt-0.5 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
           </label>
-          <div class="grid grid-cols-2 gap-2 mt-3">
+          <div class="grid grid-cols-2 gap-2 mt-2">
             <div class="rounded-xl bg-zinc-100 px-3 py-2">
               <div class="text-[11px] text-zinc-500">מקדמה (15%)</div>
               <div id="fDeposit" class="font-bold text-wine-dark">₪0</div>
@@ -350,7 +360,7 @@
               <div id="fBalance" class="font-bold text-wine-dark">₪0</div>
             </div>
           </div>
-          <div class="mt-3 space-y-2 text-sm text-wine-dark">
+          <div class="mt-2 space-y-1.5 text-sm text-wine-dark">
             <label class="flex items-center gap-2 cursor-pointer"><input id="fContract" type="checkbox" class="w-5 h-5" /> 📝 נחתם חוזה</label>
             <label class="flex items-center gap-2 cursor-pointer"><input id="fDepositPaid" type="checkbox" class="w-5 h-5" /> שולמה מקדמה</label>
             <label class="flex items-center gap-2 cursor-pointer"><input id="fPaidFull" type="checkbox" class="w-5 h-5" /> שולמה היתרה / שולם במלואו</label>
@@ -358,7 +368,7 @@
         </fieldset>
 
         <p id="formError" class="text-sm text-red-600 mt-2 hidden"></p>
-        <div class="flex gap-2 mt-5 mb-1">
+        <div class="flex gap-2 mt-4">
           <button type="submit" class="flex-1 py-3 rounded-2xl bg-wine text-white font-semibold shadow-soft">שמירה</button>
           <button type="button" data-close="formModal" class="px-5 py-3 rounded-2xl border border-zinc-200 text-zinc-500">ביטול</button>
         </div>
@@ -367,7 +377,7 @@
   </div>
 
   <!-- Confirm Dialog -->
-  <div id="confirmModal" class="fixed inset-0 z-[60] hidden">
+  <div data-app id="confirmModal" class="fixed inset-0 z-[60] hidden">
     <div class="absolute inset-0 bg-black/50 fade-in"></div>
     <div class="absolute inset-0 flex items-center justify-center p-6">
       <div class="modal-enter bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl">
@@ -381,7 +391,7 @@
   </div>
 
   <!-- Toast -->
-  <div id="toast" class="fixed bottom-6 inset-x-0 z-[70] flex justify-center pointer-events-none hidden">
+  <div data-app id="toast" class="fixed bottom-6 inset-x-0 z-[70] flex justify-center pointer-events-none hidden">
     <div id="toastInner" class="px-5 py-3 rounded-full bg-wine-dark/90 text-white text-sm shadow-lg"></div>
   </div>
 
@@ -395,7 +405,7 @@
   // Day:  { status: 'booked'|null, bookingType: 'bride'|'maternity', bookedLeadId, leads: [Lead] }
   // Lead: { id, firstName, lastName, phone, email, notes, createdAt,
   //         state: 'open'|'tour'|'won'|'lost'|'cancelled', prevState,
-  //         tourTime, pkg: 'lodging'|'prep', arriveTime, leaveTime, leaveDate,
+  //         tourDate, tourTime, pkg: 'lodging'|'prep', arriveTime, leaveTime, leaveDate,
   //         total, contractSigned, depositPaid, paidInFull }
   let db = load();
 
@@ -440,12 +450,25 @@
   const activeLeads = (day) => day.leads.filter(l => l.state === 'open' || l.state === 'tour');
   const isMaternity = (day) => day.status === 'booked' && day.bookingType === 'maternity';
 
+  // A tour lead belongs to its event date (the day key) but the visit happens on tourDate.
+  const tourDateOf = (lead, key) => lead.tourDate || key;
+  // Tours whose visit falls on date k, wherever their event date is.
+  function toursOn(k) {
+    const out = [];
+    Object.entries(db.days).forEach(([key, day]) => day.leads.forEach(lead => {
+      if (lead.state === 'tour' && tourDateOf(lead, key) === k) out.push({ key, lead });
+    }));
+    return out.sort((a, b) => String(a.lead.tourTime || '').localeCompare(String(b.lead.tourTime || '')));
+  }
+  // Leads waiting on date k as their event date: interested ones, and tours scheduled for another day.
+  const pendingCount = (k) => getDay(k).leads.filter(l => l.state === 'open' || (l.state === 'tour' && tourDateOf(l, k) !== k)).length;
+
   // Day color priority: booked (red / blue) > tour (purple) > interested (yellow) > free (green)
   function dayState(k) {
     const d = getDay(k);
     if (d.status === 'booked') return isMaternity(d) ? 'maternity' : 'booked';
-    if (tourLeads(d).length) return 'tour';
-    if (openLeads(d).length) return 'pending';
+    if (toursOn(k).length) return 'tour';
+    if (pendingCount(k)) return 'pending';
     return 'free';
   }
 
@@ -480,7 +503,6 @@
     for (let d = 1; d <= daysInMonth; d++) {
       const k = keyOf(viewYear, viewMonth, d);
       const state = dayState(k);
-      const day = getDay(k);
 
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -489,7 +511,7 @@
       if (k === tKey) btn.classList.add('ring-2', 'ring-wine', 'ring-offset-1');
 
       let badge = '';
-      if (state === 'pending') badge = `<span class="absolute top-0.5 left-1 text-[10px] font-bold">${openLeads(day).length}</span>`;
+      if (state === 'pending') badge = `<span class="absolute top-0.5 left-1 text-[10px] font-bold">${pendingCount(k)}</span>`;
       if (DAY_BADGE[state]) badge = `<span class="text-[9px] leading-none mt-0.5">${DAY_BADGE[state]}</span>`;
       btn.innerHTML = `<span>${d}</span>${badge}`;
       btn.setAttribute('aria-label', `${d} ${HE_MONTHS[viewMonth]} - ${STATE_LABEL[state]}`);
@@ -502,7 +524,7 @@
   }
 
   function renderStats() {
-    const upcoming = allRecords().filter(r => !isPast(r.key));
+    const upcoming = allRecords().filter(r => !isPast(r.date));
     $('statBooked').textContent = upcoming.filter(r => r.kind === 'booked').length;
     $('statPending').textContent = upcoming.filter(r => r.kind === 'pending').length;
     $('statTours').textContent = upcoming.filter(r => r.kind === 'tour').length;
@@ -551,9 +573,12 @@
     const out = [];
     Object.keys(db.days).sort().forEach(key => {
       const day = db.days[key];
-      day.leads.forEach(lead => out.push({ key, day, lead, kind: recordKind(day, lead) }));
+      day.leads.forEach(lead => {
+        const kind = recordKind(day, lead);
+        out.push({ key, day, lead, kind, date: kind === 'tour' ? tourDateOf(lead, key) : key });
+      });
     });
-    return out.sort((a, b) => a.key.localeCompare(b.key) || String(a.lead.tourTime || '').localeCompare(String(b.lead.tourTime || '')));
+    return out.sort((a, b) => a.date.localeCompare(b.date) || String(a.lead.tourTime || '').localeCompare(String(b.lead.tourTime || '')));
   }
 
   function packageText(l) {
@@ -564,7 +589,7 @@
     return `חבילה 2 – התארגנות בלבד (חצי יום) · ${l.arriveTime || '—'}–${l.leaveTime || '—'}`;
   }
   function scheduleText(r) {
-    if (r.kind === 'tour') return `סיור בשעה ${r.lead.tourTime || '—'}`;
+    if (r.kind === 'tour') return `סיור ב-${shortDate(r.date)} בשעה ${r.lead.tourTime || '—'}${r.date !== r.key ? ` · לתאריך אירוע ${shortDate(r.key)}` : ''}`;
     return packageText(r.lead);
   }
 
@@ -656,16 +681,37 @@
       </div>`;
   }
 
-  function tourBlock(l) {
+  // key = the lead's event date; the visit itself happens on tourDateOf(l, key)
+  function tourBlock(l, key) {
+    const date = tourDateOf(l, key);
     return `
       <div class="mt-3 rounded-xl border border-[#6b1d38]/25 bg-[#f6e8ed] p-3">
-        <div class="flex items-center justify-between">
-          <div class="text-sm font-semibold text-[#6b1d38]">🍇 סיור בשעה <span dir="ltr">${esc(l.tourTime || '—')}</span></div>
-        </div>
+        <div class="text-sm font-semibold text-[#6b1d38]">🍇 סיור ב-${shortDate(date)} בשעה <span dir="ltr">${esc(l.tourTime || '—')}</span></div>
+        ${date !== key ? `<div class="text-xs text-zinc-600 mt-0.5">לתאריך אירוע: ${prettyDate(key)}</div>` : ''}
         <div class="flex gap-2 mt-2">
-          <button data-act="share" data-id="${l.id}" class="flex-1 py-2 rounded-xl bg-[#6b1d38] text-white text-sm font-semibold">📤 שתף</button>
-          ${l.phone ? `<button data-act="shareWa" data-id="${l.id}" class="flex-1 py-2 rounded-xl border border-[#6b1d38] text-[#6b1d38] text-sm font-semibold">💬 שליחה ללקוחה</button>` : ''}
+          <button data-act="share" data-key="${key}" data-id="${l.id}" class="flex-1 py-2 rounded-xl bg-[#6b1d38] text-white text-sm font-semibold">📤 שתף</button>
+          ${l.phone ? `<button data-act="shareWa" data-key="${key}" data-id="${l.id}" class="flex-1 py-2 rounded-xl border border-[#6b1d38] text-[#6b1d38] text-sm font-semibold">💬 שליחה ללקוחה</button>` : ''}
         </div>
+      </div>`;
+  }
+
+  // Tours visiting date k whose event date is another day.
+  function visitingToursBlock(k) {
+    const visits = toursOn(k).filter(t => t.key !== k);
+    if (!visits.length) return '';
+    return `
+      <div class="pt-1">
+        <div class="text-sm font-semibold text-[#6b1d38] mb-2">🍇 סיורים שמתקיימים ביום זה (${visits.length})</div>
+        ${visits.map(({ key, lead }) => `
+          <div class="rounded-2xl border border-[#6b1d38]/40 bg-white shadow-sm p-4 mb-2">
+            <div class="flex items-start justify-between gap-2">
+              <div class="text-lg font-bold text-wine-dark">${esc(fullName(lead))}</div>
+              ${kindBadge('tour')}
+            </div>
+            ${leadDetails(lead)}
+            ${tourBlock(lead, key)}
+            <button data-act="gotoDay" data-key="${key}" class="mt-2 w-full py-2 rounded-xl bg-zinc-100 text-wine text-sm">📅 פתח את תאריך האירוע</button>
+          </div>`).join('')}
       </div>`;
   }
 
@@ -704,13 +750,15 @@
                 ${contactLinks(l)}
               </div>`).join('')}
           </div>` : ''}
+        ${visitingToursBlock(k)}
       `;
       footer.innerHTML = `<button data-act="unbook" class="w-full py-3 mb-1 rounded-2xl border-2 border-wine text-wine font-semibold">ביטול סגירה / שחרור התאריך</button>`;
       return;
     }
 
     const leads = [...tourLeads(day), ...openLeads(day), ...day.leads.filter(l => l.state === 'cancelled')];
-    body.innerHTML = leads.length ? leads.map(l => l.state === 'cancelled' ? `
+    const visiting = visitingToursBlock(k);
+    body.innerHTML = visiting + (leads.length ? leads.map(l => l.state === 'cancelled' ? `
       <div class="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 opacity-75">
         <div class="flex items-start justify-between gap-2">
           <div>
@@ -736,18 +784,18 @@
           </div>
         </div>
         ${leadDetails(l)}
-        ${l.state === 'tour' ? tourBlock(l) : ''}
+        ${l.state === 'tour' ? tourBlock(l, k) : ''}
         ${financeBlock(l)}
         ${contactLinks(l)}
         ${past ? '' : `<button data-act="book" data-id="${l.id}" class="mt-3 w-full py-3 rounded-xl bg-wine text-white font-semibold shadow-soft">
           💍 סגור עסקה / הפוך לתאריך תפוס
         </button>`}
       </div>`).join('')
-      : `<div class="text-center py-8">
+      : visiting ? '' : `<div class="text-center py-8">
            <div class="text-4xl mb-2">🤍</div>
            <div class="text-zinc-600 font-semibold">${past ? 'לא נקבע אירוע בתאריך זה' : 'התאריך פנוי לחלוטין'}</div>
            <div class="text-sm text-zinc-500">${past ? 'התאריך כבר עבר' : 'עדיין אין מתעניינות או סיורים ליום זה'}</div>
-         </div>`;
+         </div>`);
     footer.innerHTML = past
       ? `<div class="w-full py-3 mb-1 rounded-2xl bg-zinc-100 text-zinc-500 text-sm text-center">🔒 התאריך עבר – לא ניתן לתאם או להוסיף מתעניינות/סיורים</div>`
       : `<div class="flex gap-2 mb-1">
@@ -763,15 +811,17 @@
     if (!btn) return;
     const act = btn.dataset.act;
     const id = btn.dataset.id;
-    const lead = id ? findLead(activeKey, id) : null;
+    const leadKey = btn.dataset.key || activeKey;
+    const lead = id ? findLead(leadKey, id) : null;
 
     if ((act === 'add' || act === 'addTour' || act === 'book') && isPast(activeKey)) { toast(PAST_MSG); return; }
     if (act === 'add') openForm(null);
     else if (act === 'addTour') openForm(null, 'tour');
     else if (act === 'edit' && lead) openForm(lead);
     else if (act === 'book' && lead) openForm(lead, 'won');
-    else if (act === 'share' && lead) shareTour(activeKey, lead, false);
-    else if (act === 'shareWa' && lead) shareTour(activeKey, lead, true);
+    else if (act === 'share' && lead) shareTour(leadKey, lead, false);
+    else if (act === 'shareWa' && lead) shareTour(leadKey, lead, true);
+    else if (act === 'gotoDay') openDay(leadKey);
     else if (act === 'delete' && lead) {
       confirmBox(`למחוק את <b>${esc(fullName(lead))}</b> מהיומן?`, 'מחיקה', 'bg-zinc-700', () => {
         const d = ensureDay(activeKey);
@@ -814,9 +864,10 @@
   function tourText(k, l) {
     return [
       '🍇 סיור בהכרם – הבית להתארגנות לכלות',
-      `📅 ${prettyDate(k)}`,
+      `📅 ${prettyDate(tourDateOf(l, k))}`,
       `🕐 שעה: ${l.tourTime || 'טרם נקבעה'}`,
       `👤 ${fullName(l)}`,
+      tourDateOf(l, k) !== k ? `💍 תאריך האירוע המבוקש: ${prettyDate(k)}` : '',
       l.phone ? `📞 ${l.phone}` : '',
       l.notes ? `📝 ${l.notes}` : ''
     ].filter(Boolean).join('\n');
@@ -854,6 +905,8 @@
     $('fEmail').value = lead ? (lead.email || '') : '';
     $('fNotes').value = lead ? (lead.notes || '') : '';
     $('fTourTime').value = (lead && lead.tourTime) || '';
+    $('fTourDate').value = lead ? tourDateOf(lead, activeKey) : activeKey;
+    $('fTourDate').min = todayKey();
     setChecked('fPkg', (lead && lead.pkg) || 'lodging');
     $('fArrive').value = (lead && lead.arriveTime) || '';
     $('fLeave').value = (lead && lead.leaveTime) || '';
@@ -884,6 +937,7 @@
     const booking = status === 'won' || status === 'maternity';
     const pkg = checkedValue('fPkg');
     const schedule = {
+      tourDate: $('fTourDate').value,
       tourTime: $('fTourTime').value,
       pkg: booking ? pkg : undefined,
       arriveTime: $('fArrive').value,
@@ -907,7 +961,11 @@
     else if (phone.replace(/\D/g, '').length < 9) msg = 'מספר הטלפון אינו תקין';
     else if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) msg = 'כתובת הדוא״ל אינה תקינה';
     else if (!Number.isFinite(total) || total < 0) msg = 'סכום העסקה אינו תקין';
+    else if (status === 'tour' && !schedule.tourDate) msg = 'יש לבחור תאריך סיור';
     else if (status === 'tour' && !schedule.tourTime) msg = 'יש לבחור שעת סיור';
+    // Iron rule: a tour can't be scheduled (or moved) to a past date.
+    else if (status === 'tour' && isPast(schedule.tourDate) &&
+             !(current && current.state === 'tour' && tourDateOf(current, activeKey) === schedule.tourDate)) msg = PAST_MSG;
     else if (booking && pkg === 'lodging' && (!schedule.leaveDate || schedule.leaveDate <= activeKey)) msg = 'בחבילה עם לינה תאריך העזיבה חייב להיות אחרי תאריך ההגעה';
     // Iron rule: past dates accept detail edits and cancellations only.
     if (!msg && isPast(activeKey)) {
@@ -965,7 +1023,7 @@
     const withPast = $('listPast').checked;
     return allRecords().filter(r =>
       (listTab === 'all' || r.kind === listTab) &&
-      (withPast || !isPast(r.key)) &&
+      (withPast || !isPast(r.date)) &&
       (!q || [fullName(r.lead), r.lead.phone, r.lead.email, r.lead.notes].join(' ').toLowerCase().includes(q))
     );
   }
@@ -979,10 +1037,10 @@
       const sched = scheduleText(r);
       const editable = r.kind !== 'lost';
       return `
-        <div class="rounded-2xl border border-zinc-200 bg-white p-3 ${isPast(r.key) ? 'opacity-70' : ''}">
+        <div class="rounded-2xl border border-zinc-200 bg-white p-3 ${isPast(r.date) ? 'opacity-70' : ''}">
           <div class="flex items-start justify-between gap-2">
             <div class="min-w-0">
-              <div class="text-xs text-zinc-500">${prettyDate(r.key)}</div>
+              <div class="text-xs text-zinc-500">${prettyDate(r.date)}</div>
               <div class="font-bold text-wine-dark truncate">${esc(fullName(r.lead))}</div>
               ${r.lead.phone ? `<div class="text-sm text-zinc-600" dir="ltr" style="text-align:right">${esc(r.lead.phone)}</div>` : ''}
               ${sched ? `<div class="text-xs text-zinc-600 mt-1">${esc(sched)}</div>` : ''}
@@ -1017,8 +1075,9 @@
     return records.map(r => {
       const l = r.lead, f = finance(l.total);
       return {
-        'תאריך': shortDate(r.key),
-        'יום': HE_DAYS[parseKey(r.key).getDay()],
+        'תאריך': shortDate(r.date),
+        'יום': HE_DAYS[parseKey(r.date).getDay()],
+        'תאריך אירוע': shortDate(r.key),
         'סטטוס': KIND[r.kind].label,
         'שם פרטי': l.firstName,
         'שם משפחה': l.lastName || '',
@@ -1057,7 +1116,7 @@
       const l = r.lead, f = finance(l.total);
       const pay = [l.contractSigned ? 'חוזה ✔' : '', l.paidInFull ? 'שולם במלואו ✔' : (l.depositPaid ? 'מקדמה ✔' : '')].filter(Boolean).join(' · ');
       return `<tr>
-        <td>${shortDate(r.key)}<br><small>${HE_DAYS[parseKey(r.key).getDay()]}</small></td>
+        <td>${shortDate(r.date)}<br><small>${HE_DAYS[parseKey(r.date).getDay()]}</small></td>
         <td><span class="b b-${r.kind}">${KIND[r.kind].label}</span></td>
         <td><b>${esc(fullName(l))}</b><br><small dir="ltr">${esc(l.phone || '')}</small></td>
         <td>${esc(scheduleText(r))}${l.notes ? `<br><small>${esc(l.notes)}</small>` : ''}</td>
@@ -1208,16 +1267,28 @@
   renderCalendar();
 })();
 
-// Remove the floating Netlify badge, including when Netlify injects it after load.
+// Remove the floating "Powered by Netlify" badge, including when Netlify injects it after load
+// (as a page-level element, an iframe, or a shadow-DOM host). The app's own top-level elements
+// carry data-app and are never touched.
 (() => {
-  const SELECTOR = '[id*="netlify"], [class*="netlify-badge"], iframe[src*="netlify"]';
+  const SELECTOR = '[id*="netlify" i], [class*="netlify" i], iframe[src*="netlify" i], a[href*="netlify" i]';
+  const SKIP = new Set(['SCRIPT', 'STYLE', 'LINK', 'META', 'HEAD', 'BODY', 'TITLE', 'NOSCRIPT']);
+  const mentionsNetlify = (el) =>
+    /netlify/i.test(el.textContent || '') ||
+    (el.shadowRoot && /netlify/i.test(el.shadowRoot.innerHTML)) ||
+    /netlify/i.test([el.id, el.className, el.getAttribute('src'), el.getAttribute('href')].join(' '));
   const removeNetlify = () => {
-    document.querySelectorAll(SELECTOR).forEach(el => el.remove());
-    document.querySelectorAll('a[href*="netlify.com"]').forEach(a => (a.closest('div') || a).remove());
+    document.querySelectorAll(SELECTOR).forEach(el => {
+      const host = el.closest('[data-app]') ? el : (el.closest('body > :not([data-app])') || el);
+      host.remove();
+    });
+    [...document.documentElement.children, ...(document.body ? document.body.children : [])].forEach(el => {
+      if (!SKIP.has(el.tagName) && !el.hasAttribute('data-app') && mentionsNetlify(el)) el.remove();
+    });
   };
   const start = () => {
     removeNetlify();
-    setTimeout(removeNetlify, 1000);
+    [300, 1000, 2500, 5000].forEach(ms => setTimeout(removeNetlify, ms));
     new MutationObserver(removeNetlify).observe(document.documentElement, { childList: true, subtree: true });
   };
   if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', start);

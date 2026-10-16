@@ -173,6 +173,35 @@
           <span class="text-sm text-stone-warm">הערות</span>
           <textarea id="fNotes" rows="3" class="mt-1 w-full rounded-xl border border-rose-soft bg-rose-blush/50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-antique" placeholder="מספר אורחות, שעת הגעה, בקשות מיוחדות..."></textarea>
         </label>
+        <fieldset class="mt-4">
+          <legend class="text-sm text-stone-warm mb-2">סטטוס הזמנה</legend>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="cursor-pointer">
+              <input type="radio" name="fStatus" value="open" class="peer sr-only" checked />
+              <div class="rounded-xl border-2 border-gray-200 px-2 py-3 text-center transition peer-checked:border-yellow-400 peer-checked:bg-yellow-50 peer-focus-visible:ring-2 peer-focus-visible:ring-rose-antique">
+                <div class="text-xl leading-none">🟡</div>
+                <div class="text-sm font-semibold mt-1 text-gray-700">מתעניינת</div>
+                <div class="text-[11px] text-stone-warm">בטיפול</div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="fStatus" value="won" class="peer sr-only" />
+              <div class="rounded-xl border-2 border-gray-200 px-2 py-3 text-center transition peer-checked:border-red-500 peer-checked:bg-red-50 peer-focus-visible:ring-2 peer-focus-visible:ring-rose-antique">
+                <div class="text-xl leading-none">🔴</div>
+                <div class="text-sm font-semibold mt-1 text-gray-700">סגור</div>
+                <div class="text-[11px] text-stone-warm">תפיסת התאריך</div>
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="fStatus" value="cancelled" class="peer sr-only" />
+              <div class="rounded-xl border-2 border-gray-200 px-2 py-3 text-center transition peer-checked:border-gray-500 peer-checked:bg-gray-100 peer-focus-visible:ring-2 peer-focus-visible:ring-rose-antique">
+                <div class="text-xl leading-none">⚪</div>
+                <div class="text-sm font-semibold mt-1 text-gray-700">מבוטל</div>
+                <div class="text-[11px] text-stone-warm">הפנייה בוטלה</div>
+              </div>
+            </label>
+          </div>
+        </fieldset>
         <p id="formError" class="text-sm text-red-600 mt-2 hidden"></p>
         <div class="flex gap-2 mt-5 mb-1">
           <button type="submit" class="flex-1 py-3 rounded-2xl bg-gradient-to-l from-rose-antique to-rose-deep text-white font-semibold shadow-luxe">שמירה</button>
@@ -208,7 +237,7 @@
   // ---------- Storage ----------
   const STORAGE_KEY = 'bridalCabinCalendar.v1';
   // Data shape: { days: { 'YYYY-MM-DD': { status: 'booked'|null, bookedLeadId, leads: [Lead] } } }
-  // Lead: { id, firstName, lastName, phone, email, notes, createdAt, state: 'open'|'won'|'lost' }
+  // Lead: { id, firstName, lastName, phone, email, notes, createdAt, state: 'open'|'won'|'lost'|'cancelled' }
   let db = load();
 
   function load() {
@@ -385,7 +414,7 @@
               <div class="rounded-xl border border-gray-200 p-3 mb-2 bg-gray-50">
                 <div class="flex justify-between items-center">
                   <div class="font-semibold text-gray-700">${esc(fullName(l))}</div>
-                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">התאריך נתפס</span>
+                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">${l.state === 'cancelled' ? 'מבוטל' : 'התאריך נתפס'}</span>
                 </div>
                 ${leadDetails(l)}
                 ${contactLinks(l)}
@@ -394,8 +423,21 @@
       `;
       footer.innerHTML = `<button data-act="unbook" class="w-full py-3 mb-1 rounded-2xl border-2 border-red-300 text-red-600 font-semibold">ביטול סגירה / שחרור התאריך</button>`;
     } else {
-      const leads = day.leads;
-      body.innerHTML = leads.length ? leads.map(l => `
+      const leads = [...openLeads(day), ...day.leads.filter(l => l.state === 'cancelled')];
+      body.innerHTML = leads.length ? leads.map(l => l.state === 'cancelled' ? `
+        <div class="rounded-2xl border border-gray-200 bg-gray-50 p-4 opacity-75">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="text-base font-semibold text-gray-500 line-through">${esc(fullName(l))}</div>
+              <span class="inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">מבוטל</span>
+            </div>
+            <div class="flex gap-1 shrink-0">
+              <button data-act="edit" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-rose-deep text-sm" aria-label="עריכה">✎</button>
+              <button data-act="delete" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-gray-500 text-sm" aria-label="מחיקה">🗑</button>
+            </div>
+          </div>
+          ${leadDetails(l)}
+        </div>` : `
         <div class="rounded-2xl border border-rose-soft bg-white shadow-sm p-4">
           <div class="flex items-start justify-between gap-2">
             <div class="text-lg font-bold text-gray-800">${esc(fullName(l))}</div>
@@ -447,19 +489,31 @@
     }
     else if (act === 'unbook') {
       confirmBox('לשחרר את התאריך? הכלה וכל המתעניינות יחזרו לסטטוס ״בטיפול״.', 'שחרור', 'bg-rose-deep', () => {
-        const d = ensureDay(activeKey);
-        d.status = null; d.bookedLeadId = null;
-        d.leads.forEach(l => l.state = 'open');
+        unbookDay(activeKey);
         save(); renderDay(); renderCalendar(); toast('התאריך שוחרר');
       });
     }
   }
 
-  function bookDay(k, leadId) {
+  // Cancelled leads keep their state through booking and release.
+  function unbookDay(k) {
+    const d = ensureDay(k);
+    d.status = null; d.bookedLeadId = null;
+    d.leads.forEach(l => { if (l.state !== 'cancelled') l.state = 'open'; });
+  }
+
+  function markBooked(k, leadId) {
     const d = ensureDay(k);
     d.status = 'booked';
     d.bookedLeadId = leadId;
-    d.leads.forEach(l => { l.state = (l.id === leadId) ? 'won' : 'lost'; });
+    d.leads.forEach(l => {
+      if (l.id === leadId) l.state = 'won';
+      else if (l.state !== 'cancelled') l.state = 'lost';
+    });
+  }
+
+  function bookDay(k, leadId) {
+    markBooked(k, leadId);
     save(); renderDay(); renderCalendar();
     toast('💍 מזל טוב! התאריך נסגר');
   }
@@ -473,6 +527,8 @@
     $('fPhone').value = lead ? (lead.phone || '') : '';
     $('fEmail').value = lead ? (lead.email || '') : '';
     $('fNotes').value = lead ? (lead.notes || '') : '';
+    const status = !lead ? 'open' : lead.state === 'won' ? 'won' : lead.state === 'cancelled' ? 'cancelled' : 'open';
+    document.querySelector(`input[name="fStatus"][value="${status}"]`).checked = true;
     $('formError').classList.add('hidden');
     show('formModal');
     setTimeout(() => $('fFirst').focus(), 250);
@@ -492,17 +548,31 @@
     else if (!phone) msg = 'יש להזין מספר טלפון';
     else if (phone.replace(/\D/g, '').length < 9) msg = 'מספר הטלפון אינו תקין';
     else if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) msg = 'כתובת הדוא״ל אינה תקינה';
-    if (msg) { err.textContent = msg; err.classList.remove('hidden'); return; }
-
+    const status = document.querySelector('input[name="fStatus"]:checked').value;
     const d = ensureDay(activeKey);
     const id = $('fLeadId').value;
-    if (id) {
-      const l = d.leads.find(x => x.id === id);
-      if (l) Object.assign(l, { firstName: first, lastName: last, phone, email, notes });
-      toast('הפרטים עודכנו');
+    if (!msg && status === 'won' && d.status === 'booked' && d.bookedLeadId !== id) {
+      const bride = d.leads.find(l => l.id === d.bookedLeadId);
+      msg = `התאריך כבר תפוס עבור ${bride ? fullName(bride) : 'כלה אחרת'}`;
+    }
+    if (msg) { err.textContent = msg; err.classList.remove('hidden'); return; }
+
+    let lead = id ? d.leads.find(x => x.id === id) : null;
+    if (lead) {
+      Object.assign(lead, { firstName: first, lastName: last, phone, email, notes });
     } else {
-      d.leads.push({ id: uid(), firstName: first, lastName: last, phone, email, notes, createdAt: new Date().toISOString(), state: 'open' });
-      toast('המתעניינת נוספה');
+      lead = { id: uid(), firstName: first, lastName: last, phone, email, notes, createdAt: new Date().toISOString(), state: 'open' };
+      d.leads.push(lead);
+    }
+
+    const wasBride = d.status === 'booked' && d.bookedLeadId === lead.id;
+    if (status === 'won') {
+      markBooked(activeKey, lead.id);
+      toast(wasBride ? 'הפרטים עודכנו' : '💍 מזל טוב! התאריך נסגר');
+    } else {
+      if (wasBride) unbookDay(activeKey);
+      lead.state = status;
+      toast(status === 'cancelled' ? 'הפנייה סומנה כמבוטלת' : wasBride ? 'התאריך שוחרר' : id ? 'הפרטים עודכנו' : 'המתעניינת נוספה');
     }
     save(); hide('formModal'); renderDay(); renderCalendar();
   }

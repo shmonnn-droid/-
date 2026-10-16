@@ -23,6 +23,9 @@ request from the owner, the newer request wins; point out the conflict.
   service, only from a free/partial day's window, never on a bride/event date), 🟢 other event / closed day.
   A bride's date takes no new interested client; tours can still be added in her free hours. Closing a bride
   or event on a day with maternity shoots asks to confirm and cancels them.
+- No double entry: tour / close deal / maternity from a day that already has clients first asks "לאיזו לקוחה?"
+  and pre-fills her name, last name, phone, email, package and notes (tour/bride update her record; maternity
+  copies her details into a new booking). "+ לקוחה חדשה" or a day with no clients opens a blank form.
 - Bride: special notes (yellow), up to two linked days (tour day + time, held day) shown on the calendar.
   Interested clients can already pick a requested package. Smart paste fills the form from free text.
 - Deposit = 15% rounded up to a whole shekel. Upcoming panel = next 30 days. Main screen has a quick search. Client cards offer a one-tap ✕ cancel (with undo); list cards can be swiped

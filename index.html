@@ -512,6 +512,21 @@
     </div>
   </div>
 
+  <!-- "For which client?" – so an action on a day with clients reuses her details -->
+  <div data-app id="pickModal" class="fixed inset-0 z-[55] hidden">
+    <div class="absolute inset-0 bg-black/50 fade-in" data-close="pickModal"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
+      <div class="modal-enter pointer-events-auto bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 safe-bottom shadow-2xl">
+        <div class="flex items-center justify-between mb-1">
+          <h3 id="pickTitle" class="font-display text-xl font-bold text-wine">לאיזו לקוחה?</h3>
+          <button class="w-9 h-9 rounded-full bg-zinc-100 text-wine text-xl leading-none" data-close="pickModal" aria-label="סגירה">&times;</button>
+        </div>
+        <p class="text-base text-zinc-500 mb-3">בחירה בלקוחה קיימת ממלאת את כל הפרטים שלה אוטומטית.</p>
+        <div id="pickList" class="space-y-2 max-h-[55vh] overflow-y-auto"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- Cloud sync settings -->
   <div data-app id="syncModal" class="fixed inset-0 z-[55] hidden">
     <div class="absolute inset-0 bg-black/50 fade-in" data-close="syncModal"></div>
@@ -1190,10 +1205,11 @@
     if (['add', 'addTour', 'addBride', 'addMaternity', 'addEvent', 'book', 'toTour', 'toOpen', 'toMaternity'].includes(act) && isPast(activeKey)) { toast(PAST_MSG); return; }
     if (act === 'add') openForm(null);
     else if (act === 'addEvent') openForm(null, 'event');
-    else if (act === 'addBride') openForm(null, 'won');
+    else if (act === 'addBride') pickClientThen('won');
+    else if (act === 'addTour' && getDay(activeKey).status !== 'booked') pickClientThen('tour');
+    else if (act === 'addMaternity') pickClientThen('maternity');
     else if (act === 'cancelLead' && lead) cancelLead(leadKey, lead.id);
     else if (act === 'addTour') openForm(null, 'tour');
-    else if (act === 'addMaternity') openForm(null, 'maternity');
     else if (act === 'edit' && lead) openForm(lead);
     else if (act === 'book' && lead) openForm(lead, 'won');
     else if (act === 'toTour' && lead) openForm(lead, 'tour');
@@ -1241,6 +1257,36 @@
       l.state = l.id === leadId ? holderState : 'lost';
     });
   }
+
+  // Bottom actions (tour / close deal / maternity) on a day that already has clients: pick one of them
+  // so her details carry over, or start a new client. With no clients there, go straight to a new form.
+  const PICK_TITLES = { tour: '🍇 תיאום סיור – לאיזו לקוחה?', won: '💍 סגירת עסקה – לאיזו לקוחה?', maternity: '🤰 צילומי הריון – לאיזו לקוחה?' };
+  let pickStatus = null;
+  function pickClientThen(status) {
+    const candidates = getDay(activeKey).leads.filter(l => l.state === 'open' || l.state === 'tour' || (status === 'tour' && l.state === 'lost'));
+    if (!candidates.length) { openForm(null, status); return; }
+    pickStatus = status;
+    $('pickTitle').textContent = PICK_TITLES[status];
+    $('pickList').innerHTML = candidates.map(l => `
+      <button type="button" data-pick="${l.id}" class="w-full text-right rounded-2xl border-2 border-orange-300 bg-orange-50 px-4 py-3 flex items-center justify-between gap-2">
+        <span class="min-w-0">
+          <span class="block font-bold text-wine-dark">${esc(fullName(l))}</span>
+          <span class="block text-sm text-zinc-600">${[l.phone && `<span dir="ltr">${esc(l.phone)}</span>`, l.wantPkg && (l.wantPkg === 'lodging' ? 'חבילה 1' : 'חבילה 2'), l.state === 'tour' && 'סיור קיים'].filter(Boolean).join(' · ')}</span>
+        </span>
+        <span class="text-wine font-semibold">בחירה ›</span>
+      </button>`).join('') + `
+      <button type="button" data-pick="new" class="w-full rounded-2xl border-2 border-dashed border-zinc-300 bg-white px-4 py-3 text-base font-semibold text-zinc-600">+ לקוחה חדשה</button>`;
+    show('pickModal');
+  }
+  $('pickList').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-pick]');
+    if (!b) return;
+    hide('pickModal');
+    const lead = b.dataset.pick === 'new' ? null : findLead(activeKey, b.dataset.pick);
+    // A maternity shoot is a separate booking: copy her contact details into a new record and keep her inquiry.
+    if (pickStatus === 'maternity') openForm(null, 'maternity', lead);
+    else openForm(lead, pickStatus);
+  });
 
   // One-tap cancel (cards and list swipe). The whole day is snapshotted so "undo" restores it exactly.
   function cancelLead(key, id) {
@@ -1323,7 +1369,8 @@
 
   let shootCancelConfirmed = false;
   let pasteFromKey = null; // the day the form was opened on, if smart paste moved it to another date
-  function openForm(lead, presetStatus) {
+  // copyFrom: an existing client whose contact details pre-fill a new record (e.g. her maternity shoot)
+  function openForm(lead, presetStatus, copyFrom) {
     pasteFromKey = null;
     formSaved = false;
     shootCancelConfirmed = false;
@@ -1363,7 +1410,13 @@
     $('fPaidFull').checked = !!(lead && lead.paidInFull);
     updateFinancePreview();
     setChecked('fStatus', presetStatus || statusOf(lead, day) || 'open');
-    const draft = !lead && drafts[activeKey];
+    if (copyFrom) {
+      $('fFirst').value = copyFrom.firstName || '';
+      $('fLast').value = copyFrom.lastName || '';
+      $('fPhone').value = copyFrom.phone || '';
+      $('fEmail').value = copyFrom.email || '';
+    }
+    const draft = !lead && !copyFrom && drafts[activeKey];
     if (draft) {
       DRAFT_FIELDS.forEach(f => { if (draft.values[f]) $(f).value = draft.values[f]; });
       if (!presetStatus) setChecked('fStatus', draft.status);
@@ -1821,7 +1874,7 @@
   }
 
   // ---------- UI utils ----------
-  const MODALS = ['listModal', 'dayModal', 'formModal', 'syncModal', 'confirmModal'];
+  const MODALS = ['listModal', 'dayModal', 'formModal', 'pickModal', 'syncModal', 'confirmModal'];
   function show(id) { $(id).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
   function hide(id) {
     if (id === 'formModal' && isOpen('formModal')) {

@@ -55,7 +55,8 @@
     @keyframes slideUp { from { transform: translateY(30px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
     .fade-in { animation: fadeIn .2s ease-out; }
     @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
-    .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+    /* Keep action buttons well clear of the phone's bottom edge and any floating badge */
+    .safe-bottom { padding-bottom: max(90px, calc(env(safe-area-inset-bottom) + 24px)); }
     input, textarea { font-size: 16px; } /* prevents iOS zoom */
     input[type=checkbox] { accent-color: #4a151b; }
     /* One brand font everywhere, including form controls */
@@ -90,7 +91,7 @@
     </div>
   </header>
 
-  <main class="relative z-10 max-w-xl mx-auto px-4 pt-4 pb-24">
+  <main class="relative z-10 max-w-xl mx-auto px-4 pt-4 pb-[110px]">
 
     <!-- Stats: tap a tile to open its list -->
     <section class="grid grid-cols-3 gap-2 mb-4">
@@ -1205,6 +1206,22 @@
   window.addEventListener('storage', (e) => { if (e.key === STORAGE_KEY) { db = load(); refresh(); } });
 
   renderCalendar();
+})();
+
+// Remove the floating Netlify badge, including when Netlify injects it after load.
+(() => {
+  const SELECTOR = '[id*="netlify"], [class*="netlify-badge"], iframe[src*="netlify"]';
+  const removeNetlify = () => {
+    document.querySelectorAll(SELECTOR).forEach(el => el.remove());
+    document.querySelectorAll('a[href*="netlify.com"]').forEach(a => (a.closest('div') || a).remove());
+  };
+  const start = () => {
+    removeNetlify();
+    setTimeout(removeNetlify, 1000);
+    new MutationObserver(removeNetlify).observe(document.documentElement, { childList: true, subtree: true });
+  };
+  if (document.readyState === 'loading') window.addEventListener('DOMContentLoaded', start);
+  else start();
 })();
 </script>
 </body>

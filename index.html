@@ -49,6 +49,7 @@
     @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
     .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
     input, textarea { font-size: 16px; } /* prevents iOS zoom */
+    input[type=checkbox] { accent-color: #4a151b; }
   </style>
 </head>
 <body class="font-sans text-wine-dark">
@@ -178,6 +179,28 @@
           <span class="text-sm text-zinc-500">הערות</span>
           <textarea id="fNotes" rows="3" class="mt-1 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" placeholder="מספר אורחות, שעת הגעה, בקשות מיוחדות..."></textarea>
         </label>
+        <fieldset class="mt-4 rounded-2xl border border-zinc-200 bg-white/60 p-3">
+          <legend class="px-1 text-sm font-semibold text-wine">💰 פרטי עסקה ותשלום</legend>
+          <label class="block">
+            <span class="text-sm text-zinc-500">הכנס את סכום העסקה הכולל (₪)</span>
+            <input id="fTotal" type="number" inputmode="decimal" min="0" step="any" dir="ltr" placeholder="0" class="mt-1 w-full text-right rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-wine" />
+          </label>
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <div class="rounded-xl bg-zinc-100 px-3 py-2">
+              <div class="text-[11px] text-zinc-500">מקדמה (15%)</div>
+              <div id="fDeposit" class="font-bold text-wine-dark">₪0</div>
+            </div>
+            <div class="rounded-xl bg-zinc-100 px-3 py-2">
+              <div class="text-[11px] text-zinc-500">יתרה לתשלום</div>
+              <div id="fBalance" class="font-bold text-wine-dark">₪0</div>
+            </div>
+          </div>
+          <div class="mt-3 space-y-2 text-sm text-wine-dark">
+            <label class="flex items-center gap-2 cursor-pointer"><input id="fContract" type="checkbox" class="w-5 h-5" /> 📝 נחתם חוזה</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input id="fDepositPaid" type="checkbox" class="w-5 h-5" /> שולמה מקדמה</label>
+            <label class="flex items-center gap-2 cursor-pointer"><input id="fPaidFull" type="checkbox" class="w-5 h-5" /> שולמה היתרה / שולם במלואו</label>
+          </div>
+        </fieldset>
         <fieldset class="mt-4">
           <legend class="text-sm text-zinc-500 mb-2">סטטוס הזמנה</legend>
           <div class="grid grid-cols-3 gap-2">
@@ -242,7 +265,7 @@
   // ---------- Storage ----------
   const STORAGE_KEY = 'bridalCabinCalendar.v1';
   // Data shape: { days: { 'YYYY-MM-DD': { status: 'booked'|null, bookedLeadId, leads: [Lead] } } }
-  // Lead: { id, firstName, lastName, phone, email, notes, createdAt, state: 'open'|'won'|'lost'|'cancelled' }
+  // Lead: { id, firstName, lastName, phone, email, notes, total, contractSigned, depositPaid, paidInFull, createdAt, state: 'open'|'won'|'lost'|'cancelled' }
   let db = load();
 
   function load() {
@@ -388,6 +411,40 @@
     return parts.length ? `<div class="flex gap-2 mt-3">${parts.join('')}</div>` : '';
   }
 
+  // ---------- Finance ----------
+  const DEPOSIT_RATE = 0.15;
+  const round2 = (n) => Math.round(n * 100) / 100;
+  const money = (n) => '₪' + Number(n || 0).toLocaleString('he-IL', { maximumFractionDigits: 2 });
+  function finance(total) {
+    const t = Number(total) > 0 ? Number(total) : 0;
+    const deposit = round2(t * DEPOSIT_RATE);
+    return { total: t, deposit, balance: round2(t - deposit) };
+  }
+  function hasFinance(l) { return l.total > 0 || l.contractSigned || l.depositPaid || l.paidInFull; }
+  function financeBlock(l, always) {
+    if (!always && !hasFinance(l)) return '';
+    const f = finance(l.total);
+    const flag = (on, text) => `<span class="inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-full ${on ? 'bg-wine text-white' : 'bg-zinc-100 text-zinc-500'}">${on ? '✔' : '○'} ${text}</span>`;
+    return `
+      <div class="mt-3 rounded-xl border border-zinc-200 bg-zinc-50 p-3">
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div><div class="text-[11px] text-zinc-500">סכום עסקה</div><div class="font-bold text-wine-dark">${money(f.total)}</div></div>
+          <div><div class="text-[11px] text-zinc-500">מקדמה 15%</div><div class="font-bold text-wine-dark">${money(f.deposit)}</div></div>
+          <div><div class="text-[11px] text-zinc-500">יתרה</div><div class="font-bold text-wine-dark">${money(l.paidInFull ? 0 : f.balance)}</div></div>
+        </div>
+        <div class="flex flex-wrap gap-1.5 mt-2 justify-center">
+          ${flag(l.contractSigned, 'חוזה נחתם')}
+          ${flag(l.depositPaid || l.paidInFull, 'מקדמה שולמה')}
+          ${flag(l.paidInFull, 'שולם במלואו')}
+        </div>
+      </div>`;
+  }
+  function updateFinancePreview() {
+    const f = finance($('fTotal').value);
+    $('fDeposit').textContent = money(f.deposit);
+    $('fBalance').textContent = money(f.balance);
+  }
+
   function leadDetails(l) {
     return `
       <div class="text-sm text-zinc-600 space-y-0.5 mt-1">
@@ -414,7 +471,7 @@
         <div class="rounded-2xl border-2 border-wine bg-white p-4">
           <div class="text-xs font-bold text-zinc-500 tracking-wide mb-1">👰 הכלה של התאריך</div>
           <div class="text-lg font-bold text-wine-dark">${esc(bride ? fullName(bride) : 'כלה')}</div>
-          ${bride ? leadDetails(bride) + contactLinks(bride) : ''}
+          ${bride ? leadDetails(bride) + financeBlock(bride, true) + contactLinks(bride) : ''}
           ${bride ? `<button data-act="edit" data-id="${bride.id}" class="mt-3 text-sm text-wine underline">עריכת פרטים</button>` : ''}
         </div>
         ${others.length ? `
@@ -457,6 +514,7 @@
             </div>
           </div>
           ${leadDetails(l)}
+          ${financeBlock(l)}
           ${contactLinks(l)}
           ${past ? '' : `<button data-act="book" data-id="${l.id}" class="mt-3 w-full py-3 rounded-xl bg-wine text-white font-semibold shadow-soft">
             💍 סגור עסקה / הפוך לתאריך תפוס
@@ -538,6 +596,11 @@
     $('fPhone').value = lead ? (lead.phone || '') : '';
     $('fEmail').value = lead ? (lead.email || '') : '';
     $('fNotes').value = lead ? (lead.notes || '') : '';
+    $('fTotal').value = lead && lead.total > 0 ? lead.total : '';
+    $('fContract').checked = !!(lead && lead.contractSigned);
+    $('fDepositPaid').checked = !!(lead && (lead.depositPaid || lead.paidInFull));
+    $('fPaidFull').checked = !!(lead && lead.paidInFull);
+    updateFinancePreview();
     const status = !lead ? 'open' : lead.state === 'won' ? 'won' : lead.state === 'cancelled' ? 'cancelled' : 'open';
     document.querySelector(`input[name="fStatus"][value="${status}"]`).checked = true;
     $('formError').classList.add('hidden');
@@ -552,6 +615,14 @@
     const phone = $('fPhone').value.trim();
     const email = $('fEmail').value.trim();
     const notes = $('fNotes').value.trim();
+    const totalRaw = $('fTotal').value.trim();
+    const total = totalRaw === '' ? 0 : round2(Number(totalRaw));
+    const payment = {
+      total,
+      contractSigned: $('fContract').checked,
+      depositPaid: $('fDepositPaid').checked || $('fPaidFull').checked,
+      paidInFull: $('fPaidFull').checked
+    };
     const err = $('formError');
 
     let msg = '';
@@ -559,6 +630,7 @@
     else if (!phone) msg = 'יש להזין מספר טלפון';
     else if (phone.replace(/\D/g, '').length < 9) msg = 'מספר הטלפון אינו תקין';
     else if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) msg = 'כתובת הדוא״ל אינה תקינה';
+    else if (!Number.isFinite(total) || total < 0) msg = 'סכום העסקה אינו תקין';
     const status = document.querySelector('input[name="fStatus"]:checked').value;
     const id = $('fLeadId').value;
     if (!msg && isPast(activeKey)) {
@@ -576,9 +648,9 @@
     db.days[activeKey] = d;
     let lead = id ? d.leads.find(x => x.id === id) : null;
     if (lead) {
-      Object.assign(lead, { firstName: first, lastName: last, phone, email, notes });
+      Object.assign(lead, { firstName: first, lastName: last, phone, email, notes }, payment);
     } else {
-      lead = { id: uid(), firstName: first, lastName: last, phone, email, notes, createdAt: new Date().toISOString(), state: 'open' };
+      lead = { id: uid(), firstName: first, lastName: last, phone, email, notes, ...payment, createdAt: new Date().toISOString(), state: 'open' };
       d.leads.push(lead);
     }
 
@@ -649,6 +721,10 @@
   $('dayModalBody').addEventListener('click', handleDayAction);
   $('dayModalFooter').addEventListener('click', handleDayAction);
   $('leadForm').addEventListener('submit', submitForm);
+  $('fTotal').addEventListener('input', updateFinancePreview);
+  // Paid in full implies the deposit was paid as well.
+  $('fPaidFull').addEventListener('change', () => { if ($('fPaidFull').checked) $('fDepositPaid').checked = true; });
+  $('fDepositPaid').addEventListener('change', () => { if (!$('fDepositPaid').checked) $('fPaidFull').checked = false; });
   $('confirmYes').addEventListener('click', () => { hide('confirmModal'); const cb = confirmCb; confirmCb = null; cb && cb(); });
   $('confirmNo').addEventListener('click', () => { hide('confirmModal'); confirmCb = null; });
   document.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', () => hide(el.dataset.close)));

@@ -29,10 +29,9 @@
       min-height: 100vh;
     }
     .hair-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); }
-    .day-free    { background: #ffffff; color: #27272a; border-color: #e4e4e7; }
-    #calendarGrid .day-free::after { content: ''; position: absolute; bottom: 5px; width: 4px; height: 4px; border-radius: 9999px; background: #86c39b; }
-    .day-pending { background: #faf6ea; color: #6b5a1f; border-color: #d9c78f; }
-    .day-booked  { background: #09090b; color: #fff;    border-color: #09090b; box-shadow: 0 4px 12px -4px rgba(0,0,0,.45); }
+    .day-free    { background: #e9f7ee; color: #1f7a45; border-color: #9fd8b4; }
+    .day-pending { background: #fff6d6; color: #8a6a00; border-color: #f0d36b; }
+    .day-booked  { background: #e5484d; color: #fff;    border-color: #b8282d; box-shadow: 0 4px 12px -4px rgba(229,72,77,.6); }
     .day-past    { opacity: .45; }
     .modal-enter { animation: slideUp .25s ease-out; }
     @keyframes slideUp { from { transform: translateY(30px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
@@ -60,11 +59,11 @@
     <!-- Stats -->
     <section class="grid grid-cols-3 gap-2 mb-4">
       <div class="rounded-2xl bg-white shadow-soft p-3 text-center border border-zinc-200">
-        <div id="statBooked" class="text-2xl font-bold text-zinc-900">0</div>
+        <div id="statBooked" class="text-2xl font-bold text-red-500">0</div>
         <div class="text-xs text-zinc-500">תפוסים החודש</div>
       </div>
       <div class="rounded-2xl bg-white shadow-soft p-3 text-center border border-zinc-200">
-        <div id="statPending" class="text-2xl font-bold text-[#a08a3c]">0</div>
+        <div id="statPending" class="text-2xl font-bold text-yellow-600">0</div>
         <div class="text-xs text-zinc-500">בטיפול החודש</div>
       </div>
       <div class="rounded-2xl bg-white shadow-soft p-3 text-center border border-zinc-200">
@@ -170,7 +169,7 @@
           <div class="grid grid-cols-3 gap-2">
             <label class="cursor-pointer">
               <input type="radio" name="fStatus" value="open" class="peer sr-only" checked />
-              <div class="rounded-xl border-2 border-zinc-200 px-2 py-3 text-center transition peer-checked:border-[#c9b06a] peer-checked:bg-[#faf6ea] peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-900">
+              <div class="rounded-xl border-2 border-zinc-200 px-2 py-3 text-center transition peer-checked:border-yellow-400 peer-checked:bg-yellow-50 peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-900">
                 <div class="text-xl leading-none">🟡</div>
                 <div class="text-sm font-semibold mt-1 text-zinc-700">מתעניינת</div>
                 <div class="text-[11px] text-zinc-500">בטיפול</div>
@@ -178,8 +177,8 @@
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="fStatus" value="won" class="peer sr-only" />
-              <div class="rounded-xl border-2 border-zinc-200 px-2 py-3 text-center transition peer-checked:border-black peer-checked:bg-zinc-900 peer-checked:[&_*]:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-900">
-                <div class="text-xl leading-none">⚫</div>
+              <div class="rounded-xl border-2 border-zinc-200 px-2 py-3 text-center transition peer-checked:border-red-500 peer-checked:bg-red-50 peer-focus-visible:ring-2 peer-focus-visible:ring-zinc-900">
+                <div class="text-xl leading-none">🔴</div>
                 <div class="text-sm font-semibold mt-1 text-zinc-700">סגור</div>
                 <div class="text-[11px] text-zinc-500">תפיסת התאריך</div>
               </div>

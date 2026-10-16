@@ -14,6 +14,9 @@ request from the owner, the newer request wins; point out the conflict.
 - Statuses: interested (orange cards, yellow day), tour (own date + time), bride booking (locks the date,
   package 1: arrive 20:00 the day before → leave 16:30; package 2: 08:00 → 16:30), maternity shoot
   (hour slot only — the day stays open; slots may not overlap bride bookings or other shoots), cancelled.
+- A lodging bride's arrival evening is marked on the calendar with a red dot and holds the venue from her
+  arrival time; tours (treated as 1 hour) and shoots may not overlap any booking.
+- Month title opens a month/year picker for quick navigation.
 - Deal/payment fields (amount, 15% deposit, balance, contract/paid checkboxes) only for bookings
   (bride, maternity shoot); hidden for interested and tour.
 

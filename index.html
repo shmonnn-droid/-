@@ -44,8 +44,13 @@
     }
     .hair-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent); }
     /* Day status colors – fixed by the app's iron rules */
-    .day-free      { background: #e9f7ee; color: #1f7a45; border-color: #9fd8b4; }
-    .day-pending   { background: #fff6d6; color: #8a6a00; border-color: #f0d36b; }
+    .day-free      { background: #ffffff; color: #3f3f46; border-color: #e4e4e7; }
+    .day-pending   { background: #ffedd5; color: #9a3412; border-color: #fb923c; }
+    /* Secondary bookings show as small dots on the day instead of filling it */
+    .day-dots { position: absolute; bottom: 3px; left: 0; right: 0; display: flex; justify-content: center; gap: 3px; }
+    .dot { width: 8px; height: 8px; border-radius: 9999px; box-shadow: 0 0 0 1.5px #fff; }
+    .dot-tour { background: #6b1d38; } .dot-maternity { background: #2563eb; } .dot-arrival { background: #dc2626; }
+    .day-booked .dot-arrival { background: #7f1d1d; }
     .day-booked    { background: #e5484d; color: #fff;    border-color: #b8282d; box-shadow: 0 4px 12px -4px rgba(229,72,77,.6); }
     .day-tour      { background: #6b1d38; color: #fff;    border-color: #581c2f; box-shadow: 0 4px 12px -4px rgba(107,29,56,.55); }
     .day-maternity { background: #2563eb; color: #fff;    border-color: #1d4ed8; box-shadow: 0 4px 12px -4px rgba(37,99,235,.55); }
@@ -123,7 +128,7 @@
         <div class="text-sm text-wine/70 mt-1">לרשימה ›</div>
       </button>
       <button data-list="pending" class="rounded-2xl bg-white/90 backdrop-blur-md shadow-soft p-3 text-center border border-zinc-200 active:scale-95 transition">
-        <div id="statPending" class="text-2xl font-bold text-yellow-600">0</div>
+        <div id="statPending" class="text-2xl font-bold text-orange-600">0</div>
         <div class="text-base font-semibold text-wine-dark leading-tight">מתעניינות (בטיפול)</div>
         <div class="text-sm text-wine/70 mt-1">לרשימה ›</div>
       </button>
@@ -175,12 +180,13 @@
 
       <!-- Legend -->
       <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm py-3 px-2 border-t border-zinc-200 bg-zinc-100">
-        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-free border"></span>פנוי</span>
-        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-pending border"></span>מתעניינות</span>
-        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-tour border"></span>יום סיור</span>
-        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-booked border"></span>תפוס (כלה)</span>
-        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-maternity border"></span>צילומי הריון</span>
-        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-600 ring-2 ring-white shadow"></span>הגעת כלה בערב (לינה)</span>
+        <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded day-free border"></span>פנוי</span>
+        <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded day-pending border"></span>מתעניינת</span>
+        <span class="flex items-center gap-1.5"><span class="w-4 h-4 rounded day-booked border"></span>תפוס (כלה)</span>
+        <span class="w-full h-0"></span>
+        <span class="flex items-center gap-1.5"><span class="dot dot-tour"></span>סיור</span>
+        <span class="flex items-center gap-1.5"><span class="dot dot-maternity"></span>צילומי הריון</span>
+        <span class="flex items-center gap-1.5"><span class="dot dot-arrival"></span>הגעת כלה בערב (לינה)</span>
       </div>
     </section>
 
@@ -287,13 +293,13 @@
         </label>
 
         <!-- Status -->
-        <fieldset class="mt-3">
+        <fieldset id="fStatusSec" class="mt-3">
           <legend class="text-base text-zinc-500 mb-2">סטטוס / סוג רישום</legend>
           <div class="grid grid-cols-3 gap-2">
             <label class="cursor-pointer">
               <input type="radio" name="fStatus" value="open" class="peer sr-only" checked />
               <div class="h-full rounded-xl border-2 border-zinc-200 px-1 py-2 text-center transition peer-checked:border-orange-500 peer-checked:bg-orange-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
-                <div class="text-lg leading-none">🟡</div>
+                <div class="text-lg leading-none">🟠</div>
                 <div class="text-base font-semibold mt-1 text-zinc-700">מתעניינת</div>
                 <div class="text-[13px] text-zinc-500">בטיפול</div>
               </div>
@@ -314,7 +320,7 @@
                 <div class="text-[13px] text-zinc-500">הפנייה בוטלה</div>
               </div>
             </label>
-            <label class="cursor-pointer col-span-3 sm:col-span-1 grid">
+            <label class="cursor-pointer col-span-3 grid">
               <input type="radio" name="fStatus" value="won" class="peer sr-only" />
               <div class="rounded-xl border-2 border-zinc-200 px-2 py-2 text-center transition peer-checked:border-red-500 peer-checked:bg-red-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
                 <span class="text-lg leading-none">🔴</span>
@@ -322,7 +328,8 @@
                 <span class="text-[13px] text-zinc-500">תפיסת התאריך</span>
               </div>
             </label>
-            <label class="cursor-pointer col-span-3 sm:col-span-2 grid">
+            <!-- maternity is a separate hourly service: opened only from the day window, never offered here -->
+            <label class="hidden">
               <input type="radio" name="fStatus" value="maternity" class="peer sr-only" />
               <div class="rounded-xl border-2 border-zinc-200 px-2 py-2 text-center transition peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-focus-visible:ring-2 peer-focus-visible:ring-wine">
                 <span class="text-lg leading-none">🔵</span>
@@ -598,17 +605,22 @@
     }));
     return out.sort((a, b) => String(a.lead.tourTime || '').localeCompare(String(b.lead.tourTime || '')));
   }
-  // Leads waiting on date k as their event date: interested ones, and tours scheduled for another day.
-  const pendingCount = (k) => getDay(k).leads.filter(l => l.state === 'open' || (l.state === 'tour' && tourDateOf(l, k) !== k)).length;
 
-  // Day color priority: bride (red) > maternity shoot (blue) > tour (purple) > interested (yellow) > free (green)
+  // Only two fills: bride (red) and interested (orange). Everything else is a dot on the day.
+  const interestedCount = (k) => getDay(k).leads.filter(l => l.state === 'open' || l.state === 'tour').length;
   function dayState(k) {
     const d = getDay(k);
     if (d.status === 'booked') return 'booked';
-    if (maternityLeads(d).length) return 'maternity';
-    if (toursOn(k).length) return 'tour';
-    if (pendingCount(k)) return 'pending';
+    if (interestedCount(k)) return 'pending';
     return 'free';
+  }
+  // Secondary bookings on date k, shown as dots: tours visiting, maternity shoots, lodging arrival evening.
+  function dayDots(k) {
+    return {
+      tour: toursOn(k).length,
+      maternity: maternityLeads(getDay(k)).length,
+      arrival: arrivalsOn(k).length
+    };
   }
 
   // Form status value for an existing lead
@@ -625,8 +637,7 @@
   let activeKey = null;
 
   // ---------- Calendar ----------
-  const DAY_BADGE = { booked: 'תפוס', maternity: 'הריון', tour: 'סיור' };
-  const STATE_LABEL = { free: 'פנוי', pending: 'בטיפול', tour: 'יום סיור', booked: 'תפוס', maternity: 'צילומי הריון' };
+  const STATE_LABEL = { free: 'פנוי', pending: 'מתעניינת', booked: 'תפוס' };
 
   function renderCalendar() {
     $('monthTitle').textContent = `${HE_MONTHS[viewMonth]} ${viewYear}`;
@@ -649,12 +660,15 @@
       if (k === tKey) btn.classList.add('ring-2', 'ring-wine', 'ring-offset-1');
 
       let badge = '';
-      if (state === 'pending') badge = `<span class="absolute top-0.5 left-1 text-xs font-bold">${pendingCount(k)}</span>`;
-      if (DAY_BADGE[state]) badge = `<span class="text-[11px] leading-none mt-0.5">${DAY_BADGE[state]}</span>`;
-      const arrivals = arrivalsOn(k);
-      const arrivalDot = arrivals.length ? `<span class="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-red-600 ring-2 ring-white shadow"></span>` : '';
-      btn.innerHTML = `<span>${d}</span>${badge}${arrivalDot}`;
-      btn.setAttribute('aria-label', `${d} ${HE_MONTHS[viewMonth]} - ${STATE_LABEL[state]}${arrivals.length ? ' · הגעת כלה בערב (לינה)' : ''}`);
+      if (state === 'pending') badge = `<span class="absolute top-0.5 left-1 text-xs font-bold">${interestedCount(k)}</span>`;
+      if (state === 'booked') badge = `<span class="text-[11px] leading-none mt-0.5">תפוס</span>`;
+      const dots = dayDots(k);
+      const dotsHtml = (dots.tour ? '<span class="dot dot-tour"></span>' : '') +
+        (dots.maternity ? '<span class="dot dot-maternity"></span>' : '') +
+        (dots.arrival ? '<span class="dot dot-arrival"></span>' : '');
+      btn.innerHTML = `<span${dotsHtml ? ' class="-mt-1"' : ''}>${d}</span>${badge}${dotsHtml ? `<span class="day-dots">${dotsHtml}</span>` : ''}`;
+      const extras = [dots.tour && 'סיור', dots.maternity && 'צילומי הריון', dots.arrival && 'הגעת כלה בערב'].filter(Boolean).join(', ');
+      btn.setAttribute('aria-label', `${d} ${HE_MONTHS[viewMonth]} - ${STATE_LABEL[state]}${extras ? ' · ' + extras : ''}`);
       btn.addEventListener('click', () => openDay(k));
       grid.appendChild(btn);
     }
@@ -746,15 +760,14 @@
 
   function statusChip(state) {
     const map = {
-      free: ['day-free', 'פנוי לחלוטין'],
-      pending: ['day-pending', 'בטיפול – יש מתעניינות'],
-      tour: ['day-tour', 'יום סיור'],
-      booked: ['day-booked', 'תפוס – נסגר עבור כלה'],
-      maternity: ['day-maternity', 'צילומי הריון – שאר היום פנוי']
+      free: ['day-free', 'פנוי'],
+      pending: ['day-pending', 'יש מתעניינות'],
+      booked: ['day-booked', 'תפוס – נסגר עבור כלה']
     };
     const [cls, txt] = map[state];
     return `<span class="inline-block text-sm font-semibold px-3 py-1 rounded-full border ${cls}">${txt}</span>`;
   }
+  const dotChip = (cls, text) => ` <span class="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full border border-zinc-200 bg-white text-zinc-700"><span class="dot ${cls}"></span>${text}</span>`;
 
   function contactLinks(l) {
     const parts = [];
@@ -843,6 +856,7 @@
           </div>
           <div class="flex gap-1 shrink-0">
             <button data-act="edit" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-wine text-base" aria-label="עריכה">✎</button>
+            <button data-act="cancelLead" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-red-600 text-base font-bold" aria-label="ביטול">✕</button>
             <button data-act="delete" data-id="${l.id}" class="w-8 h-8 rounded-full bg-white text-zinc-500 text-base" aria-label="מחיקה">🗑</button>
           </div>
         </div>
@@ -880,8 +894,9 @@
   }
 
   // Tours visiting date k whose event date is another day.
-  function visitingToursBlock(k) {
-    const visits = toursOn(k).filter(t => t.key !== k);
+  // includeOwn: also list tours stored on k itself (used on a bride's date, where they are visits in free hours)
+  function visitingToursBlock(k, includeOwn) {
+    const visits = toursOn(k).filter(t => includeOwn || t.key !== k);
     if (!visits.length) return '';
     return `
       <div class="pt-1">
@@ -894,7 +909,7 @@
             </div>
             ${leadDetails(lead)}
             ${tourBlock(lead, key)}
-            <button data-act="gotoDay" data-key="${key}" class="mt-2 w-full py-2 rounded-xl bg-zinc-100 text-wine text-base">📅 פתח את תאריך האירוע</button>
+            ${key !== k ? `<button data-act="gotoDay" data-key="${key}" class="mt-2 w-full py-2 rounded-xl bg-zinc-100 text-wine text-base">📅 פתח את תאריך האירוע</button>` : ''}
           </div>`).join('')}
       </div>`;
   }
@@ -907,14 +922,17 @@
     const past = isPast(k);
     $('dayModalTitle').textContent = prettyDate(k);
     const arriving = arrivalsOn(k);
-    $('dayModalStatus').innerHTML = (state === 'free' && arriving.length ? '' : statusChip(state)) +
-      (arriving.length ? ` <span class="inline-block text-sm font-semibold px-3 py-1 rounded-full border bg-red-50 border-red-300 text-red-700">🏠 הגעת כלה מ-${esc(arriving[0].lead.arriveTime || PKG_DEFAULTS.lodging.arrive)}</span>` : '');
+    const dots = dayDots(k);
+    $('dayModalStatus').innerHTML = statusChip(state) +
+      (dots.tour ? dotChip('dot-tour', `סיור (${dots.tour})`) : '') +
+      (dots.maternity ? dotChip('dot-maternity', `צילומי הריון (${dots.maternity})`) : '') +
+      (arriving.length ? dotChip('dot-arrival', `🏠 הגעת כלה מ-${esc(arriving[0].lead.arriveTime || PKG_DEFAULTS.lodging.arrive)}`) : '');
     const body = $('dayModalBody');
     const footer = $('dayModalFooter');
 
     if (day.status === 'booked') {
       const bride = day.leads.find(l => l.id === day.bookedLeadId);
-      const others = day.leads.filter(l => l.id !== day.bookedLeadId && l.state !== 'maternity');
+      const others = day.leads.filter(l => l.id !== day.bookedLeadId && l.state !== 'maternity' && l.state !== 'tour');
       body.innerHTML = `
         <div class="rounded-2xl border-2 border-red-500 bg-white p-4">
           <div class="text-sm font-bold text-red-600 tracking-wide mb-1">👰 הכלה של התאריך</div>
@@ -940,12 +958,14 @@
           </div>` : ''}
         ${maternityBlock(k, past)}
         ${arrivalBlock(k)}
-        ${visitingToursBlock(k)}
+        ${visitingToursBlock(k, true)}
       `;
-      footer.innerHTML = `<div class="flex gap-2 mb-1">
-        <button data-act="unbook" class="flex-1 py-3 rounded-2xl border-2 border-wine text-wine font-semibold">שחרור התאריך</button>
-        ${past ? '' : `<button data-act="addMaternity" class="flex-1 py-3 rounded-2xl bg-blue-600 text-white font-semibold">🤰 צילומי הריון</button>`}
-      </div>`;
+      footer.innerHTML = `<div class="grid ${past ? 'grid-cols-1' : 'grid-cols-3'} gap-2 mb-1">
+        ${past ? '' : `<button data-act="addTour" class="py-3 rounded-2xl bg-[#6b1d38] text-white font-semibold">🍇 סיור</button>
+        <button data-act="addMaternity" class="py-3 rounded-2xl bg-blue-600 text-white font-semibold">🤰 הריון</button>`}
+        <button data-act="unbook" class="py-3 rounded-2xl border-2 border-wine text-wine font-semibold">שחרור</button>
+      </div>
+      <div class="text-sm text-zinc-500 text-center">יום תפוס – ניתן להוסיף סיור או צילומי הריון בשעות פנויות בלבד</div>`;
       return;
     }
 
@@ -1112,6 +1132,7 @@
   function syncFormSections() {
     const status = checkedValue('fStatus');
     $('leadForm').dataset.status = status;
+    $('fStatusSec').classList.toggle('hidden', status === 'maternity');
     $('fTourSec').classList.toggle('hidden', status !== 'tour');
     $('fMatSec').classList.toggle('hidden', status !== 'maternity');
     $('fPkgSec').classList.toggle('hidden', status !== 'won');
@@ -1142,7 +1163,8 @@
   function openForm(lead, presetStatus) {
     formSaved = false;
     const day = getDay(activeKey);
-    $('formTitle').textContent = lead ? 'עריכת פרטים' : presetStatus === 'tour' ? 'תיאום סיור' : 'רישום חדש';
+    $('formTitle').textContent = lead ? 'עריכת פרטים'
+      : { tour: 'תיאום סיור', won: 'סגירת עסקה – כלה', maternity: '🤰 צילומי הריון' }[presetStatus] || 'מתעניינת חדשה';
     $('formDate').textContent = prettyDate(activeKey);
     $('fLeadId').value = lead ? lead.id : '';
     $('fFirst').value = lead ? lead.firstName : '';
@@ -1244,6 +1266,8 @@
       const clash = !msg && findClash(slot, $('fLeadId').value, !booking);
       if (clash) msg = `השעות חופפות ל${clash.what} של ${fullName(clash.l)} (${shortDate(clash.k)}) – בחרי שעות אחרות`;
     }
+    // A bride's date never takes a new interested client.
+    if (!msg && status === 'open' && !current && d.status === 'booked') msg = 'היום תפוס לכלה – לא ניתן להוסיף מתעניינת. ניתן להוסיף סיור או צילומי הריון.';
     // Iron rule: past dates accept detail edits and cancellations only.
     if (!msg && isPast(activeKey)) {
       if (!current || (status !== statusOf(current, d) && status !== 'cancelled')) msg = PAST_MSG;
@@ -1275,9 +1299,10 @@
     } else {
       if (wasHolder) unbookDay(activeKey);
       // A lead added to a date that another client already holds stays in "date taken".
-      const heldByOther = d.status === 'booked' && d.bookedLeadId !== lead.id;
+      // A tour may be added on a bride's date (as a visit in her free hours).
+      const heldByOther = d.status === 'booked' && d.bookedLeadId !== lead.id && status === 'open';
       lead.state = status === 'cancelled' ? 'cancelled' : heldByOther ? 'lost' : status;
-      if (heldByOther && status !== 'cancelled') lead.prevState = status;
+      if (heldByOther) lead.prevState = status;
       toast(status === 'cancelled' ? 'הפנייה סומנה כמבוטלת' : wasHolder ? 'התאריך שוחרר' : status === 'tour' ? '🍇 הסיור נשמר' : id ? 'הפרטים עודכנו' : 'המתעניינת נוספה');
     }
     delete drafts[activeKey];
@@ -1288,7 +1313,7 @@
   // ---------- Lists panel ----------
   const TABS = [
     { id: 'booked',    label: '👰 כלות' },
-    { id: 'pending',   label: '🟡 מתעניינות' },
+    { id: 'pending',   label: '🟠 מתעניינות' },
     { id: 'tour',      label: '🍇 סיורים' },
     { id: 'maternity', label: '🤰 צילומי הריון' },
     { id: 'all',       label: '📋 הכל' }
@@ -1476,7 +1501,7 @@
         small { color: #71717a; }
         .b { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
         .b-booked { background: #e5484d; color: #fff; } .b-maternity { background: #2563eb; color: #fff; }
-        .b-tour { background: #6b1d38; color: #fff; } .b-pending { background: #fff6d6; color: #8a6a00; }
+        .b-tour { background: #6b1d38; color: #fff; } .b-pending { background: #ffedd5; color: #9a3412; }
         .b-lost, .b-cancelled { background: #e4e4e7; color: #52525b; }
         * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         @page { size: A4 landscape; margin: 12mm; }

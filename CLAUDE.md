@@ -16,4 +16,5 @@ request from the owner, the newer request wins; point out the conflict.
 - Day status colors: free green, interested yellow, booked (bride) red,
   tour day wine purple `#6b1d38`, maternity shoot blue `#2563eb`.
 - Past dates: no new leads, tours or bookings; only detail/payment edits and cancelling.
-- Brand: wine `#4a151b` for headings and primary buttons; Frank Ruhl Libre font.
+- Brand: wine `#4a151b` for headings and primary buttons; font stack 'November', 'Assistant' (November is used
+  only where installed; Assistant loads from Google Fonts). Inputs stay at 16px+ to avoid iOS zoom.

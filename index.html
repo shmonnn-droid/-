@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#c48b8f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>יומן צימרים לכלות</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700&family=Frank+Ruhl+Libre:wght@500;700&display=swap" rel="stylesheet" />
+  <script>
+    if (window.tailwind) tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rose: { antique: '#c48b8f', soft: '#f6e9e8', deep: '#9e5f66', blush: '#fbf4f3' },
+            gold: { DEFAULT: '#c9a45c', light: '#e8d5a8', dark: '#a8843f' },
+            stone: { warm: '#8a8282' }
+          },
+          fontFamily: {
+            sans: ['Assistant', 'system-ui', 'sans-serif'],
+            display: ['"Frank Ruhl Libre"', 'serif']
+          },
+          boxShadow: { luxe: '0 10px 30px -12px rgba(158, 95, 102, 0.35)' }
+        }
+      }
+    };
+  </script>
+  <style>
+    html, body { -webkit-tap-highlight-color: transparent; }
+    body {
+      background: linear-gradient(180deg, #fbf4f3 0%, #ffffff 45%, #f9f5ee 100%);
+      min-height: 100vh;
+    }
+    .gold-text {
+      background: linear-gradient(90deg, #a8843f, #e8d5a8, #c9a45c);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .gold-line { height: 1px; background: linear-gradient(90deg, transparent, #c9a45c, transparent); }
+    .day-free    { background: #e9f7ee; color: #1f7a45; border-color: #9fd8b4; }
+    .day-pending { background: #fff6d6; color: #8a6a00; border-color: #f0d36b; }
+    .day-booked  { background: #e5484d; color: #fff;    border-color: #b8282d; box-shadow: 0 4px 12px -4px rgba(229,72,77,.6); }
+    .day-past    { opacity: .45; }
+    .modal-enter { animation: slideUp .25s ease-out; }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+    .fade-in { animation: fadeIn .2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+    .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+    input, textarea { font-size: 16px; } /* prevents iOS zoom */
+  </style>
+</head>
+<body class="font-sans text-gray-700">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-20 bg-white/85 backdrop-blur border-b border-gold-light">
+    <div class="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div>
+        <h1 class="font-display text-2xl font-bold gold-text leading-tight">יומן הכלות</h1>
+        <p class="text-xs text-stone-warm">ניהול תאריכים ומתעניינות לצימר</p>
+      </div>
+      <button id="btnToday" class="text-sm px-3 py-1.5 rounded-full border border-gold text-gold-dark hover:bg-gold-light/40 transition">היום</button>
+    </div>
+  </header>
+
+  <main class="max-w-xl mx-auto px-4 pt-4 pb-24">
+
+    <!-- Stats -->
+    <section class="grid grid-cols-3 gap-2 mb-4">
+      <div class="rounded-2xl bg-white shadow-luxe p-3 text-center border border-rose-soft">
+        <div id="statBooked" class="text-2xl font-bold text-red-500">0</div>
+        <div class="text-xs text-stone-warm">תפוסים החודש</div>
+      </div>
+      <div class="rounded-2xl bg-white shadow-luxe p-3 text-center border border-rose-soft">
+        <div id="statPending" class="text-2xl font-bold text-yellow-600">0</div>
+        <div class="text-xs text-stone-warm">בטיפול החודש</div>
+      </div>
+      <div class="rounded-2xl bg-white shadow-luxe p-3 text-center border border-rose-soft">
+        <div id="statLeads" class="text-2xl font-bold text-rose-deep">0</div>
+        <div class="text-xs text-stone-warm">מתעניינות פתוחות</div>
+      </div>
+    </section>
+
+    <!-- Calendar card -->
+    <section class="bg-white rounded-3xl shadow-luxe border border-rose-soft overflow-hidden">
+      <div class="bg-gradient-to-l from-rose-antique to-rose-deep text-white px-4 py-4 flex items-center justify-between">
+        <button id="btnPrev" aria-label="החודש הקודם" class="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-xl transition">&#8250;</button>
+        <div class="text-center">
+          <div id="monthTitle" class="font-display text-2xl font-bold tracking-wide"></div>
+          <div class="gold-line w-24 mx-auto mt-1 opacity-80"></div>
+        </div>
+        <button id="btnNext" aria-label="החודש הבא" class="w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center text-xl transition">&#8249;</button>
+      </div>
+
+      <div class="grid grid-cols-7 text-center text-xs font-semibold text-gold-dark px-2 pt-3">
+        <div>א׳</div><div>ב׳</div><div>ג׳</div><div>ד׳</div><div>ה׳</div><div>ו׳</div><div>ש׳</div>
+      </div>
+      <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 p-2 pb-3"></div>
+
+      <!-- Legend -->
+      <div class="flex flex-wrap justify-center gap-4 text-xs py-3 border-t border-rose-soft bg-rose-blush">
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-free border"></span>פנוי</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-pending border"></span>יש מתעניינות</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full day-booked border"></span>תפוס</span>
+      </div>
+    </section>
+
+    <!-- Upcoming bookings -->
+    <section class="mt-5">
+      <h2 class="font-display text-lg font-bold text-rose-deep mb-2">אירועים קרובים</h2>
+      <div id="upcomingList" class="space-y-2"></div>
+    </section>
+
+    <!-- Backup -->
+    <section class="mt-6 flex gap-2 justify-center text-sm">
+      <button id="btnExport" class="px-4 py-2 rounded-full border border-gold text-gold-dark hover:bg-gold-light/40">ייצוא גיבוי</button>
+      <label class="px-4 py-2 rounded-full border border-gold text-gold-dark hover:bg-gold-light/40 cursor-pointer">
+        ייבוא גיבוי<input id="fileImport" type="file" accept="application/json" class="hidden" />
+      </label>
+    </section>
+  </main>
+
+  <!-- Day Modal -->
+  <div id="dayModal" class="fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/40 fade-in" data-close="dayModal"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
+      <div class="modal-enter pointer-events-auto bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col shadow-2xl">
+        <div class="px-5 pt-4 pb-3 border-b border-rose-soft">
+          <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-3 sm:hidden"></div>
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div id="dayModalTitle" class="font-display text-xl font-bold text-rose-deep"></div>
+              <div id="dayModalStatus" class="mt-1"></div>
+            </div>
+            <button class="w-9 h-9 rounded-full bg-rose-blush text-rose-deep text-xl leading-none" data-close="dayModal" aria-label="סגירה">&times;</button>
+          </div>
+        </div>
+        <div id="dayModalBody" class="overflow-y-auto px-5 py-4 space-y-3 flex-1"></div>
+        <div id="dayModalFooter" class="px-5 pt-3 safe-bottom border-t border-rose-soft"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lead Form Modal -->
+  <div id="formModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 fade-in" data-close="formModal"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center pointer-events-none">
+      <form id="leadForm" class="modal-enter pointer-events-auto bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl max-h-[92vh] overflow-y-auto shadow-2xl px-5 pt-5 safe-bottom" novalidate>
+        <div class="flex items-center justify-between mb-4">
+          <h3 id="formTitle" class="font-display text-xl font-bold text-rose-deep">מתעניינת חדשה</h3>
+          <button type="button" class="w-9 h-9 rounded-full bg-rose-blush text-rose-deep text-xl leading-none" data-close="formModal" aria-label="סגירה">&times;</button>
+        </div>
+        <input type="hidden" id="fLeadId" />
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-sm text-stone-warm">שם פרטי *</span>
+            <input id="fFirst" required class="mt-1 w-full rounded-xl border border-rose-soft bg-rose-blush/50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-antique" />
+          </label>
+          <label class="block">
+            <span class="text-sm text-stone-warm">שם משפחה</span>
+            <input id="fLast" class="mt-1 w-full rounded-xl border border-rose-soft bg-rose-blush/50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-antique" />
+          </label>
+        </div>
+        <label class="block mt-3">
+          <span class="text-sm text-stone-warm">טלפון *</span>
+          <input id="fPhone" type="tel" inputmode="tel" dir="ltr" required class="mt-1 w-full text-right rounded-xl border border-rose-soft bg-rose-blush/50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-antique" placeholder="050-0000000" />
+        </label>
+        <label class="block mt-3">
+          <span class="text-sm text-stone-warm">דוא״ל</span>
+          <input id="fEmail" type="email" inputmode="email" dir="ltr" class="mt-1 w-full text-right rounded-xl border border-rose-soft bg-rose-blush/50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-antique" placeholder="name@example.com" />
+        </label>
+        <label class="block mt-3">
+          <span class="text-sm text-stone-warm">הערות</span>
+          <textarea id="fNotes" rows="3" class="mt-1 w-full rounded-xl border border-rose-soft bg-rose-blush/50 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-antique" placeholder="מספר אורחות, שעת הגעה, בקשות מיוחדות..."></textarea>
+        </label>
+        <p id="formError" class="text-sm text-red-600 mt-2 hidden"></p>
+        <div class="flex gap-2 mt-5 mb-1">
+          <button type="submit" class="flex-1 py-3 rounded-2xl bg-gradient-to-l from-rose-antique to-rose-deep text-white font-semibold shadow-luxe">שמירה</button>
+          <button type="button" data-close="formModal" class="px-5 py-3 rounded-2xl border border-gray-200 text-gray-500">ביטול</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Confirm Dialog -->
+  <div id="confirmModal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/50 fade-in"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-6">
+      <div class="modal-enter bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl">
+        <div id="confirmText" class="text-gray-700 mb-5 leading-relaxed"></div>
+        <div class="flex gap-2">
+          <button id="confirmYes" class="flex-1 py-3 rounded-2xl text-white font-semibold"></button>
+          <button id="confirmNo" class="flex-1 py-3 rounded-2xl border border-gray-200 text-gray-500">ביטול</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-6 inset-x-0 z-[70] flex justify-center pointer-events-none hidden">
+    <div id="toastInner" class="px-5 py-3 rounded-full bg-gray-900/90 text-white text-sm shadow-lg"></div>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- Storage ----------
+  const STORAGE_KEY = 'bridalCabinCalendar.v1';
+  // Data shape: { days: { 'YYYY-MM-DD': { status: 'booked'|null, bookedLeadId, leads: [Lead] } } }
+  // Lead: { id, firstName, lastName, phone, email, notes, createdAt, state: 'open'|'won'|'lost' }
+  let db = load();
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && typeof parsed.days === 'object') return parsed;
+    } catch (e) { /* ignore */ }
+    return { days: {} };
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
+    catch (e) { toast('שגיאה בשמירה במכשיר'); }
+  }
+
+  // ---------- Helpers ----------
+  const $ = (id) => document.getElementById(id);
+  const HE_MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  const HE_DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  const pad = (n) => String(n).padStart(2, '0');
+  const keyOf = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`;
+  const parseKey = (k) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+  const todayKey = () => { const t = new Date(); return keyOf(t.getFullYear(), t.getMonth(), t.getDate()); };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  const fullName = (l) => `${l.firstName} ${l.lastName || ''}`.trim();
+  const prettyDate = (k) => { const d = parseKey(k); return `יום ${HE_DAYS[d.getDay()]}, ${d.getDate()} ב${HE_MONTHS[d.getMonth()]} ${d.getFullYear()}`; };
+  const intlPhone = (p) => { const digits = String(p).replace(/\D/g, ''); return digits.startsWith('0') ? '972' + digits.slice(1) : digits; };
+
+  function getDay(k) { return db.days[k] || { status: null, bookedLeadId: null, leads: [] }; }
+  function ensureDay(k) { if (!db.days[k]) db.days[k] = { status: null, bookedLeadId: null, leads: [] }; return db.days[k]; }
+  function cleanupDay(k) { const d = db.days[k]; if (d && !d.status && d.leads.length === 0) delete db.days[k]; }
+  function openLeads(day) { return day.leads.filter(l => l.state === 'open'); }
+  function dayState(k) {
+    const d = getDay(k);
+    if (d.status === 'booked') return 'booked';
+    if (openLeads(d).length > 0) return 'pending';
+    return 'free';
+  }
+
+  // ---------- State ----------
+  const now = new Date();
+  let viewYear = now.getFullYear();
+  let viewMonth = now.getMonth();
+  let activeKey = null;
+
+  // ---------- Calendar ----------
+  function renderCalendar() {
+    $('monthTitle').textContent = `${HE_MONTHS[viewMonth]} ${viewYear}`;
+    const grid = $('calendarGrid');
+    grid.innerHTML = '';
+    const firstDow = new Date(viewYear, viewMonth, 1).getDay();
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const tKey = todayKey();
+    let booked = 0, pending = 0;
+
+    for (let i = 0; i < firstDow; i++) grid.appendChild(document.createElement('div'));
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const k = keyOf(viewYear, viewMonth, d);
+      const state = dayState(k);
+      const day = getDay(k);
+      if (state === 'booked') booked++;
+      if (state === 'pending') pending++;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `day-${state} relative aspect-square rounded-xl border flex flex-col items-center justify-center font-semibold text-base transition active:scale-95`;
+      if (k < tKey) btn.classList.add('day-past');
+      if (k === tKey) btn.classList.add('ring-2', 'ring-gold', 'ring-offset-1');
+
+      let badge = '';
+      const openCount = openLeads(day).length;
+      if (state === 'pending') badge = `<span class="absolute top-0.5 left-1 text-[10px] font-bold">${openCount}</span>`;
+      if (state === 'booked') badge = `<span class="text-[9px] leading-none mt-0.5">תפוס</span>`;
+      btn.innerHTML = `<span>${d}</span>${badge}`;
+      btn.setAttribute('aria-label', `${d} ${HE_MONTHS[viewMonth]} - ${state === 'booked' ? 'תפוס' : state === 'pending' ? 'בטיפול' : 'פנוי'}`);
+      btn.addEventListener('click', () => openDay(k));
+      grid.appendChild(btn);
+    }
+
+    $('statBooked').textContent = booked;
+    $('statPending').textContent = pending;
+    let totalOpen = 0;
+    const tk = todayKey();
+    Object.entries(db.days).forEach(([k, d]) => { if (k >= tk && d.status !== 'booked') totalOpen += openLeads(d).length; });
+    $('statLeads').textContent = totalOpen;
+    renderUpcoming();
+  }
+
+  function renderUpcoming() {
+    const tk = todayKey();
+    const items = Object.entries(db.days)
+      .filter(([k, d]) => k >= tk && d.status === 'booked')
+      .sort(([a], [b]) => a.localeCompare(b))
+      .slice(0, 6);
+    const list = $('upcomingList');
+    if (!items.length) {
+      list.innerHTML = `<div class="text-sm text-stone-warm text-center py-4 bg-white rounded-2xl border border-rose-soft">אין אירועים סגורים קרובים</div>`;
+      return;
+    }
+    list.innerHTML = items.map(([k, d]) => {
+      const bride = d.leads.find(l => l.id === d.bookedLeadId);
+      return `<button data-key="${k}" class="w-full text-right bg-white rounded-2xl border border-rose-soft shadow-sm px-4 py-3 flex items-center justify-between gap-3">
+        <div>
+          <div class="font-semibold text-gray-800">${esc(bride ? fullName(bride) : 'כלה')}</div>
+          <div class="text-xs text-stone-warm">${prettyDate(k)}</div>
+        </div>
+        <span class="text-xs px-2.5 py-1 rounded-full day-booked">תפוס</span>
+      </button>`;
+    }).join('');
+    list.querySelectorAll('[data-key]').forEach(b => b.addEventListener('click', () => openDay(b.dataset.key)));
+  }
+
+  // ---------- Day modal ----------
+  function openDay(k) {
+    activeKey = k;
+    renderDay();
+    show('dayModal');
+  }
+
+  function statusChip(state) {
+    const map = {
+      free: ['day-free', 'פנוי לחלוטין'],
+      pending: ['day-pending', 'בטיפול – יש מתעניינות'],
+      booked: ['day-booked', 'תפוס – נסגר עבור כלה']
+    };
+    const [cls, txt] = map[state];
+    return `<span class="inline-block text-xs font-semibold px-3 py-1 rounded-full border ${cls}">${txt}</span>`;
+  }
+
+  function contactLinks(l) {
+    const parts = [];
+    if (l.phone) {
+      parts.push(`<a href="tel:${esc(l.phone)}" class="flex-1 text-center py-2 rounded-xl bg-rose-blush text-rose-deep text-sm">📞 חיוג</a>`);
+      parts.push(`<a href="https://wa.me/${intlPhone(l.phone)}" target="_blank" rel="noopener" class="flex-1 text-center py-2 rounded-xl bg-green-50 text-green-700 text-sm">💬 וואטסאפ</a>`);
+    }
+    if (l.email) parts.push(`<a href="mailto:${esc(l.email)}" class="flex-1 text-center py-2 rounded-xl bg-gold-light/40 text-gold-dark text-sm">✉️ מייל</a>`);
+    return parts.length ? `<div class="flex gap-2 mt-3">${parts.join('')}</div>` : '';
+  }
+
+  function leadDetails(l) {
+    return `
+      <div class="text-sm text-gray-600 space-y-0.5 mt-1">
+        ${l.phone ? `<div dir="ltr" class="text-right">${esc(l.phone)}</div>` : ''}
+        ${l.email ? `<div dir="ltr" class="text-right break-all">${esc(l.email)}</div>` : ''}
+        ${l.notes ? `<div class="mt-2 p-2 rounded-lg bg-rose-blush text-gray-700 whitespace-pre-wrap">${esc(l.notes)}</div>` : ''}
+      </div>`;
+  }
+
+  function renderDay() {
+    const k = activeKey;
+    const day = getDay(k);
+    const state = dayState(k);
+    $('dayModalTitle').textContent = prettyDate(k);
+    $('dayModalStatus').innerHTML = statusChip(state);
+    const body = $('dayModalBody');
+    const footer = $('dayModalFooter');
+
+    if (state === 'booked') {
+      const bride = day.leads.find(l => l.id === day.bookedLeadId);
+      const others = day.leads.filter(l => l.id !== day.bookedLeadId);
+      body.innerHTML = `
+        <div class="rounded-2xl border-2 border-red-400 bg-red-50 p-4">
+          <div class="text-xs font-bold text-red-600 mb-1">👰 הכלה של התאריך</div>
+          <div class="text-lg font-bold text-gray-800">${esc(bride ? fullName(bride) : 'כלה')}</div>
+          ${bride ? leadDetails(bride) + contactLinks(bride) : ''}
+          ${bride ? `<button data-act="edit" data-id="${bride.id}" class="mt-3 text-sm text-rose-deep underline">עריכת פרטים</button>` : ''}
+        </div>
+        ${others.length ? `
+          <div class="pt-2">
+            <div class="text-sm font-semibold text-stone-warm mb-2">מתעניינות נוספות לתאריך זה (${others.length})</div>
+            ${others.map(l => `
+              <div class="rounded-xl border border-gray-200 p-3 mb-2 bg-gray-50">
+                <div class="flex justify-between items-center">
+                  <div class="font-semibold text-gray-700">${esc(fullName(l))}</div>
+                  <span class="text-[11px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">התאריך נתפס</span>
+                </div>
+                ${leadDetails(l)}
+                ${contactLinks(l)}
+              </div>`).join('')}
+          </div>` : ''}
+      `;
+      footer.innerHTML = `<button data-act="unbook" class="w-full py-3 mb-1 rounded-2xl border-2 border-red-300 text-red-600 font-semibold">ביטול סגירה / שחרור התאריך</button>`;
+    } else {
+      const leads = day.leads;
+      body.innerHTML = leads.length ? leads.map(l => `
+        <div class="rounded-2xl border border-rose-soft bg-white shadow-sm p-4">
+          <div class="flex items-start justify-between gap-2">
+            <div class="text-lg font-bold text-gray-800">${esc(fullName(l))}</div>
+            <div class="flex gap-1 shrink-0">
+              <button data-act="edit" data-id="${l.id}" class="w-8 h-8 rounded-full bg-rose-blush text-rose-deep text-sm" aria-label="עריכה">✎</button>
+              <button data-act="delete" data-id="${l.id}" class="w-8 h-8 rounded-full bg-gray-100 text-gray-500 text-sm" aria-label="מחיקה">🗑</button>
+            </div>
+          </div>
+          ${leadDetails(l)}
+          ${contactLinks(l)}
+          <button data-act="book" data-id="${l.id}" class="mt-3 w-full py-3 rounded-xl bg-gradient-to-l from-gold to-gold-dark text-white font-semibold shadow-luxe">
+            💍 סגור עסקה / הפוך לתאריך תפוס
+          </button>
+        </div>`).join('')
+        : `<div class="text-center py-8">
+             <div class="text-4xl mb-2">🌸</div>
+             <div class="text-gray-600 font-semibold">התאריך פנוי לחלוטין</div>
+             <div class="text-sm text-stone-warm">עדיין אין מתעניינות ליום זה</div>
+           </div>`;
+      footer.innerHTML = `<button data-act="add" class="w-full py-3 mb-1 rounded-2xl bg-gradient-to-l from-rose-antique to-rose-deep text-white font-semibold shadow-luxe">+ הוסף מתעניינת חדשה</button>`;
+    }
+  }
+
+  function handleDayAction(e) {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const act = btn.dataset.act;
+    const id = btn.dataset.id;
+    const day = getDay(activeKey);
+    const lead = id ? day.leads.find(l => l.id === id) : null;
+
+    if (act === 'add') openForm(null);
+    else if (act === 'edit' && lead) openForm(lead);
+    else if (act === 'delete' && lead) {
+      confirmBox(`למחוק את <b>${esc(fullName(lead))}</b> מרשימת המתעניינות?`, 'מחיקה', 'bg-gray-700', () => {
+        const d = ensureDay(activeKey);
+        d.leads = d.leads.filter(l => l.id !== id);
+        cleanupDay(activeKey); save(); renderDay(); renderCalendar(); toast('המתעניינת נמחקה');
+      });
+    }
+    else if (act === 'book' && lead) {
+      const others = openLeads(day).length - 1;
+      confirmBox(
+        `לסגור את התאריך <b>${prettyDate(activeKey)}</b><br>עבור <b>${esc(fullName(lead))}</b>?` +
+        (others > 0 ? `<div class="text-sm text-stone-warm mt-2">${others} מתעניינות נוספות יסומנו כ״התאריך נתפס״.</div>` : ''),
+        'אישור סגירה', 'bg-red-500',
+        () => bookDay(activeKey, lead.id)
+      );
+    }
+    else if (act === 'unbook') {
+      confirmBox('לשחרר את התאריך? הכלה וכל המתעניינות יחזרו לסטטוס ״בטיפול״.', 'שחרור', 'bg-rose-deep', () => {
+        const d = ensureDay(activeKey);
+        d.status = null; d.bookedLeadId = null;
+        d.leads.forEach(l => l.state = 'open');
+        save(); renderDay(); renderCalendar(); toast('התאריך שוחרר');
+      });
+    }
+  }
+
+  function bookDay(k, leadId) {
+    const d = ensureDay(k);
+    d.status = 'booked';
+    d.bookedLeadId = leadId;
+    d.leads.forEach(l => { l.state = (l.id === leadId) ? 'won' : 'lost'; });
+    save(); renderDay(); renderCalendar();
+    toast('💍 מזל טוב! התאריך נסגר');
+  }
+
+  // ---------- Lead form ----------
+  function openForm(lead) {
+    $('formTitle').textContent = lead ? 'עריכת פרטי מתעניינת' : 'מתעניינת חדשה';
+    $('fLeadId').value = lead ? lead.id : '';
+    $('fFirst').value = lead ? lead.firstName : '';
+    $('fLast').value = lead ? (lead.lastName || '') : '';
+    $('fPhone').value = lead ? (lead.phone || '') : '';
+    $('fEmail').value = lead ? (lead.email || '') : '';
+    $('fNotes').value = lead ? (lead.notes || '') : '';
+    $('formError').classList.add('hidden');
+    show('formModal');
+    setTimeout(() => $('fFirst').focus(), 250);
+  }
+
+  function submitForm(e) {
+    e.preventDefault();
+    const first = $('fFirst').value.trim();
+    const last = $('fLast').value.trim();
+    const phone = $('fPhone').value.trim();
+    const email = $('fEmail').value.trim();
+    const notes = $('fNotes').value.trim();
+    const err = $('formError');
+
+    let msg = '';
+    if (!first) msg = 'יש להזין שם פרטי';
+    else if (!phone) msg = 'יש להזין מספר טלפון';
+    else if (phone.replace(/\D/g, '').length < 9) msg = 'מספר הטלפון אינו תקין';
+    else if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) msg = 'כתובת הדוא״ל אינה תקינה';
+    if (msg) { err.textContent = msg; err.classList.remove('hidden'); return; }
+
+    const d = ensureDay(activeKey);
+    const id = $('fLeadId').value;
+    if (id) {
+      const l = d.leads.find(x => x.id === id);
+      if (l) Object.assign(l, { firstName: first, lastName: last, phone, email, notes });
+      toast('הפרטים עודכנו');
+    } else {
+      d.leads.push({ id: uid(), firstName: first, lastName: last, phone, email, notes, createdAt: new Date().toISOString(), state: 'open' });
+      toast('המתעניינת נוספה');
+    }
+    save(); hide('formModal'); renderDay(); renderCalendar();
+  }
+
+  // ---------- UI utils ----------
+  function show(id) { $(id).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  function hide(id) {
+    $(id).classList.add('hidden');
+    if (['dayModal', 'formModal', 'confirmModal'].every(m => $(m).classList.contains('hidden'))) document.body.style.overflow = '';
+  }
+
+  let confirmCb = null;
+  function confirmBox(html, yesText, yesClass, cb) {
+    $('confirmText').innerHTML = html;
+    const yes = $('confirmYes');
+    yes.textContent = yesText;
+    yes.className = `flex-1 py-3 rounded-2xl text-white font-semibold ${yesClass}`;
+    confirmCb = cb;
+    show('confirmModal');
+  }
+
+  let toastTimer = null;
+  function toast(text) {
+    $('toastInner').textContent = text;
+    $('toast').classList.remove('hidden');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $('toast').classList.add('hidden'), 2200);
+  }
+
+  // ---------- Backup ----------
+  function exportData() {
+    const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `bridal-calendar-${todayKey()}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  function importData(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data || typeof data.days !== 'object') throw new Error();
+        confirmBox('הייבוא יחליף את כל הנתונים הקיימים. להמשיך?', 'ייבוא', 'bg-rose-deep', () => {
+          db = data; save(); renderCalendar(); toast('הגיבוי יובא בהצלחה');
+        });
+      } catch { toast('קובץ גיבוי לא תקין'); }
+    };
+    reader.readAsText(file);
+  }
+
+  // ---------- Events ----------
+  $('btnPrev').addEventListener('click', () => { if (--viewMonth < 0) { viewMonth = 11; viewYear--; } renderCalendar(); });
+  $('btnNext').addEventListener('click', () => { if (++viewMonth > 11) { viewMonth = 0; viewYear++; } renderCalendar(); });
+  $('btnToday').addEventListener('click', () => { const t = new Date(); viewYear = t.getFullYear(); viewMonth = t.getMonth(); renderCalendar(); });
+  $('dayModalBody').addEventListener('click', handleDayAction);
+  $('dayModalFooter').addEventListener('click', handleDayAction);
+  $('leadForm').addEventListener('submit', submitForm);
+  $('confirmYes').addEventListener('click', () => { hide('confirmModal'); const cb = confirmCb; confirmCb = null; cb && cb(); });
+  $('confirmNo').addEventListener('click', () => { hide('confirmModal'); confirmCb = null; });
+  document.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', () => hide(el.dataset.close)));
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    for (const m of ['confirmModal', 'formModal', 'dayModal']) if (!$(m).classList.contains('hidden')) { hide(m); break; }
+  });
+  $('btnExport').addEventListener('click', exportData);
+  $('fileImport').addEventListener('change', (e) => { const f = e.target.files[0]; if (f) importData(f); e.target.value = ''; });
+
+  // Swipe between months
+  let touchX = null;
+  const grid = $('calendarGrid');
+  grid.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+  grid.addEventListener('touchend', e => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX; touchX = null;
+    if (Math.abs(dx) < 60) return;
+    // RTL: swipe right -> next month, swipe left -> previous month
+    (dx > 0 ? $('btnNext') : $('btnPrev')).click();
+  }, { passive: true });
+
+  window.addEventListener('storage', (e) => { if (e.key === STORAGE_KEY) { db = load(); renderCalendar(); } });
+
+  renderCalendar();
+})();
+</script>
+</body>
+</html>

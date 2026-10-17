@@ -32,6 +32,9 @@ request from the owner, the newer request wins; point out the conflict.
   Interested clients can already pick a requested package. Smart paste fills the form from free text.
 - Deposit = 15% rounded up to a whole shekel. Upcoming panel = next 30 days. Main screen has a quick search. Client cards offer a one-tap ✕ cancel (with undo); list cards can be swiped
   left/right to reveal cancel.
+- A tour is a stage of an interested client, not a separate status: she stays in the interested list/count
+  with a wine "🍇 סיור נקבע" chip; the tours tab lists the visits by tour date. List and upcoming cards show
+  every payment tick together (✓ חוזה, ✓ מקדמה, ✓ שולם במלואו).
 - Deal/payment fields (amount, 15% deposit, balance, contract/paid checkboxes) only for bookings
   (bride, maternity shoot); hidden for interested and tour.
 

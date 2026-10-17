@@ -214,7 +214,7 @@
       </label>
     </section>
     <div id="syncStatus" class="mt-2 text-center text-sm text-zinc-500"></div>
-    <div class="mt-1 text-center text-[13px] text-zinc-400">גרסה 2026.10.16</div>
+    <div class="mt-1 text-center text-[13px] text-zinc-400">גרסה 2026.10.17</div>
   </main>
 
   <!-- Lists Modal -->
@@ -839,6 +839,7 @@
           <div class="font-semibold text-wine-dark">${esc(fullName(r.lead))}</div>
           <div class="text-sm text-zinc-500">${prettyDate(r.date)}</div>
           ${scheduleText(r) ? `<div class="text-sm text-zinc-500 mt-0.5">${esc(scheduleText(r))}</div>` : ''}
+          ${isBookingKind(r.kind) ? payChecks(r.lead) : ''}
         </div>
         ${kindBadge(r.kind)}
       </button>`).join('');
@@ -873,6 +874,8 @@
       day.leads.forEach(lead => {
         const kind = recordKind(day, lead);
         out.push({ key, day, lead, kind, date: kind === 'tour' ? tourDateOf(lead, key) : key });
+        // A tour is a stage of the inquiry, not a separate status: she stays in the interested list too.
+        if (kind === 'tour') out.push({ key, day, lead, kind: 'pending', date: key, stage: true });
       });
     });
     return out.sort((a, b) => a.date.localeCompare(b.date) || String(a.lead.tourTime || '').localeCompare(String(b.lead.tourTime || '')));
@@ -1645,10 +1648,16 @@
     const q = $('listSearch').value.trim().toLowerCase();
     const withPast = $('listPast').checked;
     return allRecords().filter(r =>
-      (listTab === 'all' || r.kind === listTab) &&
+      (listTab === 'all' ? !r.stage : r.kind === listTab) &&
       (withPast || !isPast(r.date)) &&
       (!q || [fullName(r.lead), r.lead.phone, r.lead.email, r.lead.notes].join(' ').toLowerCase().includes(q))
     );
+  }
+
+  // An interested client with a scheduled tour: a clear wine chip with the tour's date and time.
+  function tourStageChip(r) {
+    const date = tourDateOf(r.lead, r.key);
+    return `<div class="mt-1.5 inline-block text-[14px] font-semibold px-2.5 py-1 rounded-full text-white" style="background:#6b1d38">🍇 סיור נקבע: ${prettyDate(date)} בשעה ${esc(r.lead.tourTime || '—')}</div>`;
   }
 
   // Small ✓ marks for what was already done (contract, deposit, paid in full)
@@ -1679,6 +1688,7 @@
               <div class="font-bold text-wine-dark truncate">${esc(fullName(r.lead))}</div>
               ${r.lead.phone ? `<div class="text-base text-zinc-600" dir="ltr" style="text-align:right">${esc(r.lead.phone)}</div>` : ''}
               ${sched ? `<div class="text-sm text-zinc-600 mt-1">${esc(sched)}</div>` : ''}
+              ${r.stage ? tourStageChip(r) : ''}
               ${isBookingKind(r.kind) && r.lead.total > 0 ? `<div class="text-sm text-zinc-600 mt-1">סכום ${money(r.lead.total)} · יתרה ${money(balanceDue(r.lead))}</div>` : ''}
               ${isBookingKind(r.kind) ? payChecks(r.lead) : ''}
             </div>
@@ -1756,10 +1766,10 @@
     const box = $('mainSearchResults');
     if (!q) { box.classList.add('hidden'); box.innerHTML = ''; return; }
     const digits = q.replace(/\D/g, '');
-    const hits = allRecords().filter(r =>
+    const hits = allRecords().filter(r => !r.stage && (
       fullName(r.lead).toLowerCase().includes(q) ||
       (digits.length >= 3 && String(r.lead.phone || '').replace(/\D/g, '').includes(digits))
-    ).slice(0, 12);
+    )).slice(0, 12);
     box.innerHTML = hits.length ? hits.map(r => `
       <button type="button" data-skey="${r.key}" class="w-full text-right px-4 py-2.5 border-b border-zinc-100 flex items-center justify-between gap-2 hover:bg-zinc-50">
         <span class="min-w-0">
@@ -1791,7 +1801,7 @@
         'שם משפחה': l.lastName || '',
         'טלפון': l.phone || '',
         'דוא״ל': l.email || '',
-        'שעת סיור': r.kind === 'tour' ? (l.tourTime || '') : '',
+        'שעת סיור': r.kind === 'tour' || r.stage ? (l.tourTime || '') : '',
         'שעות צילום': r.kind === 'maternity' ? `${l.shootStart || ''}–${l.shootEnd || ''}` : '',
         'חבילה': l.state === 'won' && l.pkg ? (l.pkg === 'lodging' ? 'חבילה 1 – כולל לינה' : 'חבילה 2 – התארגנות בלבד') : '',
         'תאריך הגעה': l.state === 'won' && l.pkg === 'lodging' ? shortDate(l.arriveDate || r.key) : '',

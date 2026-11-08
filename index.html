@@ -142,7 +142,14 @@
 
     <!-- Quick search across the whole diary -->
     <section class="relative mb-4">
-      <input id="mainSearch" type="search" autocomplete="off" placeholder="🔍 חיפוש מהיר לפי שם או טלפון..." class="w-full rounded-2xl border border-zinc-200 bg-white/90 backdrop-blur-md shadow-soft px-4 py-3 focus:outline-none focus:ring-2 focus:ring-wine" />
+      <div class="relative flex items-center rounded-2xl border-2 border-wine/30 bg-white/95 backdrop-blur-md shadow-soft focus-within:border-wine">
+        <svg class="absolute right-3 w-5 h-5 text-wine pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="mainSearch" type="text" inputmode="search" enterkeyhint="search" autocomplete="off" aria-label="חיפוש ביומן" placeholder="חיפוש: שם, טלפון, מייל, חבילה, הערות או תאריך (15.6)" class="flex-1 min-w-0 bg-transparent pr-10 pl-2 py-3 focus:outline-none" />
+        <button id="mainSearchClear" type="button" class="hidden w-9 h-9 shrink-0 rounded-full bg-zinc-100 text-zinc-600 text-lg leading-none" aria-label="ניקוי החיפוש">✕</button>
+        <button id="mainSearchDateBtn" type="button" class="relative w-11 h-11 shrink-0 ml-1 rounded-xl text-xl" aria-label="בחירת תאריך לקפיצה">📅
+          <input id="mainSearchDate" type="date" tabindex="-1" aria-hidden="true" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+        </button>
+      </div>
       <div id="mainSearchResults" class="hidden absolute z-30 inset-x-0 mt-1 max-h-80 overflow-y-auto rounded-2xl border border-zinc-200 bg-white shadow-2xl"></div>
     </section>
 
@@ -214,7 +221,7 @@
       </label>
     </section>
     <div id="syncStatus" class="mt-2 text-center text-sm text-zinc-500"></div>
-    <div class="mt-1 text-center text-[13px] text-zinc-400">גרסה 2026.10.17</div>
+    <div class="mt-1 text-center text-[13px] text-zinc-400">גרסה 2026.11.08</div>
   </main>
 
   <!-- Lists Modal -->
@@ -231,7 +238,7 @@
             <button class="w-9 h-9 rounded-full bg-zinc-100 text-wine text-xl leading-none" data-close="listModal" aria-label="סגירה">&times;</button>
           </div>
           <div id="listTabs" class="flex gap-1.5 overflow-x-auto no-scrollbar -mx-1 px-1"></div>
-          <input id="listSearch" type="search" placeholder="🔍 חיפוש לפי שם, טלפון, הערות..." class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
+          <input id="listSearch" type="search" placeholder="🔍 שם, טלפון, מייל, חבילה, הערות או תאריך..." class="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-wine" />
           <div class="flex items-center justify-between gap-2">
             <label class="flex items-center gap-2 text-base text-zinc-600 cursor-pointer"><input id="listPast" type="checkbox" class="w-4 h-4" /> כולל תאריכים שעברו</label>
             <div class="flex gap-1.5">
@@ -1650,7 +1657,7 @@
     return allRecords().filter(r =>
       (listTab === 'all' ? !r.stage : r.kind === listTab) &&
       (withPast || !isPast(r.date)) &&
-      (!q || [fullName(r.lead), r.lead.phone, r.lead.email, r.lead.notes].join(' ').toLowerCase().includes(q))
+      (!q || recordMatches(r, q))
     );
   }
 
@@ -1760,24 +1767,61 @@
     }
   }
 
-  // ---------- Quick search on the main screen ----------
+  // ---------- Smart search (free text or a date) ----------
+  // A date typed as 15/06/2027, 15.6.27, 15-6, 15.6 (no year: the next time that date comes) or 2027-06-15.
+  function parseDateQuery(q) {
+    let y, m, d;
+    let x = q.match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})$/);
+    if (x) [y, m, d] = [+x[1], +x[2], +x[3]];
+    else if ((x = q.match(/^(\d{1,2})[-./](\d{1,2})(?:[-./](\d{2}|\d{4}))?$/))) {
+      [d, m] = [+x[1], +x[2]];
+      if (x[3]) y = x[3].length === 2 ? 2000 + +x[3] : +x[3];
+      else { y = new Date().getFullYear(); if (keyOf(y, m - 1, d) < todayKey()) y++; }
+    } else return null;
+    const dt = new Date(y, m - 1, d);
+    if (dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
+    return keyOf(y, m - 1, d);
+  }
+  const phoneDigits = (p) => String(p || '').replace(/\D/g, '').replace(/^972/, '0');
+  const PKG_WORDS = { lodging: 'חבילה 1 לינה כולל לינה', prep: 'חבילה 2 התארגנות בלבד' };
+  // Free-text match on name, phone (any format), email, package, status, notes and special notes.
+  function recordMatches(r, q) {
+    const date = parseDateQuery(q);
+    if (date) return r.date === date || r.key === date;
+    const l = r.lead;
+    const text = [fullName(l), l.email, l.notes, l.special, KIND[r.kind] && KIND[r.kind].label,
+      PKG_WORDS[l.pkg] || '', PKG_WORDS[l.wantPkg] || ''].join(' ').toLowerCase();
+    // Whole phrase, or every word anywhere (a short word like the "2" of "חבילה 2" must match as a phrase).
+    const words = q.split(/\s+/);
+    if (text.includes(q) || (words.every(w => w.length > 1) && words.every(w => text.includes(w)))) return true;
+    const digits = phoneDigits(q);
+    return digits.length >= 3 && /^[\d\s+()\-.]+$/.test(q) && phoneDigits(l.phone).includes(digits);
+  }
+  const JUMP_BTN = (k) => `<button type="button" data-jump="${k}" class="shrink-0 text-sm font-semibold px-2.5 py-1.5 rounded-xl border border-wine text-wine bg-white">📅 קפוץ לתאריך בלוח</button>`;
   function renderMainSearch() {
-    const q = $('mainSearch').value.trim().toLowerCase();
+    const raw = $('mainSearch').value.trim();
+    const q = raw.toLowerCase();
     const box = $('mainSearchResults');
+    $('mainSearchClear').classList.toggle('hidden', !raw);
     if (!q) { box.classList.add('hidden'); box.innerHTML = ''; return; }
-    const digits = q.replace(/\D/g, '');
-    const hits = allRecords().filter(r => !r.stage && (
-      fullName(r.lead).toLowerCase().includes(q) ||
-      (digits.length >= 3 && String(r.lead.phone || '').replace(/\D/g, '').includes(digits))
-    )).slice(0, 12);
-    box.innerHTML = hits.length ? hits.map(r => `
-      <button type="button" data-skey="${r.key}" class="w-full text-right px-4 py-2.5 border-b border-zinc-100 flex items-center justify-between gap-2 hover:bg-zinc-50">
-        <span class="min-w-0">
-          <span class="block font-semibold text-wine-dark truncate">${esc(fullName(r.lead))}</span>
+    const date = parseDateQuery(q);
+    const hits = allRecords().filter(r => !r.stage && recordMatches(r, q));
+    const head = date ? `
+      <div class="px-4 py-3 border-b border-zinc-200 bg-zinc-50 flex items-center justify-between gap-2">
+        <span class="min-w-0"><span class="block font-bold text-wine-dark">${prettyDate(date)}</span>
+          <span class="block text-sm text-zinc-500">${hits.length ? `${hits.length} רשומות בתאריך זה` : 'אין רשומות בתאריך זה'}</span></span>
+        ${JUMP_BTN(date)}
+      </div>` : '';
+    const rows = hits.slice(0, 30).map(r => { const k = date || r.date; return `
+      <div class="px-4 py-2.5 border-b border-zinc-100 flex items-center justify-between gap-2">
+        <button type="button" data-jump="${k}" class="min-w-0 flex-1 text-right">
+          <span class="flex items-center gap-2"><span class="font-semibold text-wine-dark truncate">${esc(fullName(r.lead))}</span>${kindBadge(r.kind)}</span>
           <span class="block text-sm text-zinc-500">${shortDate(r.date)}${r.lead.phone ? ' · <span dir="ltr">' + esc(r.lead.phone) + '</span>' : ''}</span>
-        </span>
-        ${kindBadge(r.kind)}
-      </button>`).join('') : `<div class="px-4 py-3 text-zinc-500">לא נמצאו תוצאות</div>`;
+        </button>
+        ${JUMP_BTN(k)}
+      </div>`; }).join('');
+    box.innerHTML = head + (rows || (date ? '' : `<div class="px-4 py-3 text-zinc-500">לא נמצאו תוצאות</div>`)) +
+      (hits.length > 30 ? `<div class="px-4 py-2 text-sm text-zinc-500">מוצגות 30 מתוך ${hits.length} – כדאי לחדד את החיפוש</div>` : '');
     box.classList.remove('hidden');
   }
   function goToDate(k) {
@@ -2034,13 +2078,26 @@
   $('fTotal').addEventListener('input', updateFinancePreview);
   $('fPasteBtn').addEventListener('click', applySmartPaste);
   $('mainSearch').addEventListener('input', renderMainSearch);
+  // Jump to date: close the search, move the calendar to that month and open the day.
   $('mainSearchResults').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-skey]');
+    const b = e.target.closest('[data-jump]');
     if (!b) return;
     $('mainSearch').value = ''; renderMainSearch();
-    goToDate(b.dataset.skey);
+    goToDate(b.dataset.jump);
   });
-  document.addEventListener('click', (e) => { if (!e.target.closest('#mainSearch, #mainSearchResults')) $('mainSearchResults').classList.add('hidden'); });
+  $('mainSearchClear').addEventListener('click', () => { $('mainSearch').value = ''; renderMainSearch(); $('mainSearch').focus(); });
+  $('mainSearchDateBtn').addEventListener('click', (e) => {
+    if (e.target.id === 'mainSearchDate') return;
+    try { $('mainSearchDate').showPicker(); } catch { $('mainSearchDate').focus(); }
+  });
+  $('mainSearchDate').addEventListener('change', (e) => {
+    const k = e.target.value;
+    if (!k) return;
+    e.target.value = '';
+    $('mainSearch').value = shortDate(k);
+    renderMainSearch();
+  });
+  document.addEventListener('click', (e) => { if (!e.target.closest('#mainSearch, #mainSearchResults, #mainSearchDateBtn, #mainSearchClear')) $('mainSearchResults').classList.add('hidden'); });
   $('mainSearch').addEventListener('focus', renderMainSearch);
   $('leadForm').addEventListener('input', () => $('formError').classList.add('hidden'));
   // Paid in full implies the deposit was paid as well.

@@ -30,7 +30,9 @@ request from the owner, the newer request wins; point out the conflict.
   copies her details into a new booking). "+ לקוחה חדשה" or a day with no clients opens a blank form.
 - Bride: special notes (yellow), up to two linked days (tour day + time, held day) shown on the calendar.
   Interested clients can already pick a requested package. Smart paste fills the form from free text.
-- Deposit = 15% rounded up to a whole shekel. Upcoming panel = next 30 days. Main screen has a quick search. Client cards offer a one-tap ✕ cancel (with undo); list cards can be swiped
+- Deposit = 15% rounded up to a whole shekel. Upcoming panel = next 30 days. Main screen has a smart search
+  (name / phone in any format / email / package / notes, or a date like 15.6, 15/06/2027, 2027-06-15, or the 📅
+  picker) with ✕ clear and "📅 קפוץ לתאריך בלוח", which moves the calendar there and opens the day. Client cards offer a one-tap ✕ cancel (with undo); list cards can be swiped
   left/right to reveal cancel.
 - A tour is a stage of an interested client, not a separate status: she stays in the interested list/count
   with a wine "🍇 סיור נקבע" chip; the tours tab lists the visits by tour date. List and upcoming cards show

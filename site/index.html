@@ -82,7 +82,10 @@
     nav.links a { text-decoration: none; color: var(--ink); }
     nav.links a:hover { color: var(--wine); }
     .top-cta { min-height: 40px; padding: 0 16px; font-size: 15px; }
-    @media (max-width: 759px) { .top-cta { display: none; } header.top .wrap { justify-content: center; } }
+    .top-actions { display: flex; gap: 8px; align-items: center; }
+    .top-gal { min-height: 40px; padding: 0 14px; font-size: 15px; gap: 6px; }
+    .top-gal .ico { width: 18px; height: 18px; }
+    @media (max-width: 759px) { .top-cta { display: none; } .brand span { font-size: 15px; } }
 
     /* Hero: a soft framed card, like the design reference */
     .hero { background: var(--stone); padding: 28px 0 44px; text-align: center; }
@@ -181,6 +184,8 @@
     }
     .filters button { border-color: transparent; background: transparent; color: var(--muted); padding: 8px 6px; }
     .filters button[aria-pressed="true"] { background: #fff; color: var(--wine); box-shadow: 0 2px 10px -4px rgba(74, 21, 27, .35); }
+    .g-more { text-align: center; margin-top: 18px; }
+    #galleryMore[hidden] { display: none; }
     .g-note { text-align: center; color: var(--olive); font-weight: 600; margin: 0 0 18px; min-height: 1.6em; }
     .g-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .g-item {
@@ -354,7 +359,10 @@
         <a href="#book">תיאום סיור</a>
         <a href="#faq">שאלות נפוצות</a>
       </nav>
-      <a class="btn btn-wine top-cta" href="#book">בדיקת זמינות</a>
+      <div class="top-actions">
+        <a class="btn btn-outline top-gal" href="#gallery"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-9 8"/></svg>גלריה</a>
+        <a class="btn btn-wine top-cta" href="#book">בדיקת זמינות</a>
+      </div>
     </div>
   </header>
 
@@ -528,6 +536,7 @@
         </div>
         <p class="g-note" id="galleryNote"></p>
         <div class="g-grid" id="galleryGrid"></div>
+        <div class="g-more"><button type="button" class="btn btn-outline" id="galleryMore" hidden></button></div>
       </div>
     </section>
 
@@ -696,20 +705,35 @@
   // cat: 'venue' (המתחם) · 'rooms' (הצימרים) · 'moments' (רגעים). The first photo of each view is shown large.
   // An entry without src shows a neat placeholder until its photo is added.
   const GALLERY = [
-    { src: 'assets/gallery/venue-swing-kiss.jpg', cat: 'venue', alt: 'מפגש ליד באר האבן העתיקה' },
-    { src: 'assets/gallery/venue-lawn-bride.jpg', cat: 'venue', alt: 'על הדשא בשמש' },
-    { src: 'assets/gallery/venue-deck.jpg', cat: 'venue', alt: 'הדק והצימרים מעץ' },
+    { src: 'assets/gallery/moment-sun-flare.jpg', cat: 'moments', alt: 'זוג ברגע של אור בגן' },
+    { src: 'assets/gallery/venue-well.jpg', cat: 'venue', alt: 'באר האבן העתיקה' },
+    { src: 'assets/gallery/moment-well-kiss.jpg', cat: 'moments', alt: 'נשיקה ליד הבאר' },
     { src: 'assets/gallery/room-dress.jpg', cat: 'rooms', alt: 'חדר ההתארגנות והשמלה' },
     { src: 'assets/gallery/moment-hair.jpg', cat: 'moments', alt: 'עיצוב השיער בבוקר החתונה' },
+    { src: 'assets/gallery/moment-bw-veil.jpg', cat: 'moments', alt: 'מבט אוהב בשחור-לבן' },
+    { src: 'assets/gallery/venue-swing-kiss.jpg', cat: 'venue', alt: 'מפגש ליד באר האבן העתיקה' },
+    { src: 'assets/gallery/moment-arena-horse.jpg', cat: 'moments', alt: 'זוג ליד מגרש הסוסים' },
+    { src: 'assets/gallery/venue-deck.jpg', cat: 'venue', alt: 'הדק והצימרים מעץ' },
+    { src: 'assets/gallery/moment-well-lookback.jpg', cat: 'moments', alt: 'כלה מביטה לאחור ליד הבאר' },
     { src: 'assets/gallery/room-bath-robe.jpg', cat: 'rooms', alt: 'חדר הרחצה עם חלוק הכלה' },
+    { src: 'assets/gallery/moment-bw-horses.jpg', cat: 'moments', alt: 'כלה עם הסוסים בשחור-לבן' },
+    { src: 'assets/gallery/venue-lawn-bride.jpg', cat: 'venue', alt: 'כלה על הדשא בשמש' },
+    { src: 'assets/gallery/venue-pergola-dress.jpg', cat: 'venue', alt: 'כלה עם השמלה תחת הפרגולה הפורחת' },
+    { src: 'assets/gallery/moment-horses-couple.jpg', cat: 'moments', alt: 'זוג מלטף את הסוסים' },
+    { src: 'assets/gallery/moment-bw-vines.jpg', cat: 'moments', alt: 'זוג צועד בין הגפנים' },
+    { src: 'assets/gallery/moment-well-couple.jpg', cat: 'moments', alt: 'זוג ליד הבאר' },
+    { src: 'assets/gallery/venue-arena-walk.jpg', cat: 'venue', alt: 'טיול בשבילי המתחם' },
     { src: 'assets/gallery/moment-bride-fence.jpg', cat: 'moments', alt: 'הכלה ליד גדר החווה' },
-    { src: 'assets/gallery/moment-couple-garden.jpg', cat: 'moments', alt: 'זוג בגינה הפורחת' },
+    { src: 'assets/gallery/moment-bw-bougainvillea.jpg', cat: 'moments', alt: 'זוג מול הבוגנוויליה' },
     { src: 'assets/gallery/room-bath.jpg', cat: 'rooms', alt: 'חדר רחצה מעוצב' },
+    { src: 'assets/gallery/moment-arena-fence.jpg', cat: 'moments', alt: 'זוג נשען על הגדר' },
+    { src: 'assets/gallery/moment-couple-garden.jpg', cat: 'moments', alt: 'זוג בגינה הפורחת' },
+    { src: 'assets/gallery/moment-barn-door.jpg', cat: 'moments', alt: 'כלה ליד דלת האסם' },
     { src: 'assets/gallery/moment-bun.jpg', cat: 'moments', alt: 'הפרטים הקטנים' },
     { src: 'assets/gallery/moment-bride-wall.jpg', cat: 'moments', alt: 'מוכנה' },
     { src: 'assets/gallery/moment-couple-wall.jpg', cat: 'moments', alt: 'רגע שקט לשניים' },
     { src: 'assets/gallery/moment-bride-portrait.jpg', cat: 'moments', alt: 'פורטרט באור טבעי' },
-    { src: 'assets/couple.jpg', cat: 'moments', alt: 'כלה וחתן בין הכרמים' }
+    { src: 'assets/couple.jpg', cat: 'moments', alt: 'כלה וחתן בין הכרמים' },
   ];
   const CAT_LABEL = { venue: 'המתחם', rooms: 'הצימרים', moments: 'רגעים' };
   const CAT_NOTE = { all: 'המתחם, הצימרים והרגעים – הכל במקום אחד', venue: 'חצר ירוקה, דק עץ ופינות צילום בין העצים',
@@ -718,10 +742,16 @@
   let shown = [];   // photos with a src in the current filter, for the lightbox
   let lbIndex = 0;
 
+  const FIRST_BATCH = 11; // one large photo + five pairs; the rest on request
+  let showAll = false;
   function renderGallery() {
-    const items = GALLERY.filter(g => filter === 'all' || g.cat === filter);
-    shown = items.filter(g => g.src);
+    const all = GALLERY.filter(g => filter === 'all' || g.cat === filter);
+    const items = showAll ? all : all.slice(0, FIRST_BATCH);
+    shown = all.filter(g => g.src); // the lightbox can browse every photo in the tab
     $('galleryNote').textContent = CAT_NOTE[filter];
+    const more = $('galleryMore');
+    more.hidden = all.length <= items.length;
+    more.textContent = `הצגת כל התמונות (${all.length})`;
     $('galleryGrid').innerHTML = items.map(g => g.src
       ? `<button type="button" class="g-item${g.wide ? ' wide' : ''}" data-photo="${shown.indexOf(g)}" aria-label="הגדלת התמונה: ${g.alt}">
            <img src="${g.src}" alt="${g.alt}" loading="lazy" /></button>`
@@ -731,7 +761,7 @@
   document.querySelector('.filters').addEventListener('click', (e) => {
     const b = e.target.closest('[data-filter]');
     if (!b) return;
-    filter = b.dataset.filter;
+    filter = b.dataset.filter; showAll = false;
     document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     renderGallery();
   });
@@ -760,6 +790,11 @@
     const i = f.indexOf(document.activeElement);
     if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
     else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+  });
+  $('galleryMore').addEventListener('click', () => {
+    showAll = true; renderGallery();
+    const next = $('galleryGrid').children[FIRST_BATCH];
+    if (next) next.focus();
   });
   $('galleryGrid').addEventListener('click', (e) => { const b = e.target.closest('[data-photo]'); if (b) openLightbox(+b.dataset.photo); });
   $('lightbox').addEventListener('click', (e) => {

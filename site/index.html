@@ -75,16 +75,19 @@
     header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
     .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .brand img { height: 44px; width: auto; }
-    .brand span { font-weight: 800; letter-spacing: .28em; color: var(--wine); font-size: 15px; }
+    .brand span { font-weight: 700; color: var(--wine); font-size: 16px; white-space: nowrap; }
     nav.links { display: none; gap: 22px; font-weight: 600; font-size: 16px; }
     nav.links a { text-decoration: none; color: var(--ink); }
     nav.links a:hover { color: var(--wine); }
     .top-cta { min-height: 40px; padding: 0 16px; font-size: 15px; }
+    @media (max-width: 759px) { .top-cta { display: none; } header.top .wrap { justify-content: center; } }
 
     /* Hero: a soft framed card, like the design reference */
     .hero { background: var(--stone); padding: 28px 0 44px; text-align: center; }
     .hero .brandline { color: var(--olive); letter-spacing: .3em; font-weight: 700; font-size: 14px; }
     .hero h1 { font-size: clamp(52px, 15vw, 84px); font-weight: 800; margin: 2px 0 0; letter-spacing: .02em; }
+    .hero h1.logo-title { margin: 0; line-height: 0; }
+    .hero h1.logo-title img { width: min(230px, 62vw); height: auto; margin: 0 auto; }
     .hero .tagline { color: var(--muted); font-size: clamp(19px, 4.8vw, 24px); margin: 2px 0 22px; }
     .hero .frame { position: relative; border-radius: 28px; overflow: hidden; box-shadow: var(--shadow); aspect-ratio: 4 / 5; max-height: 72vh; margin: 0 auto; max-width: 560px; }
     .hero .frame img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
@@ -310,6 +313,7 @@
       .hero .frame { grid-column: 2; grid-row: 1 / -1; width: 100%; max-height: none; }
       .hero .brandline { grid-column: 1; grid-row: 2; }
       .hero h1 { grid-column: 1; grid-row: 3; }
+      .hero h1.logo-title img { margin: 0; width: 260px; }
       .hero .tagline { grid-column: 1; grid-row: 4; }
       .hero .lead { grid-column: 1; grid-row: 5; margin-top: 18px; }
       .hero .sub { grid-column: 1; grid-row: 6; margin-right: 0; }
@@ -324,7 +328,7 @@
     <div class="wrap">
       <a class="brand" href="#top" aria-label="הכרם – לראש הדף">
         <img src="assets/logo.png" alt="הכרם" width="52" height="44" />
-        <span>HAKEREM</span>
+        <span>הבית להתארגנות לכלות</span>
       </a>
       <nav class="links" aria-label="ניווט ראשי">
         <a href="#included">מה כלול</a>
@@ -342,8 +346,7 @@
     <!-- Hero -->
     <section class="hero">
       <div class="wrap">
-        <div class="brandline">HAKEREM</div>
-        <h1>הכרם</h1>
+        <h1 class="logo-title"><img src="assets/logo.png" alt="הכרם – הבית להתארגנות לכלות" width="312" height="264" /></h1>
         <p class="tagline">הבית להתארגנות לכלות</p>
         <div class="frame">
           <img src="assets/gallery/venue-lawn-bride.jpg" alt="כלה מחייכת על הדשא בשמש" fetchpriority="high" />

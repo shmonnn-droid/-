@@ -21,6 +21,8 @@ request from the owner, the newer request wins; point out the conflict.
   only — never invent claims), 15% deposit rule, gold line icons (no emojis), tour form that opens a
   WhatsApp message to 972533488645 in a format the diary's smart paste reads. Root `landing.html` only redirects to
   `site/`. It never touches the diary; edit the GALLERY list in `site/index.html` to add photos.
+  Accessibility (IS 5568 / WCAG 2.0 AA): `site/accessibility.html` statement (coordinator: נטלי, 053-3488645), linked
+  from the footer; keep text contrast ≥4.5:1, video pause buttons, skip link, keyboard-usable lightbox. No overlay widgets.
 - Statuses: interested (orange), tour (own date + time), bride booking (locks the date,
   package 1: arrive 20:00 the day before → leave 16:30; package 2: 08:00 → 16:30), maternity shoot
   (hour slot only — the day stays open; slots may not overlap bride bookings or other shoots), cancelled.

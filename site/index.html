@@ -45,7 +45,7 @@
     a { color: inherit; }
     h1, h2, h3 { color: var(--wine); line-height: 1.2; margin: 0; font-weight: 700; }
     .wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-    .eyebrow { letter-spacing: .32em; font-size: 13px; font-weight: 700; color: var(--gold); text-transform: uppercase; }
+    .eyebrow { letter-spacing: .32em; font-size: 13px; font-weight: 700; color: #7a5f37; text-transform: uppercase; } /* deep gold: AA contrast for small text */
     .divider { position: relative; width: 120px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 16px auto 0; }
     .divider::after { content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; background: var(--gold); transform: translate(-50%, -50%) rotate(45deg); box-shadow: 0 0 0 4px var(--cream); }
     .gallery-sec .divider::after, .highlights .divider::after { box-shadow: 0 0 0 4px var(--stone); }
@@ -65,7 +65,7 @@
     .btn-wine:hover { background: #5c1d24; }
     .btn-ghost { background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.55); backdrop-filter: blur(6px); }
     .btn-outline { background: #fff; color: var(--wine); border: 1.5px solid var(--wine); }
-    .btn-wa { background: #1f8a4c; color: #fff; }
+    .btn-wa { background: #1b7a43; color: #fff; }
 
     /* Header */
     header.top {
@@ -204,6 +204,19 @@
     .v-card .cap { position: absolute; inset: auto 0 0 0; padding: 26px 12px 12px; color: #fff; font-weight: 700; font-size: 15px;
       background: linear-gradient(180deg, transparent, rgba(20, 10, 8, .75)); pointer-events: none; }
 
+    .v-btn { position: absolute; bottom: 12px; left: 12px; width: 44px; height: 44px; border-radius: 50%; border: 0; cursor: pointer;
+      background: rgba(250, 247, 242, .9); color: var(--wine); display: flex; align-items: center; justify-content: center; }
+    .v-btn svg { width: 20px; height: 20px; }
+    .v-btn .i-play, .v-btn[aria-pressed="true"] .i-pause { display: none; }
+    .v-btn[aria-pressed="true"] .i-play { display: block; }
+
+    /* Accessibility helpers */
+    .skip { position: absolute; top: -60px; right: 12px; z-index: 100; background: var(--wine); color: #fff; padding: 10px 16px; border-radius: 12px; font-weight: 700; text-decoration: none; }
+    .skip:focus { top: 10px; }
+    a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible, label:has(input:focus-visible) {
+      outline: 3px solid var(--wine); outline-offset: 3px; border-radius: 12px; }
+    footer a { color: var(--wine); font-weight: 600; }
+
     /* Lightbox */
     .lightbox { position: fixed; inset: 0; z-index: 80; background: rgba(20, 10, 8, .94); display: none; align-items: center; justify-content: center; flex-direction: column; }
     .lightbox.open { display: flex; }
@@ -323,6 +336,7 @@
   </style>
 </head>
 <body>
+  <a class="skip" href="#content">דלג לתוכן העיקרי</a>
 
   <header class="top">
     <div class="wrap">
@@ -343,6 +357,7 @@
   </header>
 
   <main id="top">
+    <span id="content" tabindex="-1"></span>
     <!-- Hero -->
     <section class="hero">
       <div class="wrap">
@@ -526,9 +541,11 @@
         <div class="v-grid">
           <div class="v-card reveal">
             <video src="assets/video/lounge.mp4" poster="assets/video/lounge.jpg" muted loop playsinline autoplay preload="metadata" aria-label="סרטון: חלל האירוח והמטבחון"></video>
+            <button type="button" class="v-btn" aria-label="עצירת הסרטון" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="i-pause"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="i-play"><path d="M8 5.5v13l11-6.5z"/></svg></button>
           </div>
           <div class="v-card reveal">
             <video src="assets/video/evening.mp4" poster="assets/video/evening.jpg" muted loop playsinline autoplay preload="metadata" aria-label="סרטון: פינת הערב בחדר"></video>
+            <button type="button" class="v-btn" aria-label="עצירת הסרטון" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="i-pause"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></svg><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="i-play"><path d="M8 5.5v13l11-6.5z"/></svg></button>
           </div>
         </div>
       </div>
@@ -611,7 +628,7 @@
     <!-- Contact -->
     <section id="contact" class="contact">
       <div class="wrap">
-        <div class="eyebrow" style="color:#e6dcc8">צור קשר</div>
+        <div class="eyebrow" style="color:#f3ecdc">צור קשר</div>
         <span class="cg"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7V4"/><path d="M12 5c1.8-2.2 4.6-2.2 6.3-.6-1.8 1.7-4.5 2.2-6.3.6z"/><circle cx="8.5" cy="10" r="2"/><circle cx="12.3" cy="10" r="2"/><circle cx="16.1" cy="10" r="2"/><circle cx="10.4" cy="13.6" r="2"/><circle cx="14.2" cy="13.6" r="2"/><circle cx="12.3" cy="17.2" r="2"/></svg></span>
         <h2>נשמח להכיר אותך ולארח אותך בכרם</h2>
         <p>לשאלות, זמינות ותיאום סיור במתחם – בטלפון או בוואטסאפ.</p>
@@ -627,7 +644,8 @@
 
   <footer>
     <img src="assets/logo.png" alt="" width="66" height="56" />
-    HAKEREM | הכרם – הבית להתארגנות לכלות • מושב בצרה
+    הכרם – הבית להתארגנות לכלות • מושב בצרה
+    <div style="margin-top:8px"><a href="accessibility.html">הצהרת נגישות</a></div>
   </footer>
 
   <!-- Floating action bar (mobile) -->
@@ -716,17 +734,31 @@
     renderGallery();
   });
 
+  let lbReturn = null;
   function openLightbox(i) {
+    if (!$('lightbox').classList.contains('open')) lbReturn = document.activeElement;
     lbIndex = (i + shown.length) % shown.length;
     const g = shown[lbIndex];
     $('lbImg').src = g.src; $('lbImg').alt = g.alt;
     const many = shown.length > 1;
     document.querySelector('.lb-prev').style.display = many ? '' : 'none';
     document.querySelector('.lb-next').style.display = many ? '' : 'none';
+    $('lbImg').setAttribute('aria-label', `תמונה ${lbIndex + 1} מתוך ${shown.length}`);
     $('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
+    if (!$('lightbox').contains(document.activeElement)) document.querySelector('.lb-close').focus();
   }
-  function closeLightbox() { $('lightbox').classList.remove('open'); document.body.style.overflow = ''; }
+  function closeLightbox() {
+    $('lightbox').classList.remove('open'); document.body.style.overflow = '';
+    if (lbReturn && lbReturn.focus) lbReturn.focus();
+  }
+  $('lightbox').addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const f = [...$('lightbox').querySelectorAll('button')].filter(b => b.offsetParent);
+    const i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
+  });
   $('galleryGrid').addEventListener('click', (e) => { const b = e.target.closest('[data-photo]'); if (b) openLightbox(+b.dataset.photo); });
   $('lightbox').addEventListener('click', (e) => {
     const a = e.target.closest('[data-lb]');
@@ -826,11 +858,16 @@
 
   // Videos play only while on screen (saves data), and never for reduced-motion users.
   const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  document.querySelectorAll('.v-card video').forEach(v => {
-    if (reduce) { v.removeAttribute('autoplay'); v.controls = true; v.pause(); return; }
+  document.querySelectorAll('.v-card').forEach(card => {
+    const v = card.querySelector('video'), btn = card.querySelector('.v-btn');
+    let stopped = reduce; // stopped by the visitor (or by the reduced-motion setting)
+    const sync = () => { btn.setAttribute('aria-pressed', String(stopped)); btn.setAttribute('aria-label', stopped ? 'הפעלת הסרטון' : 'עצירת הסרטון'); };
+    if (reduce) { v.removeAttribute('autoplay'); v.pause(); }
+    btn.addEventListener('click', () => { stopped = !stopped; stopped ? v.pause() : v.play().catch(() => {}); sync(); });
     if ('IntersectionObserver' in window) {
-      new IntersectionObserver(([en]) => { en.isIntersecting ? v.play().catch(() => {}) : v.pause(); }, { threshold: .3 }).observe(v);
+      new IntersectionObserver(([en]) => { (en.isIntersecting && !stopped) ? v.play().catch(() => {}) : v.pause(); }, { threshold: .3 }).observe(v);
     }
+    sync();
   });
 
   renderGallery();

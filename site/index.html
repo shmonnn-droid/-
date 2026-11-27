@@ -444,11 +444,9 @@
         <div class="v-grid">
           <div class="v-card reveal">
             <video src="assets/video/lounge.mp4" poster="assets/video/lounge.jpg" muted loop playsinline autoplay preload="metadata" aria-label="סרטון: חלל האירוח והמטבחון"></video>
-            <span class="cap">חלל האירוח והמטבחון</span>
           </div>
           <div class="v-card reveal">
             <video src="assets/video/evening.mp4" poster="assets/video/evening.jpg" muted loop playsinline autoplay preload="metadata" aria-label="סרטון: פינת הערב בחדר"></video>
-            <span class="cap">ערב רגוע לפני היום הגדול</span>
           </div>
         </div>
       </div>
@@ -541,7 +539,6 @@
     <button type="button" class="lb-btn lb-close" data-lb="close" aria-label="סגירה">✕</button>
     <button type="button" class="lb-btn lb-prev" data-lb="prev" aria-label="התמונה הקודמת">›</button>
     <img id="lbImg" alt="" />
-    <div class="lb-cap" id="lbCap"></div>
     <button type="button" class="lb-btn lb-next" data-lb="next" aria-label="התמונה הבאה">‹</button>
   </div>
 
@@ -604,7 +601,7 @@
     $('galleryNote').textContent = CAT_NOTE[filter];
     $('galleryGrid').innerHTML = items.map(g => g.src
       ? `<button type="button" class="g-item${g.wide ? ' wide' : ''}" data-photo="${shown.indexOf(g)}" aria-label="הגדלת התמונה: ${g.alt}">
-           <img src="${g.src}" alt="${g.alt}" loading="lazy" /><span class="cap">${g.alt}</span></button>`
+           <img src="${g.src}" alt="${g.alt}" loading="lazy" /></button>`
       : `<div class="g-item placeholder${g.wide ? ' wide' : ''}" aria-label="${g.alt} – תמונה בקרוב">
            <span class="ph-ic">🖼️</span><span class="ph-t">${CAT_LABEL[g.cat]} · ${g.alt}</span></div>`).join('');
   }
@@ -619,7 +616,7 @@
   function openLightbox(i) {
     lbIndex = (i + shown.length) % shown.length;
     const g = shown[lbIndex];
-    $('lbImg').src = g.src; $('lbImg').alt = g.alt; $('lbCap').textContent = g.alt;
+    $('lbImg').src = g.src; $('lbImg').alt = g.alt;
     const many = shown.length > 1;
     document.querySelector('.lb-prev').style.display = many ? '' : 'none';
     document.querySelector('.lb-next').style.display = many ? '' : 'none';

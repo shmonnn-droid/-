@@ -109,14 +109,33 @@
     .checks { list-style: none; padding: 0; margin: 0; }
     .checks li { position: relative; padding: 6px 30px 6px 0; border-bottom: 1px dashed var(--line); font-size: 17px; }
     .checks li:last-child { border-bottom: 0; }
-    .checks li::before { content: '✓'; position: absolute; right: 0; top: 6px; width: 22px; height: 22px; border-radius: 50%;
-      background: #eef1ea; color: var(--olive); font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+    .checks li::before { content: '';
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23586853' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E");
+      background-size: 14px; background-repeat: no-repeat; background-position: center; position: absolute; right: 0; top: 6px; width: 22px; height: 22px; border-radius: 50%;
+      background-color: #eef1ea; }
     .locs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 18px 0 6px; }
     .locs span { background: var(--cream); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-weight: 600; font-size: 16px; color: var(--olive); }
     .photo-intro { text-align: center; max-width: 620px; margin: 0 auto 26px; color: var(--muted); }
     .photo-intro p { margin: 10px 0 0; }
     .policy { border-right: 4px solid var(--gold); background: var(--stone); border-radius: 14px; padding: 12px 14px; font-size: 15px; color: var(--ink); margin: 4px 0 16px; line-height: 1.55; }
     .policy b { color: var(--wine); }
+
+    /* Line icons (replace emojis) */
+    .ico { width: 1.15em; height: 1.15em; flex: 0 0 auto; vertical-align: -0.2em; }
+    .btn .ico { width: 20px; height: 20px; }
+    .hero .frame .badge { display: inline-flex; align-items: center; gap: 6px; }
+    .hero .frame .badge .ico { color: var(--gold); width: 18px; height: 18px; }
+    .ih { display: flex; align-items: center; gap: 10px; }
+    .ib { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--gold); background: #fff; color: #8f7349;
+      display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+    .ib .ico { width: 22px; height: 22px; }
+    .policy { display: flex; gap: 10px; align-items: flex-start; }
+    .policy .pi { color: #8f7349; flex: 0 0 auto; margin-top: 1px; }
+    .policy .pi .ico { width: 22px; height: 22px; }
+    .cg { display: inline-flex; width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255,255,255,.55); color: #fff;
+      align-items: center; justify-content: center; margin-bottom: 10px; }
+    .cg .ico { width: 28px; height: 28px; }
+    .g-item.placeholder .ph-ic .ico { width: 30px; height: 30px; }
 
     /* Packages */
     .pk-grid { display: grid; gap: 18px; }
@@ -289,7 +308,7 @@
         <p class="tagline">הבית להתארגנות לכלות</p>
         <div class="frame">
           <img src="assets/gallery/venue-lawn-bride.jpg" alt="כלה מחייכת על הדשא בשמש" fetchpriority="high" />
-          <span class="badge">📍 מושב בצרה · השרון</span>
+          <span class="badge"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg> מושב בצרה · השרון</span>
         </div>
         <h2 class="lead">היום שלך מתחיל כאן.</h2>
         <p class="sub">מוזמנת להכיר מקרוב את המתחם שלנו, את הפינות הקטנות ואת האווירה שהופכת כל רגע למיוחד.</p>
@@ -335,7 +354,7 @@
         </div>
         <div class="incl-grid">
           <div class="incl-card reveal">
-            <h3>🤍 בחבילה</h3>
+            <h3 class="ih"><span class="ib"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 2.8C19.5 15.4 12 20 12 20z"/></svg></span>בחבילה</h3>
             <ul class="checks">
               <li>מתחם פרטי וסגור העומד כולו לרשות הכלה והמלוות</li>
               <li>אירוח לכלה ועד 4 מלוות</li>
@@ -346,7 +365,7 @@
             </ul>
           </div>
           <div class="incl-card reveal">
-            <h3>🏡 בכל אחד משני הצימרים</h3>
+            <h3 class="ih"><span class="ib"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 20.5h17"/><path d="M5.5 20.5V10L12 4.5l6.5 5.5v10.5"/><path d="M10 20.5v-5h4v5"/></svg></span>בכל אחד משני הצימרים</h3>
             <ul class="checks">
               <li>חדר שינה זוגי</li>
               <li>ספה הנפתחת למיטה זוגית</li>
@@ -419,7 +438,7 @@
           <div class="divider"></div>
         </div>
         <div class="photo-intro reveal">
-          <h3 style="font-size:22px">🌿 גם הצילומים מקבלים מקום מרכזי</h3>
+          <h3 class="ih" style="font-size:22px;justify-content:center"><span class="ib"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3a1 1 0 0 1 1 1v9.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.6"/></svg></span>גם הצילומים מקבלים מקום מרכזי</h3>
           <div class="locs"><span>כרם הענבים</span><span>מטע הזיתים</span><span>באר האבן העתיקה</span><span>המדשאות</span><span>החצר</span></div>
           <p>מגוון רקעים לצילומי ההתארגנות, לצילומים עם המלוות ולרגעים האישיים שלפני החופה. גם המפגש עם החתן יכול להתקיים בכרם – החתן מגיע עם עד 4 מלווים, אפשר להמשיך יחד לצילומי זוגיות במקום, ובני משפחה קרובים מוזמנים למפגש.</p>
           <p><b style="color:var(--wine)">הכל באותו מתחם:</b> ההתארגנות, המנוחה, המפגש והצילומים – בלי לעבור בין לוקיישנים ובלי לוותר על פרטיות ונוחות.</p>
@@ -499,7 +518,7 @@
             <div><small>מחיר החבילה</small><span id="estDesc">בחרי תאריך לחישוב</span></div>
             <b id="estPrice">—</b>
           </div>
-          <p class="policy">🤍 <b>חשוב לדעת:</b> שריון התאריך מתבצע רק לאחר העברת מקדמה בגובה 15% מסך העסקה ואישור התשלום. עד אז התאריך נחשב פנוי ויכול להינתן לכלה אחרת שתשריין בפועל.</p>
+          <p class="policy"><span class="pi"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.2"/></svg></span><span><b>חשוב לדעת:</b> שריון התאריך מתבצע רק לאחר העברת מקדמה בגובה 15% מסך העסקה ואישור התשלום. עד אז התאריך נחשב פנוי ויכול להינתן לכלה אחרת שתשריין בפועל.</span></p>
           <p class="form-err" id="formErr" role="alert"></p>
           <button type="submit" class="btn btn-wa">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.1c-.24.68-1.42 1.3-1.95 1.34-.5.05-.97.23-3.27-.68-2.77-1.09-4.52-3.93-4.66-4.11-.13-.18-1.11-1.48-1.11-2.83 0-1.34.7-2 .95-2.27.25-.27.54-.34.72-.34l.52.01c.17.01.39-.06.61.47.24.56.79 1.92.86 2.06.07.14.11.3.02.48-.09.18-.14.3-.27.46-.14.16-.29.36-.41.48-.14.14-.28.29-.12.56.16.27.71 1.17 1.52 1.89 1.05.93 1.93 1.22 2.2 1.36.27.14.43.11.59-.07.16-.18.68-.79.86-1.06.18-.27.36-.23.61-.14.25.09 1.58.75 1.85.88.27.14.45.2.52.32.07.11.07.66-.17 1.33z"/></svg>
@@ -514,12 +533,13 @@
     <section id="contact" class="contact">
       <div class="wrap">
         <div class="eyebrow" style="color:#e6dcc8">צור קשר</div>
-        <h2>נשמח להכיר אותך ולארח אותך בכרם 🤍🍇</h2>
+        <span class="cg"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7V4"/><path d="M12 5c1.8-2.2 4.6-2.2 6.3-.6-1.8 1.7-4.5 2.2-6.3.6z"/><circle cx="8.5" cy="10" r="2"/><circle cx="12.3" cy="10" r="2"/><circle cx="16.1" cy="10" r="2"/><circle cx="10.4" cy="13.6" r="2"/><circle cx="14.2" cy="13.6" r="2"/><circle cx="12.3" cy="17.2" r="2"/></svg></span>
+        <h2>נשמח להכיר אותך ולארח אותך בכרם</h2>
         <p>לשאלות, זמינות ותיאום סיור במתחם – בטלפון או בוואטסאפ.</p>
         <a class="phone" href="tel:0533488645">053-3488645</a>
         <div class="actions">
-          <a class="btn btn-outline" href="tel:0533488645">📞 חיוג</a>
-          <a class="btn btn-wa" href="https://wa.me/972533488645" target="_blank" rel="noopener">💬 וואטסאפ</a>
+          <a class="btn btn-outline" href="tel:0533488645"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.5h2.6l1.4 4.2-2 1.4a12 12 0 0 0 6.3 6.3l1.4-2 4.2 1.4v2.6a1.6 1.6 0 0 1-1.7 1.6A16.6 16.6 0 0 1 5 5.2 1.6 1.6 0 0 1 6.6 3.5z"/></svg> חיוג</a>
+          <a class="btn btn-wa" href="https://wa.me/972533488645" target="_blank" rel="noopener"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.1c-.24.68-1.42 1.3-1.95 1.34-.5.05-.97.23-3.27-.68-2.77-1.09-4.52-3.93-4.66-4.11-.13-.18-1.11-1.48-1.11-2.83 0-1.34.7-2 .95-2.27.25-.27.54-.34.72-.34l.52.01c.17.01.39-.06.61.47.24.56.79 1.92.86 2.06.07.14.11.3.02.48-.09.18-.14.3-.27.46-.14.16-.29.36-.41.48-.14.14-.28.29-.12.56.16.27.71 1.17 1.52 1.89 1.05.93 1.93 1.22 2.2 1.36.27.14.43.11.59-.07.16-.18.68-.79.86-1.06.18-.27.36-.23.61-.14.25.09 1.58.75 1.85.88.27.14.45.2.52.32.07.11.07.66-.17 1.33z"/></svg> וואטסאפ</a>
         </div>
         <p style="margin-top:22px">הכרם | הבית להתארגנות לכלות<br />מושב בצרה, השרון · סמוך לרעננה וכפר סבא</p>
       </div>
@@ -533,8 +553,8 @@
 
   <!-- Floating action bar (mobile) -->
   <div class="action-bar" aria-label="פעולות מהירות">
-    <a class="btn btn-outline" href="tel:0533488645" aria-label="חיוג להכרם">📞 חיוג</a>
-    <a class="btn btn-wa" href="https://wa.me/972533488645" target="_blank" rel="noopener" aria-label="וואטסאפ להכרם">💬 וואטסאפ</a>
+    <a class="btn btn-outline" href="tel:0533488645" aria-label="חיוג להכרם"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.5h2.6l1.4 4.2-2 1.4a12 12 0 0 0 6.3 6.3l1.4-2 4.2 1.4v2.6a1.6 1.6 0 0 1-1.7 1.6A16.6 16.6 0 0 1 5 5.2 1.6 1.6 0 0 1 6.6 3.5z"/></svg> חיוג</a>
+    <a class="btn btn-wa" href="https://wa.me/972533488645" target="_blank" rel="noopener" aria-label="וואטסאפ להכרם"><svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.1c-.24.68-1.42 1.3-1.95 1.34-.5.05-.97.23-3.27-.68-2.77-1.09-4.52-3.93-4.66-4.11-.13-.18-1.11-1.48-1.11-2.83 0-1.34.7-2 .95-2.27.25-.27.54-.34.72-.34l.52.01c.17.01.39-.06.61.47.24.56.79 1.92.86 2.06.07.14.11.3.02.48-.09.18-.14.3-.27.46-.14.16-.29.36-.41.48-.14.14-.28.29-.12.56.16.27.71 1.17 1.52 1.89 1.05.93 1.93 1.22 2.2 1.36.27.14.43.11.59-.07.16-.18.68-.79.86-1.06.18-.27.36-.23.61-.14.25.09 1.58.75 1.85.88.27.14.45.2.52.32.07.11.07.66-.17 1.33z"/></svg> וואטסאפ</a>
     <a class="btn btn-wine" href="#book">תיאום סיור</a>
   </div>
 
@@ -607,7 +627,7 @@
       ? `<button type="button" class="g-item${g.wide ? ' wide' : ''}" data-photo="${shown.indexOf(g)}" aria-label="הגדלת התמונה: ${g.alt}">
            <img src="${g.src}" alt="${g.alt}" loading="lazy" /></button>`
       : `<div class="g-item placeholder${g.wide ? ' wide' : ''}" aria-label="${g.alt} – תמונה בקרוב">
-           <span class="ph-ic">🖼️</span><span class="ph-t">${CAT_LABEL[g.cat]} · ${g.alt}</span></div>`).join('');
+           <span class="ph-ic"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l1.6-2.5h6.8L17 8h3a1 1 0 0 1 1 1v9.5a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.6"/></svg></span><span class="ph-t">${CAT_LABEL[g.cat]} · ${g.alt}</span></div>`).join('');
   }
   document.querySelector('.filters').addEventListener('click', (e) => {
     const b = e.target.closest('[data-filter]');

@@ -182,7 +182,9 @@
       flex: 1 1 0; font: inherit; font-size: 16px; font-weight: 600; padding: 8px 18px; border-radius: 999px; cursor: pointer;
       border: 1px solid var(--line); background: var(--cream); color: var(--ink);
     }
-    .filters button { border-color: transparent; background: transparent; color: var(--muted); padding: 8px 6px; }
+    .filters button { border-color: transparent; background: transparent; color: var(--muted); padding: 8px 10px; flex: 1 1 auto; white-space: nowrap; }
+    @media (max-width: 420px) { .filters button { font-size: 15px; padding: 8px 8px; } }
+    @media (max-width: 380px) { .filters { gap: 2px; padding: 3px; } .filters button { font-size: 14px; padding: 8px 5px; } }
     .filters button[aria-pressed="true"] { background: #fff; color: var(--wine); box-shadow: 0 2px 10px -4px rgba(74, 21, 27, .35); }
     .g-head { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 14px 0 2px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
     .g-head:first-child { margin-top: 0; }
@@ -531,9 +533,9 @@
         </div>
         <div class="filters" role="group" aria-label="סינון הגלריה">
           <button type="button" data-filter="all" aria-pressed="true">הכל</button>
+          <button type="button" data-filter="moments" aria-pressed="false">הכלות של הכרם</button>
           <button type="button" data-filter="venue" aria-pressed="false">המתחם</button>
           <button type="button" data-filter="rooms" aria-pressed="false">הצימרים</button>
-          <button type="button" data-filter="moments" aria-pressed="false">רגעים</button>
         </div>
         <p class="g-note" id="galleryNote"></p>
         <div class="g-grid" id="galleryGrid"></div>
@@ -702,7 +704,7 @@
 
   // ---------- Gallery ----------
   // To add photos: put the files in assets/gallery/ and add a line here.
-  // cat: 'venue' (המתחם) · 'rooms' (הצימרים) · 'moments' (רגעים). The first photo of each view is shown large.
+  // cat: 'moments' (הכלות של הכרם) · 'venue' (המתחם) · 'rooms' (הצימרים). The first photo of each view is shown large.
   // An entry without src shows a neat placeholder until its photo is added.
   const GALLERY = [
     { src: 'assets/gallery/venue-well.jpg', cat: 'venue', alt: 'באר האבן העתיקה' },
@@ -734,9 +736,9 @@
     { src: 'assets/gallery/moment-bride-portrait.jpg', cat: 'moments', alt: 'פורטרט באור טבעי' },
     { src: 'assets/couple.jpg', cat: 'moments', alt: 'כלה וחתן בין הכרמים' },
   ];
-  const CAT_LABEL = { venue: 'המתחם', rooms: 'הצימרים', moments: 'רגעים' };
-  const CAT_ORDER = ['venue', 'rooms', 'moments'];
-  const CAT_NOTE = { all: 'המתחם, הצימרים והרגעים – הכל במקום אחד', venue: 'באר האבן, מגרש הסוסים, הכרם והמדשאות',
+  const CAT_LABEL = { venue: 'המתחם', rooms: 'הצימרים', moments: 'הכלות של הכרם' };
+  const CAT_ORDER = ['moments', 'venue', 'rooms'];
+  const CAT_NOTE = { all: 'הכלות של הכרם, המתחם והצימרים – הכל במקום אחד', venue: 'באר האבן, מגרש הסוסים, הכרם והמדשאות',
     rooms: 'הפרטים הקטנים שעושים את ההבדל', moments: 'רגעים אמיתיים מכלות שהתארגנו בהכרם' };
   let filter = 'all';
   let shown = [];   // photos with a src in the current filter, for the lightbox

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>HAKEREM | הכרם – הבית להתארגנות לכלות • מושב בצרה</title>
-  <meta name="description" content="הכרם – הבית להתארגנות לכלות במושב בצרה. חבילת התארגנות עם לינה או התארגנות ליום, בבית שקט ויוקרתי בין הכרמים. לבדיקת זמינות ותיאום סיור." />
+  <meta name="description" content="הכרם – מתחם התארגנות אקסקלוסיבי ואינטימי לכלות במושב בצרה שבשרון, סמוך לרעננה וכפר סבא. מתחם פרטי, שני צימרים מעוצבים ולוקיישנים לצילום. לבדיקת זמינות ותיאום סיור." />
   <meta name="theme-color" content="#4a151b" />
   <meta property="og:title" content="HAKEREM | הכרם – הבית להתארגנות לכלות" />
   <meta property="og:description" content="בית שקט ויוקרתי להתארגנות לכלות במושב בצרה. לבדיקת זמינות ותיאום סיור." />
@@ -93,6 +93,24 @@
     .hl h3 { font-size: 18px; margin-top: 6px; }
     .hl p { margin: 4px 0 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
 
+    /* About & what's included */
+    .about { text-align: center; max-width: 640px; margin: 0 auto; }
+    .about p { color: var(--muted); margin: 12px 0 0; }
+    .incl-grid { display: grid; gap: 16px; }
+    .incl-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 20px; box-shadow: var(--shadow); }
+    .incl-card h3 { font-size: 21px; margin-bottom: 10px; }
+    .checks { list-style: none; padding: 0; margin: 0; }
+    .checks li { position: relative; padding: 6px 30px 6px 0; border-bottom: 1px dashed var(--line); font-size: 17px; }
+    .checks li:last-child { border-bottom: 0; }
+    .checks li::before { content: '✓'; position: absolute; right: 0; top: 6px; width: 22px; height: 22px; border-radius: 50%;
+      background: #eef1ea; color: var(--olive); font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+    .locs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 18px 0 6px; }
+    .locs span { background: var(--cream); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; font-weight: 600; font-size: 16px; color: var(--olive); }
+    .photo-intro { text-align: center; max-width: 620px; margin: 0 auto 26px; color: var(--muted); }
+    .photo-intro p { margin: 10px 0 0; }
+    .policy { border-right: 4px solid var(--gold); background: var(--stone); border-radius: 14px; padding: 12px 14px; font-size: 15px; color: var(--ink); margin: 4px 0 16px; line-height: 1.55; }
+    .policy b { color: var(--wine); }
+
     /* Packages */
     .pk-grid { display: grid; gap: 18px; }
     .pk {
@@ -110,6 +128,7 @@
     .price { text-align: center; border-radius: 16px; padding: 12px 6px; background: var(--stone); }
     .price small { display: block; color: var(--muted); font-size: 14px; }
     .price b { font-size: 28px; color: var(--wine); font-weight: 800; }
+    .price .from { display: block; font-size: 13px; font-weight: 600; color: var(--muted); line-height: 1.2; }
     .pk ul { list-style: none; padding: 0; margin: 0 0 20px; color: var(--muted); font-size: 16px; }
     .pk li { padding: 3px 0; }
     .pk li::before { content: '✦'; color: var(--gold); margin-left: 8px; font-size: 12px; }
@@ -221,6 +240,7 @@
       nav.links { display: flex; }
       .hl-grid { grid-template-columns: repeat(4, 1fr); }
       .pk-grid { grid-template-columns: 1fr 1fr; }
+      .incl-grid { grid-template-columns: 1.2fr 1fr; }
       .g-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
       .g-item:last-child:nth-child(even) { grid-column: auto; aspect-ratio: 3 / 4; }
       .filters { justify-content: center; }
@@ -238,6 +258,7 @@
         <span>HAKEREM</span>
       </a>
       <nav class="links" aria-label="ניווט ראשי">
+        <a href="#included">מה כלול</a>
         <a href="#packages">חבילות ומחירים</a>
         <a href="#gallery">גלריה</a>
         <a href="#video">וידאו</a>
@@ -257,7 +278,7 @@
         <p class="tagline">הבית להתארגנות לכלות</p>
         <div class="frame">
           <img src="assets/gallery/venue-lawn-bride.jpg" alt="כלה מחייכת על הדשא בשמש" fetchpriority="high" />
-          <span class="badge">📍 מושב בצרה</span>
+          <span class="badge">📍 מושב בצרה · השרון</span>
         </div>
         <h2 class="lead">היום שלך מתחיל כאן.</h2>
         <p class="sub">מוזמנת להכיר מקרוב את המתחם שלנו, את הפינות הקטנות ואת האווירה שהופכת כל רגע למיוחד.</p>
@@ -268,14 +289,61 @@
       </div>
     </section>
 
+    <!-- About -->
+    <section class="about-sec" id="about">
+      <div class="wrap">
+        <div class="about reveal">
+          <div class="eyebrow">ברוכה הבאה לכרם</div>
+          <h2 style="font-size:clamp(26px,6vw,36px);margin-top:6px">מתחם התארגנות אקסקלוסיבי ואינטימי לכלות</h2>
+          <div class="divider"></div>
+          <p>הכרם ממוקם במושב בצרה שבשרון, סמוך לרעננה וכפר סבא. הוא תוכנן מתוך מחשבה על כל מה שחשוב ביום ההתארגנות: פרטיות מלאה, מרחב, נוחות, אסתטיקה מוקפדת ולוקיישנים טבעיים וייחודיים שילוו אותך לאורך היום המיוחד שלך.</p>
+          <p>המתחם כולו עומד לרשותך באופן בלעדי – את והמלוות שלך נהנות ממרחב פרטי ונעים, עם כל מה שצריך ליום החתונה.</p>
+        </div>
+      </div>
+    </section>
+
     <!-- Highlights -->
     <section class="highlights">
       <div class="wrap">
         <div class="hl-grid">
-          <div class="hl reveal"><div class="ic">🍇</div><h3>בין הכרמים</h3><p>שקט, ירוק ואור טבעי לצילומים</p></div>
-          <div class="hl reveal"><div class="ic">💄</div><h3>מרחב התארגנות</h3><p>מקום נוח לאיפור, שיער והמלוות</p></div>
-          <div class="hl reveal"><div class="ic">🛏️</div><h3>לינה בערב שלפני</h3><p>להתעורר רגועה ביום הגדול</p></div>
-          <div class="hl reveal"><div class="ic">📸</div><h3>רגעים לנצח</h3><p>פינות צילום מקסימות בכל הבית</p></div>
+          <div class="hl reveal"><div class="ic">🔒</div><h3>מתחם פרטי וסגור</h3><p>כולו לרשותך, בלעדית</p></div>
+          <div class="hl reveal"><div class="ic">👰</div><h3>כלה ועד 4 מלוות</h3><p>מרחב נוח לכולן</p></div>
+          <div class="hl reveal"><div class="ic">🏡</div><h3>שני צימרים מעוצבים</h3><p>מאובזרים להתארגנות</p></div>
+          <div class="hl reveal"><div class="ic">🍇</div><h3>לוקיישנים לצילום</h3><p>כרם, זיתים, באר ומדשאות</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- What's included -->
+    <section id="included">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="eyebrow">הכל במקום אחד</div>
+          <h2>מה כלול בחבילת ההתארגנות?</h2>
+          <div class="divider"></div>
+        </div>
+        <div class="incl-grid">
+          <div class="incl-card reveal">
+            <h3>🤍 בחבילה</h3>
+            <ul class="checks">
+              <li>מתחם פרטי וסגור העומד כולו לרשות הכלה והמלוות</li>
+              <li>אירוח לכלה ועד 4 מלוות</li>
+              <li>שני צימרים מעוצבים ומאובזרים, לרשותך ולרשות המלוות לאורך יום ההתארגנות</li>
+              <li>מראות וכיסאות מתאימים לאיפור ושיער – עד שתי עמדות במקביל בכל צימר</li>
+              <li>חצר רחבה, פינות ישיבה ומיטות שיזוף</li>
+              <li>פרטיות, שקט ואווירה טבעית ומוקפדת</li>
+            </ul>
+          </div>
+          <div class="incl-card reveal">
+            <h3>🏡 בכל אחד משני הצימרים</h3>
+            <ul class="checks">
+              <li>חדר שינה זוגי</li>
+              <li>ספה הנפתחת למיטה זוגית</li>
+              <li>מטבח מאובזר</li>
+              <li>חדר רחצה פרטי</li>
+              <li>מרחב מתאים להתארגנות</li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -298,13 +366,13 @@
               <div class="time"><small>צ'ק אאוט</small><b>16:30</b><small>ביום האירוע</small></div>
             </div>
             <div class="prices">
-              <div class="price"><small>ראשון–רביעי</small><b>₪4,500</b></div>
-              <div class="price"><small>חמישי–שישי</small><b>₪4,950</b></div>
+              <div class="price"><small>ראשון–רביעי</small><b><span class="from">החל מ-</span>₪4,500</b></div>
+              <div class="price"><small>חמישי–שישי</small><b><span class="from">החל מ-</span>₪4,950</b></div>
             </div>
             <ul>
-              <li>ערב רגוע ולינה בבית לפני החתונה</li>
-              <li>בוקר התארגנות מלא במרחב פרטי</li>
-              <li>מקום נוח למלוות, לאיפור ולשיער</li>
+              <li>ערב רגוע ולינה בכרם לפני החתונה</li>
+              <li>בוקר התארגנות מלא במתחם פרטי</li>
+              <li>שני צימרים לכלה ועד 4 מלוות</li>
             </ul>
             <button type="button" class="btn btn-wine" data-pick="lodging">לבדיקת זמינות ותיאום סיור</button>
           </article>
@@ -316,13 +384,13 @@
               <div class="time"><small>צ'ק אאוט</small><b>16:30</b><small>ביום האירוע</small></div>
             </div>
             <div class="prices">
-              <div class="price"><small>ראשון–רביעי</small><b>₪3,500</b></div>
-              <div class="price"><small>חמישי–שישי</small><b>₪3,850</b></div>
+              <div class="price"><small>ראשון–רביעי</small><b><span class="from">החל מ-</span>₪3,500</b></div>
+              <div class="price"><small>חמישי–שישי</small><b><span class="from">החל מ-</span>₪3,850</b></div>
             </div>
             <ul>
               <li>יום התארגנות מלא מהבוקר</li>
-              <li>מרחב פרטי ומואר לך ולמלוות</li>
-              <li>פינות צילום בבית ובכרם</li>
+              <li>מתחם פרטי וסגור לך ולמלוות</li>
+              <li>מפגש עם החתן וצילומים במקום</li>
             </ul>
             <button type="button" class="btn btn-wine" data-pick="prep">לבדיקת זמינות ותיאום סיור</button>
           </article>
@@ -338,7 +406,13 @@
           <div class="eyebrow">גלריה</div>
           <h2>גלריית התמונות</h2>
           <div class="divider"></div>
-          <p>בחרי אזור וגלי את הכרם</p>
+        </div>
+        <div class="photo-intro reveal">
+          <h3 style="font-size:22px">🌿 גם הצילומים מקבלים מקום מרכזי</h3>
+          <div class="locs"><span>כרם הענבים</span><span>מטע הזיתים</span><span>באר האבן העתיקה</span><span>המדשאות</span><span>החצר</span></div>
+          <p>מגוון רקעים לצילומי ההתארגנות, לצילומים עם המלוות ולרגעים האישיים שלפני החופה. גם המפגש עם החתן יכול להתקיים בכרם – החתן מגיע עם עד 4 מלווים, אפשר להמשיך יחד לצילומי זוגיות במקום, ובני משפחה קרובים מוזמנים למפגש.</p>
+          <p><b style="color:var(--wine)">הכל באותו מתחם:</b> ההתארגנות, המנוחה, המפגש והצילומים – בלי לעבור בין לוקיישנים ובלי לוותר על פרטיות ונוחות.</p>
+          <p style="margin-top:16px">בחרי אזור וגלי את הכרם</p>
         </div>
         <div class="filters" role="group" aria-label="סינון הגלריה">
           <button type="button" data-filter="all" aria-pressed="true">הכל</button>
@@ -380,7 +454,7 @@
           <div class="eyebrow">בואי להכיר</div>
           <h2>בדיקת זמינות ותיאום סיור</h2>
           <div class="divider"></div>
-          <p>ממלאים כמה פרטים, רואים מחיר משוער, והבקשה נשלחת אלינו בוואטסאפ. נחזור אלייך לתיאום.</p>
+          <p>אם את מרגישה שהכרם יכול להתאים ליום שלך, נשמח להזמין אותך לסיור אישי – להתרשם מקרוב מהצימרים, מהחצר, מהלוקיישנים לצילום ומהאווירה. ממלאים כמה פרטים והבקשה נשלחת אלינו בוואטסאפ.</p>
         </div>
         <form class="form-card" id="bookForm" novalidate>
           <div class="field">
@@ -412,9 +486,10 @@
             </select>
           </div>
           <div class="estimate" aria-live="polite">
-            <div><small>מחיר משוער</small><span id="estDesc">בחרי תאריך לחישוב</span></div>
+            <div><small>מחיר החבילה</small><span id="estDesc">בחרי תאריך לחישוב</span></div>
             <b id="estPrice">—</b>
           </div>
+          <p class="policy">🤍 <b>חשוב לדעת:</b> שריון התאריך מתבצע רק לאחר העברת מקדמה בגובה 15% מסך העסקה ואישור התשלום. עד אז התאריך נחשב פנוי ויכול להינתן לכלה אחרת שתשריין בפועל.</p>
           <p class="form-err" id="formErr" role="alert"></p>
           <button type="submit" class="btn btn-wa">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.1c-.24.68-1.42 1.3-1.95 1.34-.5.05-.97.23-3.27-.68-2.77-1.09-4.52-3.93-4.66-4.11-.13-.18-1.11-1.48-1.11-2.83 0-1.34.7-2 .95-2.27.25-.27.54-.34.72-.34l.52.01c.17.01.39-.06.61.47.24.56.79 1.92.86 2.06.07.14.11.3.02.48-.09.18-.14.3-.27.46-.14.16-.29.36-.41.48-.14.14-.28.29-.12.56.16.27.71 1.17 1.52 1.89 1.05.93 1.93 1.22 2.2 1.36.27.14.43.11.59-.07.16-.18.68-.79.86-1.06.18-.27.36-.23.61-.14.25.09 1.58.75 1.85.88.27.14.45.2.52.32.07.11.07.66-.17 1.33z"/></svg>
@@ -429,14 +504,14 @@
     <section id="contact" class="contact">
       <div class="wrap">
         <div class="eyebrow" style="color:#e6dcc8">צור קשר</div>
-        <h2>נשמח לארח אותך 🤍</h2>
+        <h2>נשמח להכיר אותך ולארח אותך בכרם 🤍🍇</h2>
         <p>לשאלות, זמינות ותיאום סיור במתחם – בטלפון או בוואטסאפ.</p>
         <a class="phone" href="tel:0533488645">053-3488645</a>
         <div class="actions">
           <a class="btn btn-outline" href="tel:0533488645">📞 חיוג</a>
           <a class="btn btn-wa" href="https://wa.me/972533488645" target="_blank" rel="noopener">💬 וואטסאפ</a>
         </div>
-        <p style="margin-top:22px">הכרם | הבית להתארגנות לכלות<br />מושב בצרה</p>
+        <p style="margin-top:22px">הכרם | הבית להתארגנות לכלות<br />מושב בצרה, השרון · סמוך לרעננה וכפר סבא</p>
       </div>
     </section>
   </main>
@@ -493,7 +568,7 @@
   // cat: 'venue' (המתחם) · 'rooms' (הצימרים) · 'moments' (רגעים). The first photo of each view is shown large.
   // An entry without src shows a neat placeholder until its photo is added.
   const GALLERY = [
-    { src: 'assets/gallery/venue-swing-kiss.jpg', cat: 'venue', alt: 'רגע של אהבה ליד הבאר בחצר' },
+    { src: 'assets/gallery/venue-swing-kiss.jpg', cat: 'venue', alt: 'מפגש ליד באר האבן העתיקה' },
     { src: 'assets/gallery/venue-lawn-bride.jpg', cat: 'venue', alt: 'על הדשא בשמש' },
     { src: 'assets/gallery/venue-deck.jpg', cat: 'venue', alt: 'הדק והצימרים מעץ' },
     { src: 'assets/gallery/room-dress.jpg', cat: 'rooms', alt: 'חדר ההתארגנות והשמלה' },
@@ -574,7 +649,7 @@
     if (!est) { $('estDesc').textContent = 'בחרי תאריך לחישוב'; $('estPrice').textContent = '—'; return; }
     if (est.price === null) { $('estDesc').textContent = 'יום שבת – המחיר בתיאום טלפוני'; $('estPrice').textContent = '—'; return; }
     $('estDesc').textContent = `${PACKAGES[pkgValue()].name.replace(/^חבילה \d – /, '')} · יום ${DAYS[est.dow]} (${est.band})`;
-    $('estPrice').textContent = money(est.price);
+    $('estPrice').textContent = 'החל מ-' + money(est.price);
   }
   form.addEventListener('change', updateEstimate);
   $('fDate').addEventListener('input', updateEstimate);
@@ -613,7 +688,7 @@
       `טלפון: ${digits}`,
       `חבילה: ${pkg.name}`,
       `שעה מועדפת לסיור: ${$('fTime').value || 'גמיש'}`,
-      `מחיר משוער: ${est.price ? money(est.price) : 'בתיאום'}`
+      `מחיר: ${est.price ? 'החל מ-' + money(est.price) : 'בתיאום'}`
     ];
     window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener');
   });

@@ -194,6 +194,9 @@
     }
     .field input[type="tel"] { direction: ltr; }
     .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--wine); box-shadow: 0 0 0 3px rgba(74, 21, 27, .12); }
+    .nodate { display: flex !important; align-items: center; gap: 8px; margin-top: 10px; font-weight: 600 !important; font-size: 16px !important; color: var(--muted); cursor: pointer; }
+    .nodate input { width: 22px !important; height: 22px; min-height: 0 !important; accent-color: var(--wine); margin: 0; }
+    .field input:disabled { opacity: .45; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .pk-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .pk-choice label {
@@ -205,8 +208,9 @@
     .pk-choice input { position: absolute; top: 0; right: 0; width: 1px; height: 1px; margin: 0; opacity: 0; pointer-events: none; }
     .pk-choice label:has(input:checked) { border-color: var(--wine); background: #fbf1f1; box-shadow: 0 0 0 3px rgba(74, 21, 27, .1); }
     .estimate {
-      border-radius: 16px; background: var(--stone); padding: 14px 16px; margin: 6px 0 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      border-radius: 16px; background: var(--stone); padding: 14px 16px; margin: 6px 0 18px; display: flex; flex-direction: column; gap: 4px;
     }
+    .estimate b .from { font-size: 15px; font-weight: 600; color: var(--muted); margin-left: 6px; }
     .estimate small { display: block; color: var(--muted); font-size: 14px; }
     .estimate b { font-size: 26px; color: var(--wine); font-weight: 800; white-space: nowrap; }
     .form-err { color: #b42318; font-weight: 600; font-size: 16px; margin: 0 0 12px; display: none; }
@@ -468,6 +472,7 @@
           <div class="field">
             <label for="fDate">תאריך החתונה / האירוע</label>
             <input id="fDate" name="date" type="date" required />
+            <label class="nodate"><input type="checkbox" id="fNoDate" /> עדיין לא סגרנו תאריך</label>
           </div>
           <div class="field">
             <label>חבילה</label>
@@ -645,14 +650,26 @@
   const pkgValue = () => form.querySelector('input[name="pkg"]:checked').value;
 
   function updateEstimate() {
+    if ($('fNoDate').checked) {
+      // No date yet: show the package's weekday price as the starting point.
+      $('estDesc').textContent = `${PACKAGES[pkgValue()].name.replace(/^חבילה \d – /, '')} · המחיר הסופי לפי יום בשבוע`;
+      $('estPrice').innerHTML = '<span class="from">החל מ-</span>' + money(PACKAGES[pkgValue()].weekday);
+      return;
+    }
     const est = estimate(pkgValue(), $('fDate').value);
     if (!est) { $('estDesc').textContent = 'בחרי תאריך לחישוב'; $('estPrice').textContent = '—'; return; }
     if (est.price === null) { $('estDesc').textContent = 'יום שבת – המחיר בתיאום טלפוני'; $('estPrice').textContent = '—'; return; }
     $('estDesc').textContent = `${PACKAGES[pkgValue()].name.replace(/^חבילה \d – /, '')} · יום ${DAYS[est.dow]} (${est.band})`;
-    $('estPrice').textContent = 'החל מ-' + money(est.price);
+    $('estPrice').innerHTML = '<span class="from">החל מ-</span>' + money(est.price);
   }
   form.addEventListener('change', updateEstimate);
   $('fDate').addEventListener('input', updateEstimate);
+  $('fNoDate').addEventListener('change', () => {
+    const off = $('fNoDate').checked;
+    $('fDate').disabled = off;
+    if (off) $('fDate').value = '';
+    updateEstimate();
+  });
 
   // Package buttons on the price cards pre-select the package and scroll to the form.
   document.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
@@ -669,22 +686,23 @@
     e.preventDefault();
     const name = $('fName').value.trim();
     const digits = $('fPhone').value.replace(/\D/g, '').replace(/^972/, '0');
-    const date = $('fDate').value;
+    const noDate = $('fNoDate').checked;
+    const date = noDate ? '' : $('fDate').value;
     let msg = '';
     if (name.length < 2) msg = 'נא למלא שם מלא';
     else if (!/^05\d{8}$/.test(digits) && !/^0\d{8}$/.test(digits)) msg = 'נא למלא מספר טלפון תקין';
-    else if (!date) msg = 'נא לבחור את תאריך החתונה';
-    else if (date < todayKey()) msg = 'לא ניתן לבחור תאריך שכבר עבר';
+    else if (!date && !noDate) msg = 'נא לבחור את תאריך החתונה, או לסמן "עדיין לא סגרנו תאריך"';
+    else if (date && date < todayKey()) msg = 'לא ניתן לבחור תאריך שכבר עבר';
     if (msg) { showErr(msg); return; }
 
-    const d = parseKey(date);
     const pkg = PACKAGES[pkgValue()];
-    const est = estimate(pkgValue(), date);
+    const d = date ? parseKey(date) : null;
+    const est = date ? estimate(pkgValue(), date) : { price: pkg.weekday };
     // Format kept simple so the diary's "smart paste" picks up name, phone, date and package.
     const lines = [
       '🍇 בקשה לתיאום סיור – הכרם',
       `שם: ${name}`,
-      `תאריך החתונה: ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} (יום ${DAYS[d.getDay()]})`,
+      `תאריך החתונה: ${d ? `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} (יום ${DAYS[d.getDay()]})` : 'עדיין לא נסגר'}`,
       `טלפון: ${digits}`,
       `חבילה: ${pkg.name}`,
       `שעה מועדפת לסיור: ${$('fTime').value || 'גמיש'}`,

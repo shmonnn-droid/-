@@ -92,7 +92,11 @@
     .highlights { background: var(--stone); }
     .hl-grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
     .hl { background: var(--cream); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 16px; text-align: center; }
-    .hl .ic { font-size: 28px; }
+    .hl .ic {
+      width: 68px; height: 68px; margin: 0 auto 6px; border-radius: 50%; color: #8f7349;
+      background: #fff; border: 1px solid var(--gold); box-shadow: inset 0 0 0 4px var(--cream); display: flex; align-items: center; justify-content: center;
+    }
+    .hl .ic svg { width: 44px; height: 44px; stroke-width: 1.9; }
     .hl h3 { font-size: 18px; margin-top: 6px; }
     .hl p { margin: 4px 0 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
 
@@ -313,10 +317,10 @@
     <section class="highlights">
       <div class="wrap">
         <div class="hl-grid">
-          <div class="hl reveal"><div class="ic">🔒</div><h3>מתחם פרטי וסגור</h3><p>כולו לרשותך, בלעדית</p></div>
-          <div class="hl reveal"><div class="ic">👰</div><h3>כלה ועד 4 מלוות</h3><p>מרחב נוח לכולן</p></div>
-          <div class="hl reveal"><div class="ic">🏡</div><h3>שני צימרים מעוצבים</h3><p>מאובזרים להתארגנות</p></div>
-          <div class="hl reveal"><div class="ic">🍇</div><h3>לוקיישנים לצילום</h3><p>כרם, זיתים, באר ומדשאות</p></div>
+          <div class="hl reveal"><div class="ic"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="15" cy="24" r="7"/><circle cx="15" cy="24" r="2.2"/><path d="M22 24h18M34 24v6M39 24v5"/></svg></div><h3>מתחם פרטי וסגור</h3><p>כולו לרשותך, בלעדית</p></div>
+          <div class="hl reveal"><div class="ic"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="24" cy="31" r="11.5"/><path d="M16.5 14l4-6.5h7l4 6.5-7.5 7.5z"/><path d="M16.5 14h15M21.5 14l2.5-6.5 2.5 6.5"/></svg></div><h3>כלה ועד 4 מלוות</h3><p>מרחב נוח לכולן</p></div>
+          <div class="hl reveal"><div class="ic"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 40h38"/><path d="M7 40V25l9-8 9 8v15"/><path d="M23 40V27l9-8 9 8v13"/><path d="M14 40v-7h4v7M30 40v-6h4v6"/></svg></div><h3>שני צימרים מעוצבים</h3><p>מאובזרים להתארגנות</p></div>
+          <div class="hl reveal"><div class="ic"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(24 24) scale(1.3) translate(-24.5 -23)"><path d="M24 16v-5"/><path d="M24 12c3-4 8-4 11-1-3 3-8 4-11 1z"/><circle cx="18" cy="21" r="3.2"/><circle cx="24.5" cy="21" r="3.2"/><circle cx="31" cy="21" r="3.2"/><circle cx="21.2" cy="27" r="3.2"/><circle cx="27.8" cy="27" r="3.2"/><circle cx="24.5" cy="33" r="3.2"/></g></svg></div><h3>לוקיישנים לצילום</h3><p>כרם, זיתים, באר ומדשאות</p></div>
         </div>
       </div>
     </section>

@@ -16,7 +16,7 @@ request from the owner, the newer request wins; point out the conflict.
   data instead of replacing it; records already present (same id / date + phone or name) are skipped.
 - Deploy: push to `main`; Netlify publishes it automatically.
 - The public marketing page lives in `site/` (`site/index.html` + `site/assets/`: gallery photos, videos, logo) and is
-  published as its own Cloudflare Pages site (build output directory `site`) so its link shows no account or repo
+  published as its own Cloudflare Pages site https://hakerem.pages.dev (project "hakerem", build output directory `site`) so its link shows no account or repo
   details. Packages/prices ("החל מ-"), gallery, videos, owner's venue details, how-it-works steps, FAQ (owner's facts
   only — never invent claims), 15% deposit rule, gold line icons (no emojis), tour form that opens a
   WhatsApp message to 972533488645 in a format the diary's smart paste reads. Root `landing.html` only redirects to

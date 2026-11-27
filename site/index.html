@@ -185,6 +185,11 @@
     .filters button { border-color: transparent; background: transparent; color: var(--muted); padding: 8px 6px; }
     .filters button[aria-pressed="true"] { background: #fff; color: var(--wine); box-shadow: 0 2px 10px -4px rgba(74, 21, 27, .35); }
     .g-more { text-align: center; margin-top: 18px; }
+    .g-head { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 14px 0 2px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+    .g-head:first-child { margin-top: 0; }
+    .g-head h3 { font-size: 21px; }
+    .g-link { border: 0; background: none; color: var(--wine); font: inherit; font-weight: 700; font-size: 16px; cursor: pointer; padding: 4px 0; }
+    .g-grid.grouped .g-item, .g-grid.grouped .g-item:first-child, .g-grid.grouped .g-item:last-child:nth-child(even) { grid-column: auto; grid-row: auto; aspect-ratio: 4 / 5; }
     #galleryMore[hidden] { display: none; }
     .g-note { text-align: center; color: var(--olive); font-weight: 600; margin: 0 0 18px; min-height: 1.6em; }
     .g-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -354,7 +359,6 @@
       <nav class="links" aria-label="ניווט ראשי">
         <a href="#included">מה כלול</a>
         <a href="#packages">חבילות ומחירים</a>
-        <a href="#gallery">גלריה</a>
         <a href="#video">וידאו</a>
         <a href="#book">תיאום סיור</a>
         <a href="#faq">שאלות נפוצות</a>
@@ -705,27 +709,27 @@
   // cat: 'venue' (המתחם) · 'rooms' (הצימרים) · 'moments' (רגעים). The first photo of each view is shown large.
   // An entry without src shows a neat placeholder until its photo is added.
   const GALLERY = [
-    { src: 'assets/gallery/moment-sun-flare.jpg', cat: 'moments', alt: 'זוג ברגע של אור בגן' },
     { src: 'assets/gallery/venue-well.jpg', cat: 'venue', alt: 'באר האבן העתיקה' },
-    { src: 'assets/gallery/moment-well-kiss.jpg', cat: 'moments', alt: 'נשיקה ליד הבאר' },
+    { src: 'assets/gallery/venue-arena-walk.jpg', cat: 'venue', alt: 'שבילי המתחם ומגרש הסוסים' },
+    { src: 'assets/gallery/venue-deck.jpg', cat: 'rooms', alt: 'הדק והצימרים מעץ' },
     { src: 'assets/gallery/room-dress.jpg', cat: 'rooms', alt: 'חדר ההתארגנות והשמלה' },
+    { src: 'assets/gallery/room-bath-robe.jpg', cat: 'rooms', alt: 'חדר הרחצה עם חלוק הכלה' },
+    { src: 'assets/gallery/room-bath.jpg', cat: 'rooms', alt: 'חדר רחצה מעוצב' },
+    { src: 'assets/gallery/moment-sun-flare.jpg', cat: 'moments', alt: 'זוג ברגע של אור בגן' },
+    { src: 'assets/gallery/moment-well-kiss.jpg', cat: 'moments', alt: 'נשיקה ליד הבאר' },
     { src: 'assets/gallery/moment-hair.jpg', cat: 'moments', alt: 'עיצוב השיער בבוקר החתונה' },
     { src: 'assets/gallery/moment-bw-veil.jpg', cat: 'moments', alt: 'מבט אוהב בשחור-לבן' },
-    { src: 'assets/gallery/venue-swing-kiss.jpg', cat: 'venue', alt: 'מפגש ליד באר האבן העתיקה' },
+    { src: 'assets/gallery/venue-swing-kiss.jpg', cat: 'moments', alt: 'מפגש ליד באר האבן העתיקה' },
     { src: 'assets/gallery/moment-arena-horse.jpg', cat: 'moments', alt: 'זוג ליד מגרש הסוסים' },
-    { src: 'assets/gallery/venue-deck.jpg', cat: 'venue', alt: 'הדק והצימרים מעץ' },
     { src: 'assets/gallery/moment-well-lookback.jpg', cat: 'moments', alt: 'כלה מביטה לאחור ליד הבאר' },
-    { src: 'assets/gallery/room-bath-robe.jpg', cat: 'rooms', alt: 'חדר הרחצה עם חלוק הכלה' },
     { src: 'assets/gallery/moment-bw-horses.jpg', cat: 'moments', alt: 'כלה עם הסוסים בשחור-לבן' },
-    { src: 'assets/gallery/venue-lawn-bride.jpg', cat: 'venue', alt: 'כלה על הדשא בשמש' },
-    { src: 'assets/gallery/venue-pergola-dress.jpg', cat: 'venue', alt: 'כלה עם השמלה תחת הפרגולה הפורחת' },
+    { src: 'assets/gallery/venue-lawn-bride.jpg', cat: 'moments', alt: 'כלה על הדשא בשמש' },
+    { src: 'assets/gallery/venue-pergola-dress.jpg', cat: 'moments', alt: 'כלה עם השמלה תחת הפרגולה הפורחת' },
     { src: 'assets/gallery/moment-horses-couple.jpg', cat: 'moments', alt: 'זוג מלטף את הסוסים' },
     { src: 'assets/gallery/moment-bw-vines.jpg', cat: 'moments', alt: 'זוג צועד בין הגפנים' },
     { src: 'assets/gallery/moment-well-couple.jpg', cat: 'moments', alt: 'זוג ליד הבאר' },
-    { src: 'assets/gallery/venue-arena-walk.jpg', cat: 'venue', alt: 'טיול בשבילי המתחם' },
     { src: 'assets/gallery/moment-bride-fence.jpg', cat: 'moments', alt: 'הכלה ליד גדר החווה' },
     { src: 'assets/gallery/moment-bw-bougainvillea.jpg', cat: 'moments', alt: 'זוג מול הבוגנוויליה' },
-    { src: 'assets/gallery/room-bath.jpg', cat: 'rooms', alt: 'חדר רחצה מעוצב' },
     { src: 'assets/gallery/moment-arena-fence.jpg', cat: 'moments', alt: 'זוג נשען על הגדר' },
     { src: 'assets/gallery/moment-couple-garden.jpg', cat: 'moments', alt: 'זוג בגינה הפורחת' },
     { src: 'assets/gallery/moment-barn-door.jpg', cat: 'moments', alt: 'כלה ליד דלת האסם' },
@@ -736,20 +740,41 @@
     { src: 'assets/couple.jpg', cat: 'moments', alt: 'כלה וחתן בין הכרמים' },
   ];
   const CAT_LABEL = { venue: 'המתחם', rooms: 'הצימרים', moments: 'רגעים' };
-  const CAT_NOTE = { all: 'המתחם, הצימרים והרגעים – הכל במקום אחד', venue: 'חצר ירוקה, דק עץ ופינות צילום בין העצים',
+  const CAT_ORDER = ['venue', 'rooms', 'moments'];
+  const CAT_NOTE = { all: 'המתחם, הצימרים והרגעים – הכל במקום אחד', venue: 'באר האבן, מגרש הסוסים, הכרם והמדשאות',
     rooms: 'הפרטים הקטנים שעושים את ההבדל', moments: 'רגעים אמיתיים מכלות שהתארגנו בהכרם' };
   let filter = 'all';
   let shown = [];   // photos with a src in the current filter, for the lightbox
   let lbIndex = 0;
 
+  const photoTile = (g, i) => `<button type="button" class="g-item" data-photo="${i}" aria-label="הגדלת התמונה: ${g.alt}">
+           <img src="${g.src}" alt="${g.alt}" loading="lazy" /></button>`;
   const FIRST_BATCH = 11; // one large photo + five pairs; the rest on request
   let showAll = false;
   function renderGallery() {
-    const all = GALLERY.filter(g => filter === 'all' || g.cat === filter);
-    const items = showAll ? all : all.slice(0, FIRST_BATCH);
-    shown = all.filter(g => g.src); // the lightbox can browse every photo in the tab
     $('galleryNote').textContent = CAT_NOTE[filter];
     const more = $('galleryMore');
+    $('galleryGrid').classList.toggle('grouped', filter === 'all');
+    if (filter === 'all') {
+      // Overview: each category under its own heading, a few photos each, with a link to the full category.
+      const PER_GROUP = 4;
+      let html = '';
+      shown = [];
+      CAT_ORDER.forEach(cat => {
+        const group = GALLERY.filter(g => g.cat === cat && g.src);
+        if (!group.length) return;
+        const part = group.slice(0, PER_GROUP);
+        html += `<div class="g-head"><h3>${CAT_LABEL[cat]}</h3>${group.length > PER_GROUP
+          ? `<button type="button" class="g-link" data-go="${cat}">לכל ${group.length} התמונות ›</button>` : ''}</div>`;
+        html += part.map(g => { shown.push(g); return photoTile(g, shown.length - 1); }).join('');
+      });
+      more.hidden = true;
+      $('galleryGrid').innerHTML = html;
+      return;
+    }
+    const all = GALLERY.filter(g => g.cat === filter);
+    const items = showAll ? all : all.slice(0, FIRST_BATCH);
+    shown = all.filter(g => g.src); // the lightbox can browse every photo in the tab
     more.hidden = all.length <= items.length;
     more.textContent = `הצגת כל התמונות (${all.length})`;
     $('galleryGrid').innerHTML = items.map(g => g.src
@@ -796,7 +821,11 @@
     const next = $('galleryGrid').children[FIRST_BATCH];
     if (next) next.focus();
   });
-  $('galleryGrid').addEventListener('click', (e) => { const b = e.target.closest('[data-photo]'); if (b) openLightbox(+b.dataset.photo); });
+  $('galleryGrid').addEventListener('click', (e) => {
+    const go = e.target.closest('[data-go]');
+    if (go) { document.querySelector(`.filters [data-filter="${go.dataset.go}"]`).click(); return; }
+    const b = e.target.closest('[data-photo]'); if (b) openLightbox(+b.dataset.photo);
+  });
   $('lightbox').addEventListener('click', (e) => {
     const a = e.target.closest('[data-lb]');
     if (a) { a.dataset.lb === 'close' ? closeLightbox() : openLightbox(lbIndex + (a.dataset.lb === 'next' ? 1 : -1)); }

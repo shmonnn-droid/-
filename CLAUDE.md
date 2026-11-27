@@ -15,6 +15,9 @@ request from the owner, the newer request wins; point out the conflict.
   An import file with `"importMode": "merge"` (e.g. converted from the owner's Excel) is added to the existing
   data instead of replacing it; records already present (same id / date + phone or name) are skipped.
 - Deploy: push to `main`; Netlify publishes it automatically.
+- `landing.html` is a separate public marketing page (packages/prices, gallery from `assets/gallery/`, videos in
+  `assets/video/`, tour form that opens a WhatsApp message to 972533488645 in a format the diary's smart paste
+  reads). It never touches the diary; edit its GALLERY list to add photos.
 - Statuses: interested (orange), tour (own date + time), bride booking (locks the date,
   package 1: arrive 20:00 the day before → leave 16:30; package 2: 08:00 → 16:30), maternity shoot
   (hour slot only — the day stays open; slots may not overlap bride bookings or other shoots), cancelled.

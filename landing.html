@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>HAKEREM | הכרם – הבית להתארגנות לכלות • מושב בצרה</title>
+  <meta name="description" content="הכרם – הבית להתארגנות לכלות במושב בצרה. חבילת התארגנות עם לינה או התארגנות ליום, בבית שקט ויוקרתי בין הכרמים. לבדיקת זמינות ותיאום סיור." />
+  <meta name="theme-color" content="#4a151b" />
+  <meta property="og:title" content="HAKEREM | הכרם – הבית להתארגנות לכלות" />
+  <meta property="og:description" content="בית שקט ויוקרתי להתארגנות לכלות במושב בצרה. לבדיקת זמינות ותיאום סיור." />
+  <meta property="og:image" content="assets/gallery/venue-swing-kiss.jpg" />
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #faf7f2;
+      --stone: #f1ece4;
+      --olive: #586853;
+      --gold: #b89e78;
+      --wine: #4a151b;
+      --ink: #2e2622;
+      --muted: #6f655d;
+      --line: #e4dccf;
+      --radius: 22px;
+      --shadow: 0 18px 40px -24px rgba(74, 21, 27, .35);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    html, body { overflow-x: clip; }
+    body {
+      margin: 0; background: var(--cream); color: var(--ink);
+      font-family: 'November', 'Assistant', system-ui, sans-serif;
+      font-size: 18px; line-height: 1.65;
+      padding-bottom: 84px; /* room for the mobile action bar */
+    }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; }
+    h1, h2, h3 { color: var(--wine); line-height: 1.2; margin: 0; font-weight: 700; }
+    .wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+    .eyebrow { letter-spacing: .32em; font-size: 13px; font-weight: 700; color: var(--gold); text-transform: uppercase; }
+    .divider { width: 72px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 14px auto 0; }
+    section { padding: 64px 0; }
+    .section-head { text-align: center; margin-bottom: 32px; }
+    .section-head h2 { font-size: clamp(28px, 6vw, 40px); margin-top: 6px; }
+    .section-head p { color: var(--muted); max-width: 560px; margin: 12px auto 0; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 50px; padding: 0 24px; border-radius: 999px; border: 0; cursor: pointer;
+      font: inherit; font-weight: 700; font-size: 17px; text-decoration: none; transition: transform .15s, box-shadow .15s, background .15s;
+    }
+    .btn:active { transform: scale(.98); }
+    .btn-wine { background: var(--wine); color: #fff; box-shadow: var(--shadow); }
+    .btn-wine:hover { background: #5c1d24; }
+    .btn-ghost { background: rgba(255,255,255,.14); color: #fff; border: 1px solid rgba(255,255,255,.55); backdrop-filter: blur(6px); }
+    .btn-outline { background: #fff; color: var(--wine); border: 1.5px solid var(--wine); }
+    .btn-wa { background: #1f8a4c; color: #fff; }
+
+    /* Header */
+    header.top {
+      position: sticky; top: 0; z-index: 40; background: rgba(250, 247, 242, .92); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand img { height: 44px; width: auto; }
+    .brand span { font-weight: 800; letter-spacing: .28em; color: var(--wine); font-size: 15px; }
+    nav.links { display: none; gap: 22px; font-weight: 600; font-size: 16px; }
+    nav.links a { text-decoration: none; color: var(--ink); }
+    nav.links a:hover { color: var(--wine); }
+    .top-cta { min-height: 40px; padding: 0 16px; font-size: 15px; }
+
+    /* Hero */
+    .hero { position: relative; min-height: 88vh; display: flex; align-items: flex-end; color: #fff; overflow: hidden; padding: 0; }
+    .hero img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 35%; }
+    .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(46, 20, 16, .15) 0%, rgba(46, 20, 16, .35) 45%, rgba(46, 20, 16, .82) 100%); }
+    .hero .wrap { position: relative; z-index: 1; padding-top: 120px; padding-bottom: 56px; }
+    .hero .eyebrow { color: #e9dcc5; }
+    .hero h1 { color: #fff; font-size: clamp(38px, 10vw, 64px); margin: 10px 0 6px; font-weight: 800; }
+    .hero .sub { font-size: clamp(19px, 4.6vw, 24px); color: #f4ece0; max-width: 560px; margin: 0 0 26px; }
+    .hero .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+    .hero .place { margin-top: 26px; font-size: 15px; color: #e9dcc5; display: flex; align-items: center; gap: 8px; }
+
+    /* Highlights */
+    .highlights { background: var(--stone); }
+    .hl-grid { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; }
+    .hl { background: var(--cream); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 16px; text-align: center; }
+    .hl .ic { font-size: 28px; }
+    .hl h3 { font-size: 18px; margin-top: 6px; }
+    .hl p { margin: 4px 0 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
+
+    /* Packages */
+    .pk-grid { display: grid; gap: 18px; }
+    .pk {
+      background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px 22px; box-shadow: var(--shadow);
+      display: flex; flex-direction: column; position: relative; overflow: hidden;
+    }
+    .pk::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 5px; background: linear-gradient(90deg, var(--gold), var(--olive)); }
+    .pk .tag { align-self: flex-start; font-size: 13px; font-weight: 700; color: var(--olive); background: #eef1ea; border-radius: 999px; padding: 3px 12px; }
+    .pk h3 { font-size: 26px; margin-top: 12px; }
+    .pk .times { display: flex; gap: 10px; margin: 16px 0; }
+    .pk .time { flex: 1; background: var(--cream); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; }
+    .pk .time small { display: block; color: var(--muted); font-size: 13px; }
+    .pk .time b { font-size: 17px; color: var(--ink); }
+    .prices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+    .price { text-align: center; border-radius: 16px; padding: 12px 6px; background: var(--stone); }
+    .price small { display: block; color: var(--muted); font-size: 14px; }
+    .price b { font-size: 28px; color: var(--wine); font-weight: 800; }
+    .pk ul { list-style: none; padding: 0; margin: 0 0 20px; color: var(--muted); font-size: 16px; }
+    .pk li { padding: 3px 0; }
+    .pk li::before { content: '✦'; color: var(--gold); margin-left: 8px; font-size: 12px; }
+    .pk .btn { margin-top: auto; width: 100%; }
+    .price-note { text-align: center; color: var(--muted); font-size: 15px; margin-top: 18px; }
+
+    /* Gallery */
+    .gallery-sec { background: var(--stone); }
+    .filters { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 18px; justify-content: flex-start; scrollbar-width: none; }
+    .filters::-webkit-scrollbar { display: none; }
+    .filters button {
+      flex: 0 0 auto; font: inherit; font-size: 16px; font-weight: 600; padding: 8px 18px; border-radius: 999px; cursor: pointer;
+      border: 1px solid var(--line); background: var(--cream); color: var(--ink);
+    }
+    .filters button[aria-pressed="true"] { background: var(--wine); border-color: var(--wine); color: #fff; }
+    .g-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .g-item {
+      position: relative; border: 0; padding: 0; cursor: pointer; border-radius: 16px; overflow: hidden; aspect-ratio: 3 / 4;
+      background: linear-gradient(160deg, #e9e1d4, #d9cdb9); font: inherit;
+    }
+    .g-item.wide { grid-column: span 2; aspect-ratio: 16 / 10; }
+    .g-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+    .g-item:hover img { transform: scale(1.04); }
+    .g-item .cap {
+      position: absolute; inset: auto 0 0 0; padding: 22px 12px 10px; color: #fff; font-size: 14px; font-weight: 600; text-align: right;
+      background: linear-gradient(180deg, transparent, rgba(30, 15, 12, .7));
+    }
+    .g-item.placeholder { cursor: default; display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--muted); }
+    .g-item.placeholder .ph-ic { font-size: 30px; opacity: .6; }
+    .g-item.placeholder .ph-t { font-size: 14px; margin-top: 4px; }
+
+    /* Video tour */
+    .v-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 640px; margin: 0 auto; }
+    .v-card { position: relative; border-radius: var(--radius); overflow: hidden; background: #201714; aspect-ratio: 9 / 16; box-shadow: var(--shadow); }
+    .v-card video { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .v-card .cap { position: absolute; inset: auto 0 0 0; padding: 26px 12px 12px; color: #fff; font-weight: 700; font-size: 15px;
+      background: linear-gradient(180deg, transparent, rgba(20, 10, 8, .75)); pointer-events: none; }
+
+    /* Lightbox */
+    .lightbox { position: fixed; inset: 0; z-index: 80; background: rgba(20, 10, 8, .94); display: none; align-items: center; justify-content: center; flex-direction: column; }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 94vw; max-height: 78vh; border-radius: 12px; object-fit: contain; }
+    .lightbox .lb-cap { color: #eadfcd; margin-top: 12px; font-size: 16px; text-align: center; padding: 0 20px; }
+    .lb-btn {
+      position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 0; cursor: pointer; font-size: 24px; color: #fff;
+      background: rgba(255,255,255,.14); display: flex; align-items: center; justify-content: center;
+    }
+    .lb-close { top: max(16px, env(safe-area-inset-top)); left: 16px; }
+    .lb-prev { right: 12px; top: 50%; transform: translateY(-50%); }
+    .lb-next { left: 12px; top: 50%; transform: translateY(-50%); }
+
+    /* Booking form */
+    .form-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 20px; box-shadow: var(--shadow); max-width: 620px; margin: 0 auto; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+    .field input, .field select, .field textarea {
+      width: 100%; font: inherit; font-size: 17px; /* 16px+ prevents iOS zoom */
+      padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--cream); color: var(--ink);
+      min-height: 50px; text-align: right;
+    }
+    .field input[type="tel"] { direction: ltr; }
+    .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--wine); box-shadow: 0 0 0 3px rgba(74, 21, 27, .12); }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .pk-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .pk-choice label {
+      display: block; border: 1.5px solid var(--line); border-radius: 14px; padding: 12px; cursor: pointer; background: var(--cream);
+      font-weight: 600; font-size: 16px; line-height: 1.35; margin: 0;
+    }
+    .pk-choice small { display: block; color: var(--muted); font-weight: 400; font-size: 13px; }
+    .pk-choice label { position: relative; }
+    .pk-choice input { position: absolute; top: 0; right: 0; width: 1px; height: 1px; margin: 0; opacity: 0; pointer-events: none; }
+    .pk-choice label:has(input:checked) { border-color: var(--wine); background: #fbf1f1; box-shadow: 0 0 0 3px rgba(74, 21, 27, .1); }
+    .estimate {
+      border-radius: 16px; background: var(--stone); padding: 14px 16px; margin: 6px 0 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .estimate small { display: block; color: var(--muted); font-size: 14px; }
+    .estimate b { font-size: 26px; color: var(--wine); font-weight: 800; white-space: nowrap; }
+    .form-err { color: #b42318; font-weight: 600; font-size: 16px; margin: 0 0 12px; display: none; }
+    .form-card .btn { width: 100%; }
+    .fine { color: var(--muted); font-size: 14px; text-align: center; margin-top: 10px; }
+
+    /* Contact & footer */
+    .contact { background: var(--olive); color: #fff; text-align: center; }
+    .contact h2 { color: #fff; }
+    .contact p { color: #e6ebe1; }
+    .contact .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 22px; }
+    .contact .phone { font-size: 26px; font-weight: 800; letter-spacing: .04em; direction: ltr; display: inline-block; margin-top: 8px; text-decoration: none; color: #fff; }
+    footer { text-align: center; padding: 28px 20px; color: var(--muted); font-size: 14px; }
+    footer img { height: 56px; margin: 0 auto 8px; opacity: .9; }
+
+    /* Floating action bar (mobile) */
+    .action-bar {
+      position: fixed; inset: auto 0 0 0; z-index: 60; display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 8px;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: rgba(250, 247, 242, .96); backdrop-filter: blur(10px);
+      border-top: 1px solid var(--line); box-shadow: 0 -10px 30px -20px rgba(0,0,0,.35);
+    }
+    .action-bar .btn { min-height: 48px; padding: 0 10px; font-size: 16px; }
+
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; transition: none; } html { scroll-behavior: auto; } }
+
+    @media (min-width: 760px) {
+      body { padding-bottom: 0; }
+      .action-bar { display: none; }
+      nav.links { display: flex; }
+      .hl-grid { grid-template-columns: repeat(4, 1fr); }
+      .pk-grid { grid-template-columns: 1fr 1fr; }
+      .g-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      .g-item.wide { grid-column: span 2; }
+      .filters { justify-content: center; }
+      section { padding: 88px 0; }
+      .form-card { padding: 34px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="הכרם – לראש הדף">
+        <img src="assets/logo.png" alt="הכרם" width="52" height="44" />
+        <span>HAKEREM</span>
+      </a>
+      <nav class="links" aria-label="ניווט ראשי">
+        <a href="#packages">חבילות ומחירים</a>
+        <a href="#gallery">גלריה</a>
+        <a href="#video">וידאו</a>
+        <a href="#book">תיאום סיור</a>
+        <a href="#contact">צור קשר</a>
+      </nav>
+      <a class="btn btn-wine top-cta" href="#book">בדיקת זמינות</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero">
+      <img class="bg" src="assets/gallery/venue-swing-kiss.jpg" alt="חתן וכלה בחצר הכרם" fetchpriority="high" />
+      <div class="wrap">
+        <div class="eyebrow">HAKEREM · מושב בצרה</div>
+        <h1>הכרם – הבית להתארגנות לכלות</h1>
+        <p class="sub">בוקר החתונה שלך מתחיל כאן: בית שקט ומואר בין הכרמים, מרחב פרטי לך ולמלוות, ורגע אחד לנשום לפני הגדול מכולם.</p>
+        <div class="actions">
+          <a class="btn btn-wine" href="#book">לבדיקת זמינות ותיאום סיור</a>
+          <a class="btn btn-ghost" href="#packages">לחבילות ולמחירים</a>
+        </div>
+        <div class="place">📍 מושב בצרה · השרון</div>
+      </div>
+    </section>
+
+    <!-- Highlights -->
+    <section class="highlights">
+      <div class="wrap">
+        <div class="hl-grid">
+          <div class="hl reveal"><div class="ic">🍇</div><h3>בין הכרמים</h3><p>שקט, ירוק ואור טבעי לצילומים</p></div>
+          <div class="hl reveal"><div class="ic">💄</div><h3>מרחב התארגנות</h3><p>מקום נוח לאיפור, שיער והמלוות</p></div>
+          <div class="hl reveal"><div class="ic">🛏️</div><h3>לינה בערב שלפני</h3><p>להתעורר רגועה ביום הגדול</p></div>
+          <div class="hl reveal"><div class="ic">📸</div><h3>רגעים לנצח</h3><p>פינות צילום מקסימות בכל הבית</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Packages -->
+    <section id="packages">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="eyebrow">המחירון שלנו</div>
+          <h2>חבילות התארגנות</h2>
+          <div class="divider"></div>
+          <p>שתי חבילות פשוטות וברורות. המחיר נקבע לפי היום בשבוע של יום ההתארגנות.</p>
+        </div>
+        <div class="pk-grid">
+          <article class="pk reveal">
+            <span class="tag">הכי מבוקשת</span>
+            <h3>חבילת התארגנות + לינה</h3>
+            <div class="times">
+              <div class="time"><small>צ'ק אין</small><b>19:30</b><small>בערב שלפני האירוע</small></div>
+              <div class="time"><small>צ'ק אאוט</small><b>16:30</b><small>ביום האירוע</small></div>
+            </div>
+            <div class="prices">
+              <div class="price"><small>ראשון–רביעי</small><b>₪4,500</b></div>
+              <div class="price"><small>חמישי–שישי</small><b>₪4,950</b></div>
+            </div>
+            <ul>
+              <li>ערב רגוע ולינה בבית לפני החתונה</li>
+              <li>בוקר התארגנות מלא במרחב פרטי</li>
+              <li>מקום נוח למלוות, לאיפור ולשיער</li>
+            </ul>
+            <button type="button" class="btn btn-wine" data-pick="lodging">לבדיקת זמינות ותיאום סיור</button>
+          </article>
+          <article class="pk reveal">
+            <span class="tag">יום בלבד</span>
+            <h3>חבילת התארגנות</h3>
+            <div class="times">
+              <div class="time"><small>צ'ק אין</small><b>08:00</b><small>ביום האירוע</small></div>
+              <div class="time"><small>צ'ק אאוט</small><b>16:30</b><small>ביום האירוע</small></div>
+            </div>
+            <div class="prices">
+              <div class="price"><small>ראשון–רביעי</small><b>₪3,500</b></div>
+              <div class="price"><small>חמישי–שישי</small><b>₪3,850</b></div>
+            </div>
+            <ul>
+              <li>יום התארגנות מלא מהבוקר</li>
+              <li>מרחב פרטי ומואר לך ולמלוות</li>
+              <li>פינות צילום בבית ובכרם</li>
+            </ul>
+            <button type="button" class="btn btn-wine" data-pick="prep">לבדיקת זמינות ותיאום סיור</button>
+          </article>
+        </div>
+        <p class="price-note">* המחירון מתייחס ליום ההתארגנות/החתונה בפועל.</p>
+      </div>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="gallery-sec">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="eyebrow">גלריה</div>
+          <h2>להרגיש את המקום</h2>
+          <div class="divider"></div>
+        </div>
+        <div class="filters" role="group" aria-label="סינון הגלריה">
+          <button type="button" data-filter="all" aria-pressed="true">הכל</button>
+          <button type="button" data-filter="venue" aria-pressed="false">המתחם</button>
+          <button type="button" data-filter="rooms" aria-pressed="false">הצימרים</button>
+          <button type="button" data-filter="moments" aria-pressed="false">רגעים</button>
+        </div>
+        <div class="g-grid" id="galleryGrid"></div>
+      </div>
+    </section>
+
+    <!-- Video tour -->
+    <section id="video">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="eyebrow">סיור וידאו</div>
+          <h2>הצצה לבית מבפנים</h2>
+          <div class="divider"></div>
+          <p>חלל אירוח מואר ביום, ופינה חמימה לערב שלפני החתונה.</p>
+        </div>
+        <div class="v-grid">
+          <div class="v-card reveal">
+            <video src="assets/video/lounge.mp4" poster="assets/video/lounge.jpg" muted loop playsinline autoplay preload="metadata" aria-label="סרטון: חלל האירוח והמטבחון"></video>
+            <span class="cap">חלל האירוח והמטבחון</span>
+          </div>
+          <div class="v-card reveal">
+            <video src="assets/video/evening.mp4" poster="assets/video/evening.jpg" muted loop playsinline autoplay preload="metadata" aria-label="סרטון: פינת הערב בחדר"></video>
+            <span class="cap">ערב רגוע לפני היום הגדול</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Booking form -->
+    <section id="book">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div class="eyebrow">בואי להכיר</div>
+          <h2>בדיקת זמינות ותיאום סיור</h2>
+          <div class="divider"></div>
+          <p>ממלאים כמה פרטים, רואים מחיר משוער, והבקשה נשלחת אלינו בוואטסאפ. נחזור אלייך לתיאום.</p>
+        </div>
+        <form class="form-card" id="bookForm" novalidate>
+          <div class="field">
+            <label for="fName">שם מלא</label>
+            <input id="fName" name="name" autocomplete="name" required placeholder="שם פרטי ומשפחה" />
+          </div>
+          <div class="field">
+            <label for="fPhone">טלפון</label>
+            <input id="fPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required placeholder="050-0000000" />
+          </div>
+          <div class="field">
+            <label for="fDate">תאריך החתונה / האירוע</label>
+            <input id="fDate" name="date" type="date" required />
+          </div>
+          <div class="field">
+            <label>חבילה</label>
+            <div class="pk-choice">
+              <label><input type="radio" name="pkg" value="lodging" checked />התארגנות + לינה<small>19:30 ערב לפני → 16:30</small></label>
+              <label><input type="radio" name="pkg" value="prep" />התארגנות (יום בלבד)<small>08:00 → 16:30</small></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="fTime">שעה מועדפת לסיור</label>
+            <select id="fTime" name="time">
+              <option value="">גמיש – נתאם יחד</option>
+              <option>10:00</option><option>11:00</option><option>12:00</option><option>13:00</option>
+              <option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option>
+              <option>18:00</option><option>19:00</option>
+            </select>
+          </div>
+          <div class="estimate" aria-live="polite">
+            <div><small>מחיר משוער</small><span id="estDesc">בחרי תאריך לחישוב</span></div>
+            <b id="estPrice">—</b>
+          </div>
+          <p class="form-err" id="formErr" role="alert"></p>
+          <button type="submit" class="btn btn-wa">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C21.96 6.45 17.5 2 12.04 2zm5.8 14.1c-.24.68-1.42 1.3-1.95 1.34-.5.05-.97.23-3.27-.68-2.77-1.09-4.52-3.93-4.66-4.11-.13-.18-1.11-1.48-1.11-2.83 0-1.34.7-2 .95-2.27.25-.27.54-.34.72-.34l.52.01c.17.01.39-.06.61.47.24.56.79 1.92.86 2.06.07.14.11.3.02.48-.09.18-.14.3-.27.46-.14.16-.29.36-.41.48-.14.14-.28.29-.12.56.16.27.71 1.17 1.52 1.89 1.05.93 1.93 1.22 2.2 1.36.27.14.43.11.59-.07.16-.18.68-.79.86-1.06.18-.27.36-.23.61-.14.25.09 1.58.75 1.85.88.27.14.45.2.52.32.07.11.07.66-.17 1.33z"/></svg>
+            שליחת הבקשה בוואטסאפ
+          </button>
+          <p class="fine">השליחה פותחת את וואטסאפ עם הודעה מוכנה. אפשר גם להתקשר: <a href="tel:0533488645" dir="ltr">053-3488645</a></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="contact">
+      <div class="wrap">
+        <div class="eyebrow" style="color:#e6dcc8">צור קשר</div>
+        <h2>נשמח להכיר אותך</h2>
+        <p>לשאלות, זמינות ותיאום סיור במתחם – בטלפון או בוואטסאפ.</p>
+        <a class="phone" href="tel:0533488645">053-3488645</a>
+        <div class="actions">
+          <a class="btn btn-outline" href="tel:0533488645">📞 חיוג</a>
+          <a class="btn btn-wa" href="https://wa.me/972533488645" target="_blank" rel="noopener">💬 וואטסאפ</a>
+        </div>
+        <p style="margin-top:22px">📍 מושב בצרה</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <img src="assets/logo.png" alt="" width="66" height="56" />
+    HAKEREM | הכרם – הבית להתארגנות לכלות • מושב בצרה
+  </footer>
+
+  <!-- Floating action bar (mobile) -->
+  <div class="action-bar" aria-label="פעולות מהירות">
+    <a class="btn btn-outline" href="tel:0533488645" aria-label="חיוג להכרם">📞 חיוג</a>
+    <a class="btn btn-wa" href="https://wa.me/972533488645" target="_blank" rel="noopener" aria-label="וואטסאפ להכרם">💬 וואטסאפ</a>
+    <a class="btn btn-wine" href="#book">תיאום סיור</a>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="תצוגת תמונה">
+    <button type="button" class="lb-btn lb-close" data-lb="close" aria-label="סגירה">✕</button>
+    <button type="button" class="lb-btn lb-prev" data-lb="prev" aria-label="התמונה הקודמת">›</button>
+    <img id="lbImg" alt="" />
+    <div class="lb-cap" id="lbCap"></div>
+    <button type="button" class="lb-btn lb-next" data-lb="next" aria-label="התמונה הבאה">‹</button>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const WA_NUMBER = '972533488645';
+
+  // ---------- Prices (by the weekday of the actual wedding / prep day) ----------
+  const PACKAGES = {
+    lodging: { name: 'חבילה 1 – התארגנות + לינה', hours: "צ'ק אין 19:30 בערב שלפני · צ'ק אאוט 16:30", weekday: 4500, weekend: 4950 },
+    prep:    { name: 'חבילה 2 – התארגנות יום בלבד', hours: "צ'ק אין 08:00 · צ'ק אאוט 16:30", weekday: 3500, weekend: 3850 }
+  };
+  const DAYS = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+  const money = (n) => '₪' + n.toLocaleString('en-US');
+  const pad = (n) => String(n).padStart(2, '0');
+  const todayKey = () => { const t = new Date(); return `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`; };
+  const parseKey = (k) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+
+  function estimate(pkgId, dateKey) {
+    if (!dateKey) return null;
+    const dow = parseKey(dateKey).getDay();
+    const p = PACKAGES[pkgId];
+    if (dow <= 3) return { dow, price: p.weekday, band: 'ראשון–רביעי' };
+    if (dow <= 5) return { dow, price: p.weekend, band: 'חמישי–שישי' };
+    return { dow, price: null, band: 'שבת' };
+  }
+
+  // ---------- Gallery ----------
+  // To add photos: put the files in assets/gallery/ and add a line here.
+  // cat: 'venue' (המתחם) · 'rooms' (הצימרים) · 'moments' (רגעים). wide: true spans two columns.
+  // An entry without src shows a neat placeholder until its photo is added.
+  const GALLERY = [
+    { src: 'assets/gallery/venue-swing-kiss.jpg', cat: 'venue', alt: 'רגע של אהבה ליד הבאר בחצר' },
+    { src: 'assets/gallery/venue-deck.jpg', cat: 'venue', alt: 'הדק והצימרים מעץ' },
+    { src: 'assets/gallery/room-dress.jpg', cat: 'rooms', alt: 'חדר ההתארגנות והשמלה' },
+    { src: 'assets/gallery/moment-hair.jpg', cat: 'moments', alt: 'עיצוב השיער בבוקר החתונה', wide: true },
+    { src: 'assets/gallery/venue-lawn-bride.jpg', cat: 'venue', alt: 'על הדשא בשמש' },
+    { src: 'assets/gallery/room-bath-robe.jpg', cat: 'rooms', alt: 'חדר הרחצה עם חלוק הכלה' },
+    { src: 'assets/gallery/moment-bride-fence.jpg', cat: 'moments', alt: 'הכלה ליד גדר החווה' },
+    { src: 'assets/gallery/moment-couple-garden.jpg', cat: 'moments', alt: 'זוג בגינה הפורחת' },
+    { src: 'assets/gallery/room-bath.jpg', cat: 'rooms', alt: 'חדר רחצה מעוצב' },
+    { src: 'assets/gallery/moment-bun.jpg', cat: 'moments', alt: 'הפרטים הקטנים' },
+    { src: 'assets/gallery/moment-bride-wall.jpg', cat: 'moments', alt: 'מוכנה' },
+    { src: 'assets/gallery/moment-couple-wall.jpg', cat: 'moments', alt: 'רגע שקט לשניים' },
+    { src: 'assets/gallery/moment-bride-portrait.jpg', cat: 'moments', alt: 'פורטרט באור טבעי' },
+    { src: 'assets/couple.jpg', cat: 'moments', alt: 'כלה וחתן בין הכרמים' }
+  ];
+  const CAT_LABEL = { venue: 'המתחם', rooms: 'הצימרים', moments: 'רגעים' };
+  let filter = 'all';
+  let shown = [];   // photos with a src in the current filter, for the lightbox
+  let lbIndex = 0;
+
+  function renderGallery() {
+    const items = GALLERY.filter(g => filter === 'all' || g.cat === filter);
+    shown = items.filter(g => g.src);
+    $('galleryGrid').innerHTML = items.map(g => g.src
+      ? `<button type="button" class="g-item${g.wide ? ' wide' : ''}" data-photo="${shown.indexOf(g)}" aria-label="הגדלת התמונה: ${g.alt}">
+           <img src="${g.src}" alt="${g.alt}" loading="lazy" /><span class="cap">${g.alt}</span></button>`
+      : `<div class="g-item placeholder${g.wide ? ' wide' : ''}" aria-label="${g.alt} – תמונה בקרוב">
+           <span class="ph-ic">🖼️</span><span class="ph-t">${CAT_LABEL[g.cat]} · ${g.alt}</span></div>`).join('');
+  }
+  document.querySelector('.filters').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-filter]');
+    if (!b) return;
+    filter = b.dataset.filter;
+    document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    renderGallery();
+  });
+
+  function openLightbox(i) {
+    lbIndex = (i + shown.length) % shown.length;
+    const g = shown[lbIndex];
+    $('lbImg').src = g.src; $('lbImg').alt = g.alt; $('lbCap').textContent = g.alt;
+    const many = shown.length > 1;
+    document.querySelector('.lb-prev').style.display = many ? '' : 'none';
+    document.querySelector('.lb-next').style.display = many ? '' : 'none';
+    $('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() { $('lightbox').classList.remove('open'); document.body.style.overflow = ''; }
+  $('galleryGrid').addEventListener('click', (e) => { const b = e.target.closest('[data-photo]'); if (b) openLightbox(+b.dataset.photo); });
+  $('lightbox').addEventListener('click', (e) => {
+    const a = e.target.closest('[data-lb]');
+    if (a) { a.dataset.lb === 'close' ? closeLightbox() : openLightbox(lbIndex + (a.dataset.lb === 'next' ? 1 : -1)); }
+    else if (e.target === $('lightbox')) closeLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (!$('lightbox').classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowLeft') openLightbox(lbIndex + 1);
+    if (e.key === 'ArrowRight') openLightbox(lbIndex - 1);
+  });
+  let touchX = null; // swipe between photos
+  $('lightbox').addEventListener('touchstart', (e) => { touchX = e.touches[0].clientX; }, { passive: true });
+  $('lightbox').addEventListener('touchend', (e) => {
+    if (touchX === null) return;
+    const dx = e.changedTouches[0].clientX - touchX; touchX = null;
+    if (Math.abs(dx) > 50) openLightbox(lbIndex + (dx > 0 ? 1 : -1));
+  }, { passive: true });
+
+  // ---------- Booking form ----------
+  const form = $('bookForm');
+  $('fDate').min = todayKey(); // no past dates
+  const pkgValue = () => form.querySelector('input[name="pkg"]:checked').value;
+
+  function updateEstimate() {
+    const est = estimate(pkgValue(), $('fDate').value);
+    if (!est) { $('estDesc').textContent = 'בחרי תאריך לחישוב'; $('estPrice').textContent = '—'; return; }
+    if (est.price === null) { $('estDesc').textContent = 'יום שבת – המחיר בתיאום טלפוני'; $('estPrice').textContent = '—'; return; }
+    $('estDesc').textContent = `${PACKAGES[pkgValue()].name.replace(/^חבילה \d – /, '')} · יום ${DAYS[est.dow]} (${est.band})`;
+    $('estPrice').textContent = money(est.price);
+  }
+  form.addEventListener('change', updateEstimate);
+  $('fDate').addEventListener('input', updateEstimate);
+
+  // Package buttons on the price cards pre-select the package and scroll to the form.
+  document.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
+    form.querySelector(`input[name="pkg"][value="${b.dataset.pick}"]`).checked = true;
+    updateEstimate();
+    $('book').scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => $('fName').focus({ preventScroll: true }), 500);
+  }));
+
+  function showErr(msg) { const el = $('formErr'); el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
+  form.addEventListener('input', () => showErr(''));
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = $('fName').value.trim();
+    const digits = $('fPhone').value.replace(/\D/g, '').replace(/^972/, '0');
+    const date = $('fDate').value;
+    let msg = '';
+    if (name.length < 2) msg = 'נא למלא שם מלא';
+    else if (!/^05\d{8}$/.test(digits) && !/^0\d{8}$/.test(digits)) msg = 'נא למלא מספר טלפון תקין';
+    else if (!date) msg = 'נא לבחור את תאריך החתונה';
+    else if (date < todayKey()) msg = 'לא ניתן לבחור תאריך שכבר עבר';
+    if (msg) { showErr(msg); return; }
+
+    const d = parseKey(date);
+    const pkg = PACKAGES[pkgValue()];
+    const est = estimate(pkgValue(), date);
+    // Format kept simple so the diary's "smart paste" picks up name, phone, date and package.
+    const lines = [
+      '🍇 בקשה לתיאום סיור – הכרם',
+      `שם: ${name}`,
+      `תאריך החתונה: ${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} (יום ${DAYS[d.getDay()]})`,
+      `טלפון: ${digits}`,
+      `חבילה: ${pkg.name}`,
+      `שעה מועדפת לסיור: ${$('fTime').value || 'גמיש'}`,
+      `מחיר משוער: ${est.price ? money(est.price) : 'בתיאום'}`
+    ];
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank', 'noopener');
+  });
+
+  // ---------- Reveal on scroll ----------
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => entries.forEach(en => {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    }), { threshold: .12 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  } else {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+  }
+
+  // Videos play only while on screen (saves data), and never for reduced-motion users.
+  const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('.v-card video').forEach(v => {
+    if (reduce) { v.removeAttribute('autoplay'); v.controls = true; v.pause(); return; }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([en]) => { en.isIntersecting ? v.play().catch(() => {}) : v.pause(); }, { threshold: .3 }).observe(v);
+    }
+  });
+
+  renderGallery();
+  updateEstimate();
+})();
+</script>
+</body>
+</html>

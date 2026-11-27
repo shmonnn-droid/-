@@ -184,13 +184,10 @@
     }
     .filters button { border-color: transparent; background: transparent; color: var(--muted); padding: 8px 6px; }
     .filters button[aria-pressed="true"] { background: #fff; color: var(--wine); box-shadow: 0 2px 10px -4px rgba(74, 21, 27, .35); }
-    .g-more { text-align: center; margin-top: 18px; }
     .g-head { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 14px 0 2px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
     .g-head:first-child { margin-top: 0; }
     .g-head h3 { font-size: 21px; }
-    .g-link { border: 0; background: none; color: var(--wine); font: inherit; font-weight: 700; font-size: 16px; cursor: pointer; padding: 4px 0; }
     .g-grid.grouped .g-item, .g-grid.grouped .g-item:first-child, .g-grid.grouped .g-item:last-child:nth-child(even) { grid-column: auto; grid-row: auto; aspect-ratio: 4 / 5; }
-    #galleryMore[hidden] { display: none; }
     .g-note { text-align: center; color: var(--olive); font-weight: 600; margin: 0 0 18px; min-height: 1.6em; }
     .g-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .g-item {
@@ -540,7 +537,6 @@
         </div>
         <p class="g-note" id="galleryNote"></p>
         <div class="g-grid" id="galleryGrid"></div>
-        <div class="g-more"><button type="button" class="btn btn-outline" id="galleryMore" hidden></button></div>
       </div>
     </section>
 
@@ -713,7 +709,6 @@
     { src: 'assets/gallery/venue-arena-walk.jpg', cat: 'venue', alt: 'שבילי המתחם ומגרש הסוסים' },
     { src: 'assets/gallery/venue-deck.jpg', cat: 'rooms', alt: 'הדק והצימרים מעץ' },
     { src: 'assets/gallery/room-dress.jpg', cat: 'rooms', alt: 'חדר ההתארגנות והשמלה' },
-    { src: 'assets/gallery/room-bath-robe.jpg', cat: 'rooms', alt: 'חדר הרחצה עם חלוק הכלה' },
     { src: 'assets/gallery/room-bath.jpg', cat: 'rooms', alt: 'חדר רחצה מעוצב' },
     { src: 'assets/gallery/moment-sun-flare.jpg', cat: 'moments', alt: 'זוג ברגע של אור בגן' },
     { src: 'assets/gallery/moment-well-kiss.jpg', cat: 'moments', alt: 'נשיקה ליד הבאר' },
@@ -749,34 +744,25 @@
 
   const photoTile = (g, i) => `<button type="button" class="g-item" data-photo="${i}" aria-label="הגדלת התמונה: ${g.alt}">
            <img src="${g.src}" alt="${g.alt}" loading="lazy" /></button>`;
-  const FIRST_BATCH = 11; // one large photo + five pairs; the rest on request
-  let showAll = false;
   function renderGallery() {
     $('galleryNote').textContent = CAT_NOTE[filter];
-    const more = $('galleryMore');
     $('galleryGrid').classList.toggle('grouped', filter === 'all');
     if (filter === 'all') {
       // Overview: each category under its own heading, a few photos each, with a link to the full category.
-      const PER_GROUP = 4;
       let html = '';
       shown = [];
       CAT_ORDER.forEach(cat => {
         const group = GALLERY.filter(g => g.cat === cat && g.src);
         if (!group.length) return;
-        const part = group.slice(0, PER_GROUP);
-        html += `<div class="g-head"><h3>${CAT_LABEL[cat]}</h3>${group.length > PER_GROUP
-          ? `<button type="button" class="g-link" data-go="${cat}">לכל ${group.length} התמונות ›</button>` : ''}</div>`;
-        html += part.map(g => { shown.push(g); return photoTile(g, shown.length - 1); }).join('');
+        html += `<div class="g-head"><h3>${CAT_LABEL[cat]}</h3></div>`;
+        html += group.map(g => { shown.push(g); return photoTile(g, shown.length - 1); }).join('');
       });
-      more.hidden = true;
       $('galleryGrid').innerHTML = html;
       return;
     }
     const all = GALLERY.filter(g => g.cat === filter);
-    const items = showAll ? all : all.slice(0, FIRST_BATCH);
+    const items = all;
     shown = all.filter(g => g.src); // the lightbox can browse every photo in the tab
-    more.hidden = all.length <= items.length;
-    more.textContent = `הצגת כל התמונות (${all.length})`;
     $('galleryGrid').innerHTML = items.map(g => g.src
       ? `<button type="button" class="g-item${g.wide ? ' wide' : ''}" data-photo="${shown.indexOf(g)}" aria-label="הגדלת התמונה: ${g.alt}">
            <img src="${g.src}" alt="${g.alt}" loading="lazy" /></button>`
@@ -786,7 +772,7 @@
   document.querySelector('.filters').addEventListener('click', (e) => {
     const b = e.target.closest('[data-filter]');
     if (!b) return;
-    filter = b.dataset.filter; showAll = false;
+    filter = b.dataset.filter;
     document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     renderGallery();
   });
@@ -816,14 +802,7 @@
     if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
     else if (!e.shiftKey && i === f.length - 1) { e.preventDefault(); f[0].focus(); }
   });
-  $('galleryMore').addEventListener('click', () => {
-    showAll = true; renderGallery();
-    const next = $('galleryGrid').children[FIRST_BATCH];
-    if (next) next.focus();
-  });
   $('galleryGrid').addEventListener('click', (e) => {
-    const go = e.target.closest('[data-go]');
-    if (go) { document.querySelector(`.filters [data-filter="${go.dataset.go}"]`).click(); return; }
     const b = e.target.closest('[data-photo]'); if (b) openLightbox(+b.dataset.photo);
   });
   $('lightbox').addEventListener('click', (e) => {

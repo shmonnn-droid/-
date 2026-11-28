@@ -18,7 +18,9 @@ request from the owner, the newer request wins; point out the conflict.
 - The public marketing page lives in `site/` (`site/index.html` + `site/assets/`: gallery photos, videos, logo) and is
   published as its own Cloudflare Pages site https://hakerem.pages.dev (project "hakerem", build output directory `site`) so its link shows no account or repo
   details. Packages/prices ("החל מ-"), gallery, videos, owner's venue details, how-it-works steps, FAQ (owner's facts
-  only — never invent claims), 15% deposit rule, gold line icons (no emojis), tour form that opens a
+  only — never invent claims), 15% deposit rule, editorial design (full-bleed photos, square corners, light-weight Assistant headings +
+  small Cormorant Garamond Latin labels, hairline rules, flat rectangular buttons; no emojis, no rounded "cards"),
+  tour form that opens a
   WhatsApp message to 972533488645 in a format the diary's smart paste reads. Root `landing.html` only redirects to
   `site/`. It never touches the diary; edit the GALLERY list in `site/index.html` to add photos.
   Accessibility (IS 5568 / WCAG 2.0 AA): `site/accessibility.html` statement (coordinator: נטלי, 053-3488645), linked
